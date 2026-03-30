@@ -1,0 +1,17 @@
+{
+  "name": "@embargo/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "embargo": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -b tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@embargo/shared": "workspace:*"
+  }
+}
