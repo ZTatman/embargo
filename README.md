@@ -32,3 +32,5 @@ node packages/cli/dist/index.js status --dir ./embargo
 node packages/cli/dist/index.js start --dir ./embargo
 node packages/cli/dist/index.js stop --dir ./embargo
 ```
+
+The Phase 1 pull requests are intentionally stacked so each review focuses on one layer of the system at a time.
