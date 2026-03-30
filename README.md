@@ -23,3 +23,12 @@ Phase 1 is split into these reviewable branches:
 - Forgejo access is performed by a constrained service account with minimum PAT scopes.
 - A repo is shareable only if the service account can see it and Embargo has sharing enabled for it.
 
+## Current CLI Surface
+
+```bash
+pnpm --filter @embargo/cli build
+node packages/cli/dist/index.js init --dir ./embargo
+node packages/cli/dist/index.js status --dir ./embargo
+node packages/cli/dist/index.js start --dir ./embargo
+node packages/cli/dist/index.js stop --dir ./embargo
+```
