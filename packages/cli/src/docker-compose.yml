@@ -1,20 +1,17 @@
-export function generateDockerCompose({ domain }: { domain: string }): string {
-  return `services:
+services:
   postgres:
-    container_name: postgres
     image: postgres:16
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - private
 
   forgejo:
-    container_name: forgejo
-    image: codeberg.org/forgejo/forgejo:14
-    restart: always
+    image: codeberg.org/forgejo/forgejo:11.0.11
+    restart: unless-stopped
     env_file:
       - .env
     depends_on:
@@ -23,14 +20,13 @@ export function generateDockerCompose({ domain }: { domain: string }): string {
       - "3000:3000"
       - "2222:22"
     volumes:
-      - forgejo:/data
+      - forgejo-data:/data
     networks:
       - private
 
   embargo:
-    container_name: embargo
     image: node:22-alpine
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     depends_on:
@@ -38,7 +34,7 @@ export function generateDockerCompose({ domain }: { domain: string }): string {
     ports:
       - "4000:4000"
     environment:
-      EMBARGO_DOMAIN: ${domain}
+      EMBARGO_DOMAIN: fuck.llms.org
     networks:
       - private
       - public
@@ -49,7 +45,5 @@ networks:
   public:
 
 volumes:
-  postgres:
-  forgejo:
-`;
-}
+  postgres-data:
+  forgejo-data:

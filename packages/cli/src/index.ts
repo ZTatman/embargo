@@ -1,47 +1,112 @@
 #!/usr/bin/env node
+import * as c from "yoctocolors";
+import pkg from "../package.json" with { type: "json" };
 
-import { initCommand } from "./commands/init.js";
-import { startCommand } from "./commands/start.js";
-import { statusCommand } from "./commands/status.js";
-import { stopCommand } from "./commands/stop.js";
+import {
+  initCommand,
+  startCommand,
+  statusCommand,
+  stopCommand,
+} from "./commands/index.js";
+
+const PADDING = 4;
+const INDENT = "  ";
+const USAGE = "embargo <command> [options/flags] [arguments]";
 
 type CommandName = "init" | "start" | "status" | "stop";
 
-const HELP_TEXT = `Embargo CLI
+interface Option {
+  name: CommandName | string | string[];
+  desc: string;
+}
 
-Usage:
-  embargo <command> [options]
+interface CLIConfig {
+  commands: Option[];
+  globalFlags: Option[];
+}
 
-Commands:
-  init    Generate the local Embargo stack scaffold
-  start   Print the docker compose command used to start the stack
-  stop    Print the docker compose command used to stop the stack
-  status  Validate docker tooling and generated files
+const config: CLIConfig = {
+  commands: [
+    { name: "init", desc: "Bootstrap embargo and generate config/env files" },
+    { name: "start", desc: "Start embargo grant access control services" },
+    { name: "stop", desc: "Stop embargo grant access control services" },
+    { name: "status", desc: "List the health of running embargo services" },
+  ],
+  globalFlags: [
+    { name: ["-h", "--help"], desc: "Display help information" },
+    { name: ["-v", "--version"], desc: "Display package version number" },
+  ],
+};
+
+const splitCamelCaseWords = (text: string): string =>
+  text.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+const toTitleCase = (text: string): string =>
+  text.replace(/\b\w/g, (c) => c.toUpperCase());
+
+function formatSection(
+  header: string,
+  options: Option[],
+  colWidth: number,
+): string {
+  const rows = options.map((o) => {
+    const name = Array.isArray(o.name) ? o.name.join(", ") : o.name;
+    return `${INDENT}${name.padEnd(colWidth)}${o.desc}`;
+  });
+  const title = toTitleCase(splitCamelCaseWords(header));
+  return [c.bold(title + ":"), ...rows].join("\n");
+}
+
+const allOptions = Object.values(config).flat();
+const COL_WIDTH =
+  Math.max(
+    ...allOptions.map((o) =>
+      Array.isArray(o.name) ? o.name.join(", ").length : o.name.length,
+    ),
+  ) + PADDING;
+
+const HELP_TEXT = `
+${c.yellow(pkg.name)}
+
+
+${INDENT}${USAGE}
+
+
+${Object.entries(config)
+  .map(([header, options]) =>
+    formatSection(header, options as Option[], COL_WIDTH),
+  )
+  .join("\n\n")}
 `;
 
 async function main(): Promise<void> {
-  const [command, ...args] = process.argv.slice(2);
+  const [command, ...options] = process.argv.slice(2);
+  const flags = options.filter((o) => o.startsWith("-"));
 
-  if (!command || command === "--help" || command === "-h") {
-    process.stdout.write(`${HELP_TEXT}\n`);
+  if (!command || flags.includes("-h") || flags.includes("--help")) {
+    process.stdout.write(`${HELP_TEXT}`);
+    process.exitCode = 0;
     return;
   }
 
-  const knownCommands: Record<CommandName, (argv: string[]) => Promise<void>> = {
-    init: initCommand,
-    start: startCommand,
-    status: statusCommand,
-    stop: stopCommand
-  };
+  const knownCommands: Record<CommandName, (args: string[]) => Promise<void>> =
+    {
+      init: initCommand,
+      start: startCommand,
+      status: statusCommand,
+      stop: stopCommand,
+    };
 
-  if (!(command in knownCommands)) {
-    process.stderr.write(`Unknown command: ${command}\n\n${HELP_TEXT}\n`);
+  const isKnownCommand = (cmd: string): cmd is CommandName =>
+    cmd in knownCommands;
+
+  if (!isKnownCommand(command)) {
+    process.stderr.write(`Unknown command: ${command}\n`);
     process.exitCode = 1;
     return;
   }
 
-  await knownCommands[command as CommandName](args);
+  await knownCommands[command](options);
 }
 
-void main();
-
+await main();
