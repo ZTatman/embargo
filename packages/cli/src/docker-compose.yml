@@ -24,7 +24,7 @@ services:
     networks:
       - private
 
-  embargo:
+  myst:
     image: node:22-alpine
     restart: unless-stopped
     env_file:
@@ -34,7 +34,7 @@ services:
     ports:
       - "4000:4000"
     environment:
-      EMBARGO_DOMAIN: fuck.llms.org
+      MYST_DOMAIN: myst.example.com
     networks:
       - private
       - public

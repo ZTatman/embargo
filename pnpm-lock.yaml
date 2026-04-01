@@ -20,7 +20,7 @@ importers:
       '@clack/prompts':
         specifier: ^1.2.0
         version: 1.2.0
-      '@embargo/shared':
+      '@myst/shared':
         specifier: workspace:*
         version: link:../shared
       yoctocolors:
@@ -29,7 +29,7 @@ importers:
 
   packages/service:
     dependencies:
-      '@embargo/shared':
+      '@myst/shared':
         specifier: workspace:*
         version: link:../shared
 

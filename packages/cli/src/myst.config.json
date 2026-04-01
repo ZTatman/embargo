@@ -1,0 +1,7 @@
+{
+  "adminUrl": "https://admin.myshit.com",
+  "databaseUrl": "postgresql://myst:password@postgres.myshit.com:5432/myst",
+  "forgejoBaseUrl": "https://git.myshit.com",
+  "forgejoServiceAccountUsername": "myshit-bot",
+  "publicUrl": "https://werwr.werwer.werwre"
+}

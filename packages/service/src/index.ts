@@ -1,3 +1,3 @@
-import { EMBARGO_DEFAULT_SERVICE_PORT } from "@embargo/shared";
+import { MYST_DEFAULT_SERVICE_PORT } from "@myst/shared";
 
-process.stdout.write(`Embargo service bootstrap on port ${EMBARGO_DEFAULT_SERVICE_PORT}\n`);
+process.stdout.write(`Myst service bootstrap on port ${MYST_DEFAULT_SERVICE_PORT}\n`);

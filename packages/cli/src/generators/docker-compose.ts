@@ -27,8 +27,8 @@ export function generateDockerCompose({ domain }: { domain: string }): string {
     networks:
       - private
 
-  embargo:
-    container_name: embargo
+  myst:
+    container_name: myst
     image: node:22-alpine
     restart: always
     env_file:
@@ -38,7 +38,7 @@ export function generateDockerCompose({ domain }: { domain: string }): string {
     ports:
       - "4000:4000"
     environment:
-      EMBARGO_DOMAIN: ${domain}
+      MYST_DOMAIN: ${domain}
     networks:
       - private
       - public

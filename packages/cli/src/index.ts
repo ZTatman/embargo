@@ -11,7 +11,7 @@ import {
 
 const PADDING = 4;
 const INDENT = "  ";
-const USAGE = "embargo <command> [options/flags] [arguments]";
+const USAGE = "myst <command> [options/flags] [arguments]";
 
 type CommandName = "init" | "start" | "status" | "stop";
 
@@ -27,10 +27,10 @@ interface CLIConfig {
 
 const config: CLIConfig = {
   commands: [
-    { name: "init", desc: "Bootstrap embargo and generate config/env files" },
-    { name: "start", desc: "Start embargo grant access control services" },
-    { name: "stop", desc: "Stop embargo grant access control services" },
-    { name: "status", desc: "List the health of running embargo services" },
+    { name: "init", desc: "Bootstrap Myst and generate config/env files" },
+    { name: "start", desc: "Start Myst grant access control services" },
+    { name: "stop", desc: "Stop Myst grant access control services" },
+    { name: "status", desc: "List the health of running Myst services" },
   ],
   globalFlags: [
     { name: ["-h", "--help"], desc: "Display help information" },
