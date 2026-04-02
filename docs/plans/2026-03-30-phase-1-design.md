@@ -21,6 +21,21 @@ Phase 1 does not deliver:
 - reverse proxy or DNS automation
 - platform-specific hosting orchestration beyond optional templates and docs
 
+## Tech Stack
+
+- **Backend**: Python 3.11+ with FastAPI
+- **Frontend**: Jinja2 templates with HTMX for interactivity
+- **Database**: PostgreSQL
+- **Async**: Uses `async/await` with asyncpg for database access
+
+### Why This Stack?
+
+**FastAPI**: Lightweight async framework, automatic OpenAPI docs, Pydantic for validation.
+
+**Jinja2 + HTMX**: Server-side rendering with minimal JavaScript. HTMX handles dynamic updates (filtering, form submissions) without a build step or heavy SPA framework.
+
+**PostgreSQL**: Reliable, well-supported by async libraries (asyncpg, SQLModel).
+
 ## Reviewable Branches
 
 1. `codex/phase1-bootstrap-monorepo`
