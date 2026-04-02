@@ -15,27 +15,26 @@ flowchart TB
             Myst["Myst<br/>(This Service)"]
             Traefik["Traefik<br/>(Reverse Proxy)"]
         end
-        
+
         Tailscale["Tailscale<br/>(Admin Access)"]
     end
-    
+
     subgraph External["External"]
         Owner["Repo Owner<br/>(Browser)"]
         Viewer["Viewer<br/>(Link Recipient)"]
     end
-    
+
     Owner -->|"Login via Forgejo<br/>Session"| Myst
     Owner -->|"Create View Link<br/>API calls w/ PAT"| Forgejo
     Myst -->|"Read-only API<br/>Service Account PAT"| Forgejo
     Myst -->|"Store Grants<br/>Own Database"| Postgres
     Forgejo -->|"Sessions"| Postgres
-    
+
     Myst -->|"Public Viewer<br/>share.example.com"| Viewer
     Myst -->|"Admin UI<br/>admin.example.com<br/>(Protected)"| Owner
-    
+
     Tailscale -->|"Private Admin<br/>Access"| Myst
     Traefik -->|"Route HTTPS<br/>Traffic"| Myst
-end
 ```
 
 ## Features
