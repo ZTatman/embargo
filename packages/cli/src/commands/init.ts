@@ -1,14 +1,16 @@
-import path from "node:path";
 import fs from "node:fs/promises";
-import * as p from "@clack/prompts";
+import path from "node:path";
+
 import * as c from "yoctocolors";
-import { generateEnvFile } from "../generators/env.js";
+import * as p from "@clack/prompts";
+
 import { generateSecret } from "../utils/crypto.js";
+import { generateEnvFile } from "../utils/env.js";
 
 /**
  * Normalizes a URL to use https:// if no protocol is specified.
  * @param value - The URL to normalize.
- * @returns The normalized URL.
+ * @returns {string} The normalized URL.
  */
 function normalizeHttpUrl(value: string): string {
   const trimmed = value.trim();
@@ -22,6 +24,12 @@ function normalizeHttpUrl(value: string): string {
   return hasProtocol ? trimmed : `https://${trimmed}`;
 }
 
+/**
+ * Validates a URL or host, returning the normalized URL or undefined if valid.
+ * @param value - The URL or host to validate.
+ * @param label - The label to use in error messages.
+ * @returns {string | undefined} The normalized URL or undefined if valid.
+ */
 function validateHttpUrlOrHost(
   value: string | undefined,
   label: string,
@@ -42,6 +50,11 @@ function validateHttpUrlOrHost(
   return undefined;
 }
 
+/**
+ * Validates a Postgres URL, returning undefined if valid.
+ * @param value - The Postgres URL to validate.
+ * @returns {string | undefined} The error message or undefined if valid.
+ */
 function validatePostgresUrl(value: string | undefined): string | undefined {
   if (!value?.trim()) {
     return "Database URL is required";
@@ -59,6 +72,12 @@ function validatePostgresUrl(value: string | undefined): string | undefined {
   return undefined;
 }
 
+/**
+ * Writes a private file to disk, throwing an error if the file already exists.
+ * @param filePath - The path to the file to write.
+ * @param content - The content to write to the file.
+ * @returns {Promise<void>} A promise that resolves when the file is written.
+ */
 async function writePrivateFile(
   filePath: string,
   content: string,
@@ -80,6 +99,11 @@ async function writePrivateFile(
   }
 }
 
+/**
+ * Preflight check for write targets, throwing an error if any target file already exists.
+ * @param filePaths - The paths of the files to write.
+ * @returns {Promise<void>} A promise that resolves when all targets are checked.
+ */
 async function preflightWriteTargets(filePaths: string[]): Promise<void> {
   for (const filePath of filePaths) {
     try {
@@ -96,6 +120,11 @@ async function preflightWriteTargets(filePaths: string[]): Promise<void> {
   }
 }
 
+/**
+ * Initializes a Myst project by creating the necessary configuration files.
+ * @param _args - The command arguments.
+ * @returns {Promise<void>} A promise that resolves when the initialization is complete.
+ */
 export async function initCommand(_args: string[]): Promise<void> {
   p.intro(c.bold("myst init"));
   p.note(

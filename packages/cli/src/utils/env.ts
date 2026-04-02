@@ -15,6 +15,11 @@ function escapeEnvValue(value: string): string {
     .replace(/\r?\n/g, "\\n")}"`; // Escape newlines
 }
 
+/**
+ * Generates an .env file for Myst with the given options.
+ * @param options - The options for generating the .env file.
+ * @returns {string} The .env file formatted as a string.
+ */
 export function generateEnvFile(options: EnvOptions): string {
   return `# Public URL used for share links.
 MYST_PUBLIC_URL=${escapeEnvValue(options.publicUrl)}

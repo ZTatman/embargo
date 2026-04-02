@@ -2,9 +2,7 @@
 import * as c from "yoctocolors";
 import pkg from "../package.json" with { type: "json" };
 
-import {
-  initCommand,
-} from "./commands/index.js";
+import { initCommand } from "./commands/init.js";
 
 const PADDING = 4;
 const INDENT = "  ";
