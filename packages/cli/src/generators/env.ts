@@ -8,22 +8,29 @@ interface EnvOptions {
   publicUrl: string;
 }
 
+function escapeEnvValue(value: string): string {
+  return `"${value
+    .replace(/\\/g, "\\\\") // Escape backslashes
+    .replace(/"/g, '\\"') // Escape double quotes
+    .replace(/\r?\n/g, "\\n")}"`; // Escape newlines
+}
+
 export function generateEnvFile(options: EnvOptions): string {
   return `# Public URL used for share links.
-MYST_PUBLIC_URL=${options.publicUrl}
+MYST_PUBLIC_URL=${escapeEnvValue(options.publicUrl)}
 
 # Private operator URL for the admin UI. Protect this upstream.
-MYST_ADMIN_URL=${options.adminUrl}
+MYST_ADMIN_URL=${escapeEnvValue(options.adminUrl)}
 
 # Myst's own Postgres database.
-DATABASE_URL=${options.databaseUrl}
+DATABASE_URL=${escapeEnvValue(options.databaseUrl)}
 
 # Existing Forgejo instance and operator-created service account token.
-FORGEJO_BASE_URL=${options.forgejoBaseUrl}
-FORGEJO_SERVICE_ACCOUNT_USERNAME=${options.forgejoServiceAccountUsername}
-FORGEJO_PAT=${options.forgejoPat}
+FORGEJO_BASE_URL=${escapeEnvValue(options.forgejoBaseUrl)}
+FORGEJO_SERVICE_ACCOUNT_USERNAME=${escapeEnvValue(options.forgejoServiceAccountUsername)}
+FORGEJO_PAT=${escapeEnvValue(options.forgejoPat)}
 
 # Secret used to sign or derive grant tokens.
-GRANT_TOKEN_SECRET=${options.grantTokenSecret}
+GRANT_TOKEN_SECRET=${escapeEnvValue(options.grantTokenSecret)}
 `;
 }

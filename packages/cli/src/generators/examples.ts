@@ -1,7 +1,7 @@
 export function generateExampleCaddyfile(domain: string): string {
   return `${domain} {
-  reverse_proxy /_myst/* localhost:4000
-  reverse_proxy localhost:3000
+  reverse_proxy /_myst/* 127.0.0.1:4000
+  reverse_proxy 127.0.0.1:3000
 }
 `;
 }

@@ -5,36 +5,32 @@ import * as c from "yoctocolors";
 import { generateEnvFile } from "../generators/env.js";
 import { generateSecret } from "../utils/crypto.js";
 
-interface MystConfig {
-  adminUrl: string;
-  databaseUrl: string;
-  forgejoBaseUrl: string;
-  forgejoServiceAccountUsername: string;
-  publicUrl: string;
-}
-
+/**
+ * Normalizes a URL to use https:// if no protocol is specified.
+ * @param value - The URL to normalize.
+ * @returns The normalized URL.
+ */
 function normalizeHttpUrl(value: string): string {
   const trimmed = value.trim();
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
+  const hasProtocol = /^[a-z]+:\/\//i.test(trimmed);
+  const isNotHttp = !/^https?:\/\//i.test(trimmed);
+
+  if (hasProtocol && isNotHttp) {
+    throw new Error("URLs must use http:// or https://");
   }
 
-  return `https://${trimmed}`;
+  return hasProtocol ? trimmed : `https://${trimmed}`;
 }
 
 function validateHttpUrlOrHost(
   value: string | undefined,
   label: string,
 ): string | undefined {
-  if (!value?.trim()) {
-    return `${label} is required`;
-  }
+  if (!value?.trim()) return `${label} is required`;
 
   try {
-    const url = new URL(normalizeHttpUrl(value));
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      return `${label} must start with http:// or https://`;
-    }
+    const normalized = normalizeHttpUrl(value);
+    const url = new URL(normalized);
 
     if (!url.hostname) {
       return `${label} must include a domain or hostname`;
@@ -63,13 +59,29 @@ function validatePostgresUrl(value: string | undefined): string | undefined {
   return undefined;
 }
 
-function generateConfigFile(config: MystConfig): string {
-  return `${JSON.stringify(config, null, 2)}\n`;
+async function writePrivateFile(
+  filePath: string,
+  content: string,
+): Promise<void> {
+  try {
+    await fs.writeFile(filePath, content, {
+      encoding: "utf8",
+      flag: "wx",
+      mode: 0o600,
+    });
+  } catch (e) {
+    const error = e as NodeJS.ErrnoException;
+    if (error.code === "EEXIST") {
+      throw new Error(
+        `Error: the file '${c.underline(path.basename(filePath))}' already exists in directory ${c.underline(path.dirname(filePath))}`,
+      );
+    }
+    throw error; // throw any other errors back if not EEXIST code
+  }
 }
 
 export async function initCommand(_args: string[]): Promise<void> {
   p.intro(c.bold("myst init"));
-
   p.note(
     [
       `${c.bold("Run this in the directory where you plan to deploy Myst.")}`,
@@ -140,7 +152,7 @@ export async function initCommand(_args: string[]): Promise<void> {
     },
     {
       onCancel: () => {
-        process.stderr.write("\nOperation cancelled.");
+        p.cancel("\nOperation cancelled.");
         process.exit(0);
       },
     },
@@ -148,7 +160,6 @@ export async function initCommand(_args: string[]): Promise<void> {
 
   const s = p.spinner();
   s.start("Generating config files");
-
   const publicUrl = normalizeHttpUrl(answers.publicUrl);
   const adminUrl = normalizeHttpUrl(answers.adminUrl);
   const forgejoBaseUrl = normalizeHttpUrl(answers.forgejoBaseUrl);
@@ -162,23 +173,35 @@ export async function initCommand(_args: string[]): Promise<void> {
     grantTokenSecret,
     publicUrl,
   });
-  const configContent = generateConfigFile({
-    adminUrl,
-    databaseUrl: answers.databaseUrl,
-    forgejoBaseUrl,
-    forgejoServiceAccountUsername: answers.forgejoServiceAccountUsername,
-    publicUrl,
-  });
+  const configContent = JSON.stringify(
+    {
+      adminUrl,
+      forgejoBaseUrl,
+      forgejoServiceAccountUsername: answers.forgejoServiceAccountUsername,
+      publicUrl,
+    },
+    null,
+    2,
+  );
 
   const outDir = process.cwd();
-  await Promise.all([
-    fs.writeFile(path.join(outDir, ".env"), envContent, "utf8"),
-    fs.writeFile(
-      path.join(outDir, "myst.config.json"),
-      configContent,
-      "utf8",
-    ),
-  ]);
+  const envPath = path.join(outDir, ".env");
+  const configPath = path.join(outDir, "myst.config.json");
+
+  try {
+    await Promise.all([
+      writePrivateFile(envPath, envContent),
+      writePrivateFile(configPath, configContent),
+    ]);
+  } catch (e) {
+    s.stop();
+    p.cancel(
+      e instanceof Error
+        ? e.message
+        : `Failed to write config files to ${outDir}`,
+    );
+    return;
+  }
 
   s.stop("Config files generated");
 
@@ -193,19 +216,14 @@ export async function initCommand(_args: string[]): Promise<void> {
       `${c.bold("Private admin URL:")} ${c.cyan(adminUrl)}`,
       `${c.bold("Forgejo base URL:")} ${c.cyan(forgejoBaseUrl)}`,
       `${c.bold("Forgejo service account:")} ${c.green(answers.forgejoServiceAccountUsername)}`,
-      `${c.bold("Tip:")} entering a bare hostname defaults to ${c.bold("https://")}.`,
+      "",
       `${c.bold("Admin URL reminder:")} protect this upstream with Tailscale, VPN, Cloudflare Access, or reverse-proxy auth.`,
-      `${c.bold("PAT setup docs:")} ${c.cyan("https://forgejo.org/docs/latest/user/api-usage/")}`,
-      `${c.bold("PAT scope docs:")} ${c.cyan("https://forgejo.org/docs/latest/user/token-scope/")}`,
-      `${c.bold("Next commands:")} ${c.green("myst forgejo bootstrap")} then ${c.green("myst doctor")}`,
     ].join("\n"),
     c.yellow("Next steps"),
   );
-
   p.outro(
-    c.green("Done. Deploy Myst, then run forgejo bootstrap and doctor."),
+    c.green(
+      "Done. Deploy Myst, then run forgejo bootstrap and doctor commands to verify setup.",
+    ),
   );
 }
-export async function startCommand(...args: any[]): Promise<void> {}
-export async function stopCommand(...args: any[]): Promise<void> {}
-export async function statusCommand(...args: any[]): Promise<void> {}

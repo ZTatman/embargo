@@ -4,16 +4,13 @@ import pkg from "../package.json" with { type: "json" };
 
 import {
   initCommand,
-  startCommand,
-  statusCommand,
-  stopCommand,
 } from "./commands/index.js";
 
 const PADDING = 4;
 const INDENT = "  ";
 const USAGE = "myst <command> [options/flags] [arguments]";
 
-type CommandName = "init" | "start" | "status" | "stop";
+type CommandName = "init";
 
 interface Option {
   name: CommandName | string | string[];
@@ -92,9 +89,6 @@ async function main(): Promise<void> {
   const knownCommands: Record<CommandName, (args: string[]) => Promise<void>> =
     {
       init: initCommand,
-      start: startCommand,
-      status: statusCommand,
-      stop: stopCommand,
     };
 
   const isKnownCommand = (cmd: string): cmd is CommandName =>
@@ -106,7 +100,13 @@ async function main(): Promise<void> {
     return;
   }
 
-  await knownCommands[command](options);
+  try {
+    await knownCommands[command](options);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    process.stderr.write(`${c.red("Error:")} ${message}\n`);
+    process.exitCode = 1;
+  }
 }
 
 await main();
