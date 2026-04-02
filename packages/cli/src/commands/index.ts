@@ -80,6 +80,22 @@ async function writePrivateFile(
   }
 }
 
+async function preflightWriteTargets(filePaths: string[]): Promise<void> {
+  for (const filePath of filePaths) {
+    try {
+      await fs.access(filePath);
+      throw new Error(
+        `Error: the file '${c.underline(path.basename(filePath))}' already exists in directory ${c.underline(path.dirname(filePath))}`,
+      );
+    } catch (error) {
+      const err = error as NodeJS.ErrnoException;
+      if (err.code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+}
+
 export async function initCommand(_args: string[]): Promise<void> {
   p.intro(c.bold("myst init"));
   p.note(
@@ -189,10 +205,9 @@ export async function initCommand(_args: string[]): Promise<void> {
   const configPath = path.join(outDir, "myst.config.json");
 
   try {
-    await Promise.all([
-      writePrivateFile(envPath, envContent),
-      writePrivateFile(configPath, configContent),
-    ]);
+    await preflightWriteTargets([envPath, configPath]);
+    await writePrivateFile(envPath, envContent);
+    await writePrivateFile(configPath, configContent);
   } catch (e) {
     s.stop();
     p.cancel(

@@ -25,9 +25,6 @@ interface CLIConfig {
 const config: CLIConfig = {
   commands: [
     { name: "init", desc: "Bootstrap Myst and generate config/env files" },
-    { name: "start", desc: "Start Myst grant access control services" },
-    { name: "stop", desc: "Stop Myst grant access control services" },
-    { name: "status", desc: "List the health of running Myst services" },
   ],
   globalFlags: [
     { name: ["-h", "--help"], desc: "Display help information" },
@@ -79,6 +76,12 @@ ${Object.entries(config)
 async function main(): Promise<void> {
   const [command, ...options] = process.argv.slice(2);
   const flags = options.filter((o) => o.startsWith("-"));
+
+  if (flags.includes("-v") || flags.includes("--version")) {
+    process.stdout.write(`${pkg.version}\n`);
+    process.exitCode = 0;
+    return;
+  }
 
   if (!command || flags.includes("-h") || flags.includes("--help")) {
     process.stdout.write(`${HELP_TEXT}`);
