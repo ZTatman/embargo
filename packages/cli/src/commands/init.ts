@@ -172,20 +172,19 @@ export async function initCommand(_args: string[]): Promise<void> {
           placeholder: "postgresql://myst:password@db.example.com:5432/myst",
           validate: validatePostgresUrl,
         }),
-      forgejoServiceAccountUsername: () =>
+      forgejoBotUsername: () =>
         p.text({
-          message:
-            "What Forgejo service account username should Myst use for API access?",
+          message: "What dedicated Forgejo username should Myst use for API access?",
           placeholder: "myst-bot",
           validate: (v) =>
             v?.trim()
               ? undefined
-              : "Forgejo service account username is required",
+              : "Dedicated Forgejo username is required",
         }),
       forgejoPat: () =>
         p.password({
           message:
-            "Paste the Forgejo personal access token for that service account",
+            "Paste the Forgejo personal access token for that dedicated Forgejo user",
           validate: (v) => (v?.trim() ? undefined : "Forgejo PAT is required"),
         }),
       grantTokenSecret: () =>
@@ -213,8 +212,8 @@ export async function initCommand(_args: string[]): Promise<void> {
     adminUrl,
     databaseUrl: answers.databaseUrl,
     forgejoBaseUrl,
+    forgejoBotUsername: answers.forgejoBotUsername,
     forgejoPat: answers.forgejoPat,
-    forgejoServiceAccountUsername: answers.forgejoServiceAccountUsername,
     grantTokenSecret,
     publicUrl,
   });
@@ -222,7 +221,7 @@ export async function initCommand(_args: string[]): Promise<void> {
     {
       adminUrl,
       forgejoBaseUrl,
-      forgejoServiceAccountUsername: answers.forgejoServiceAccountUsername,
+      forgejoBotUsername: answers.forgejoBotUsername,
       publicUrl,
     },
     null,
@@ -259,7 +258,7 @@ export async function initCommand(_args: string[]): Promise<void> {
       `${c.bold("Public viewer URL:")} ${c.cyan(publicUrl)}`,
       `${c.bold("Private admin URL:")} ${c.cyan(adminUrl)}`,
       `${c.bold("Forgejo base URL:")} ${c.cyan(forgejoBaseUrl)}`,
-      `${c.bold("Forgejo service account:")} ${c.green(answers.forgejoServiceAccountUsername)}`,
+      `${c.bold("Forgejo bot username:")} ${c.green(answers.forgejoBotUsername)}`,
       "",
       `${c.bold("Admin URL reminder:")} protect this upstream with Tailscale, VPN, Cloudflare Access, or reverse-proxy auth.`,
     ].join("\n"),
