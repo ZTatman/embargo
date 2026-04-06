@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Myst system routing diagram placeholder</title>
+  <desc id="desc">Placeholder image for the Myst system routing diagram. Replace this file with the exported SVG from D2.</desc>
+  <rect width="1200" height="630" fill="#f8fafc"/>
+  <rect x="60" y="60" width="1080" height="510" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+  <text x="600" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" font-weight="700" fill="#0f172a">Myst system routing diagram</text>
+  <text x="600" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">Replace docs/diagrams/system-routing.svg</text>
+  <text x="600" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#334155">with the exported SVG from D2.</text>
+  <text x="600" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#64748b">The README is already wired to preview and link this file.</text>
+</svg>
