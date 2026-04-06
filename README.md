@@ -4,35 +4,13 @@
 
 Myst is a companion service for Forgejo that lets repo owners create expiring, revocable, read-only share links for code snapshots.
 
-## Architecture
+## System Diagram
 
-```mermaid
-flowchart TB
-    subgraph VPS["VPS / Self-Hosted"]
-        subgraph Docker["Docker Network"]
-            Forgejo["Forgejo (Git Server)"]
-            Postgres["PostgreSQL (2 Databases)"]
-            Myst["Myst (This Service)"]
-            Traefik["Traefik (Reverse Proxy)"]
-        end
-        Tailscale["Tailscale (Admin Access)"]
-    end
+This diagram shows how traffic moves through the public internet, the VPS or self-hosted server, the host firewall, the platform router, Myst, Forgejo, and Postgres.
 
-    subgraph External["External"]
-        Owner["Repo Owner"]
-        Viewer["Link Recipient"]
-    end
+[![Myst system routing diagram](docs/diagrams/system-routing.svg)](docs/diagrams/system-routing.svg)
 
-    Owner -->|"Login via Forgejo Session"| Myst
-    Owner -->|"Create View Link (PAT)"| Forgejo
-    Myst -->|"Read-only API (PAT)"| Forgejo
-    Myst -->|"Store Grants"| Postgres
-    Forgejo -->|"Sessions"| Postgres
-    Myst -->|"Public Viewer"| Viewer
-    Myst -->|"Admin UI (Protected)"| Owner
-    Tailscale -->|"Private Admin Access"| Myst
-    Traefik -->|"Route HTTPS Traffic"| Myst
-```
+Click the diagram to open the full-size SVG.
 
 ## Features
 
@@ -56,7 +34,7 @@ flowchart TB
 | Purpose | Method |
 |---------|--------|
 | User Identity | Forgejo Sessions |
-| Data Access | Service Account PAT |
+| Data Access | Dedicated Forgejo User PAT |
 
 ### Tech Stack
 
@@ -80,10 +58,10 @@ Prompts for:
 - Private admin URL (`admin.example.com`)
 - Forgejo base URL (`git.example.com`)
 - PostgreSQL connection string
-- Forgejo service account username and PAT
+- Dedicated Forgejo username and PAT
 - Grant token secret
 
-### 2. Configure Service Account
+### 2. Configure Dedicated Forgejo User
 
 Create a dedicated Forgejo user (e.g., `myst-bot`) with a PAT:
 
@@ -92,7 +70,12 @@ Create a dedicated Forgejo user (e.g., `myst-bot`) with a PAT:
 
 ### 3. Deploy
 
-Deploy via Dokploy, Coolify, or your preferred platform.
+Deploy Myst anywhere you can run a normal web app beside Forgejo. Phase 1 should explicitly support both of these examples:
+
+- VPS deployment: Hostinger or another VPS with Dokploy, Traefik, UFW, Myst, Forgejo, and a shared Postgres instance that contains separate `forgejo` and `myst` databases.
+- Self-hosted server deployment: a home server, mini PC, NAS, or other self-hosted Linux machine running Myst with Docker, Podman, Docker Compose, Coolify, Caddy, Nginx, or another reverse proxy.
+
+Myst should not assume a VPS-only environment. The requirement is an existing Forgejo instance, Myst's own database, and a way to route the public and admin hostnames to the Myst app.
 
 ## Example Configuration
 
