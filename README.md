@@ -84,7 +84,7 @@ MYST_PUBLIC_URL="https://share.example.com"
 MYST_ADMIN_URL="https://admin.example.com"
 DATABASE_URL="postgresql://myst:secret@localhost:5432/myst"
 FORGEJO_BASE_URL="https://git.example.com"
-FORGEJO_SERVICE_ACCOUNT_USERNAME="myst-bot"
+FORGEJO_BOT_USERNAME="myst-bot"
 FORGEJO_PAT="fgp_xxxxxxxxxxxxxxxxxxxx"
 GRANT_TOKEN_SECRET="your-secret-here"
 ```

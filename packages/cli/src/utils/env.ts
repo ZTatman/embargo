@@ -2,8 +2,8 @@ interface EnvOptions {
   adminUrl: string;
   databaseUrl: string;
   forgejoBaseUrl: string;
+  forgejoBotUsername: string;
   forgejoPat: string;
-  forgejoServiceAccountUsername: string;
   grantTokenSecret: string;
   publicUrl: string;
 }
@@ -30,9 +30,9 @@ MYST_ADMIN_URL=${escapeEnvValue(options.adminUrl)}
 # Myst's own Postgres database.
 DATABASE_URL=${escapeEnvValue(options.databaseUrl)}
 
-# Existing Forgejo instance and operator-created service account token.
+# Existing Forgejo instance and operator-created PAT for the dedicated Forgejo user.
 FORGEJO_BASE_URL=${escapeEnvValue(options.forgejoBaseUrl)}
-FORGEJO_SERVICE_ACCOUNT_USERNAME=${escapeEnvValue(options.forgejoServiceAccountUsername)}
+FORGEJO_BOT_USERNAME=${escapeEnvValue(options.forgejoBotUsername)}
 FORGEJO_PAT=${escapeEnvValue(options.forgejoPat)}
 
 # Secret used to sign or derive grant tokens.

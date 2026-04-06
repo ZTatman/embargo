@@ -47,11 +47,11 @@ Phase 1 does not deliver:
 
 ## Security Baseline
 
-- service account access is restricted to approved repos
+- dedicated Forgejo user access is restricted to approved repos
 - Myst grant checks are enforced on every Forgejo read
 - grants store `repo_id` and pinned `commit_sha`
 - viewer requests never choose repo or ref directly
-- operators create the Forgejo service account and PAT themselves
+- operators create the dedicated Forgejo user and PAT themselves
 - Myst stores only its own app config and metadata in its own database
 - admin access is protected upstream with Tailscale, VPN, Cloudflare Access, reverse-proxy auth, or equivalent operator-managed controls
 - Myst does not ship built-in admin auth in Phase 1
@@ -66,8 +66,8 @@ Myst uses two authentication mechanisms:
 - Users use their existing Forgejo accounts — no separate Myst login
 - All Forgejo users with an account are trusted Myst users
 
-**Data Access (Service Account PAT)**
-- Myst uses an operator-created service account PAT to call the Forgejo API
+**Data Access (Dedicated Forgejo User PAT)**
+- Myst uses an operator-created PAT for a dedicated Forgejo user to call the Forgejo API
 - PAT is used to verify repo ownership and fetch code for viewers
 - PAT is never used for user identity (that's handled by sessions)
 
@@ -76,9 +76,9 @@ Myst uses two authentication mechanisms:
 - PAT allows Myst to verify repo ownership (can zach@me.com create view links for this repo?)
 - PAT allows Myst to fetch code content for the viewer (get the pinned commit's files)
 
-## Forgejo Service Account Baseline
+## Dedicated Forgejo User Baseline
 
-- the Forgejo service account is a normal Forgejo user account dedicated to Myst, such as `myst-bot`
+- the dedicated Forgejo user is a normal Forgejo user account dedicated to Myst, such as `myst-bot`
 - the operator creates this user in Forgejo and grants repo access explicitly
 - the operator creates the PAT for this user through the Forgejo UI or admin CLI
 - recommended PAT scopes are `read:user` and `read:repository`
@@ -112,7 +112,7 @@ Myst supports two types of view links:
 
 Only repo owners can create view links for their repos.
 
-- Myst verifies ownership via the Forgejo API using the service account PAT
+- Myst verifies ownership via the Forgejo API using the dedicated Forgejo user PAT
 - Collaborators or read-access users cannot create view links
 - Site admins are treated as regular users for this purpose (details to be finalized)
 
@@ -124,8 +124,8 @@ Only repo owners can create view links for their repos.
 - private admin URL, for example `https://admin.example.com` or `https://myst-admin.tailnet.ts.net`
 - Forgejo base URL, for example `https://git.example.com`
 - Myst Postgres URL, for example `postgresql://myst:password@db.example.com:5432/myst`
-- Forgejo service account username, for example `myst-bot`
-- Forgejo PAT for that service account
+- Forgejo bot username, for example `myst-bot`
+- Forgejo PAT for that dedicated Forgejo user
 - grant token secret, with secure auto-generation as the default
 
 `myst init` should generate all Myst-owned deployment config needed for Phase 1:
@@ -139,7 +139,7 @@ Only repo owners can create view links for their repos.
 - it should be run in the directory where Myst will be deployed, usually on the target VPS or server workspace
 - the admin URL must be protected upstream because Myst does not provide admin auth in Phase 1
 - the database URL must point to Myst's own Postgres database, not Forgejo's tables
-- the PAT should be created for the dedicated service account user
+- the PAT should be created for the dedicated Forgejo user
 - the operator can consult Forgejo docs for token creation and scopes if needed
 - bare hostnames such as `share.example.com` are accepted and should default to `https://`
 
@@ -148,7 +148,7 @@ Only repo owners can create view links for their repos.
 - Forgejo is already deployed and operator-managed
 - Myst is deployed independently as its own app
 - Myst uses its own Postgres database on the same DB server as Forgejo (separate database, not shared tables)
-- Myst reaches Forgejo via API using a least-privilege service account token
+- Myst reaches Forgejo via API using a least-privilege PAT for the dedicated Forgejo user
 - the CLI validates configuration and connectivity rather than provisioning infrastructure
 - the Myst admin surface must be protected by VPN, Tailscale, Cloudflare Access, or reverse-proxy auth in front of the app
 
@@ -191,8 +191,8 @@ Minimum v1 data model:
 `myst forgejo bootstrap` should verify, not provision:
 
 - Forgejo base URL reachability
-- service account token validity
-- authenticated user matches the configured service account username
+- dedicated Forgejo user token validity
+- authenticated user matches the configured Forgejo bot username
 - minimum token scopes are sufficient for Myst's read-only API usage
 - Myst can resolve repo metadata, pinned commits, and tree/file reads for the repos it is expected to serve
 - Myst can verify repo ownership for the operator's user account
