@@ -52,7 +52,7 @@ Deployment boundaries:
 - Forgejo is already running and is managed by the operator.
 - Myst is deployed independently from Forgejo.
 - Myst never reads or writes Forgejo's database directly.
-- Myst uses a service account PAT to call the Forgejo API.
+- Myst uses a PAT created for a dedicated Forgejo user to call the Forgejo API.
 - Myst uses Forgejo sessions to identify logged-in users.
 - Myst admin access is protected upstream rather than by an in-app login system in Phase 1.
 - VPN, Tailscale, Cloudflare Access, or reverse-proxy auth is required for the admin surface in Phase 1.
@@ -77,7 +77,7 @@ Users log in via Forgejo's existing session system:
 - All Forgejo users with an account are trusted Myst users
 - No separate user management in Myst
 
-### Data Access: Service Account PAT
+### Data Access: Dedicated Forgejo User PAT
 
 Myst uses an operator-created PAT to call the Forgejo API:
 
@@ -202,8 +202,8 @@ The CLI is the primary way to configure and validate Myst against an existing Fo
 - prompt for the public viewer URL, for example `https://share.example.com`
 - prompt for the private admin URL, for example `https://admin.example.com`
 - prompt for the Forgejo base URL, for example `https://git.example.com`
-- collect the Forgejo service account username, for example `myst-bot`
-- collect a user-created Forgejo PAT for that service account
+- collect the dedicated Forgejo username Myst should use for API access, for example `myst-bot`
+- collect a user-created Forgejo PAT for that dedicated Forgejo user
 - collect Myst Postgres connection details, for example `postgresql://myst:password@db.example.com:5432/myst`
 - generate a grant token secret by default unless the operator pastes one
 - generate all Myst-owned config files needed for deployment in Phase 1
@@ -221,8 +221,8 @@ Suggested `init` prompt guidance:
 - Private admin URL: "What private URL should operators use for the Myst admin UI?" Example: `https://admin.example.com`
 - Forgejo base URL: "What is the base URL of your existing Forgejo instance?" Example: `https://git.example.com`
 - Myst database URL: "What Postgres connection string should Myst use?" Example: `postgresql://myst:password@db.example.com:5432/myst`
-- Forgejo service account username: "What Forgejo username should Myst use for API access?" Example: `myst-bot`
-- Forgejo PAT: "Paste the Forgejo personal access token for that service account" Example: `fgp_...`
+- Dedicated Forgejo username: "What Forgejo username should Myst use for API access?" Example: `myst-bot`
+- Forgejo PAT: "Paste the Forgejo personal access token for that dedicated Forgejo user" Example: `fgp_...`
 - Grant token secret: "Paste a grant token secret, or press enter to generate one automatically"
 
 Suggested `init` prompt notes:
@@ -246,10 +246,10 @@ Forgejo docs to link directly from CLI output:
 `forgejo bootstrap` should:
 
 - validate Forgejo connectivity
-- validate the provided service account token
+- validate the provided dedicated Forgejo user token
 - verify minimum required scopes and permissions
 - confirm Myst can resolve the repos it needs
-- confirm the authenticated user matches the configured service account username
+- confirm the authenticated user matches the configured dedicated Forgejo username
 - confirm Myst can resolve a branch or ref to a pinned `commit_sha`
 - confirm Myst can read tree and file data for a pinned commit
 - verify Myst can confirm repo ownership for the operator's user account
@@ -314,7 +314,7 @@ The owner dashboard provides:
 - Link status (active, expired, revoked)
 - View count and access logs (details to be finalized)
 - Create new link flow:
-  - Select repo (fetched via service account PAT, filtered to owned repos)
+  - Select repo (fetched via the dedicated Forgejo user's PAT, filtered to owned repos)
   - Select commit (branch/tag to SHA resolution)
   - Choose link type (public or private)
   - Set expiration
