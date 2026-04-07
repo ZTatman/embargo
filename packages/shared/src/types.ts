@@ -1,5 +1,3 @@
-export type VisibilityMode = "team" | "allowlist";
-
 export interface RepoRef {
   owner: string;
   name: string;
@@ -10,4 +8,3 @@ export interface GrantSnapshot {
   sourceBranch: string;
   commitSha: string;
 }
-

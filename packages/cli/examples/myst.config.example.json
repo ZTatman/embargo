@@ -1,0 +1,6 @@
+{
+  "adminUrl": "https://admin.example.com",
+  "forgejoBaseUrl": "https://git.example.com",
+  "forgejoBotUsername": "myst-bot",
+  "publicUrl": "https://share.example.com"
+}

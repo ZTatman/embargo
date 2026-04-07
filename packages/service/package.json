@@ -1,5 +1,5 @@
 {
-  "name": "@embargo/service",
+  "name": "@myst/service",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,6 +9,6 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@embargo/shared": "workspace:*"
+    "@myst/shared": "workspace:*"
   }
 }

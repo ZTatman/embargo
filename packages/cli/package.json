@@ -1,10 +1,19 @@
 {
-  "name": "@embargo/cli",
+  "name": "@myst/cli",
+  "description": "A CLI tool that helps you wire Myst into an existing Forgejo instance with expiring grant access controls for repos you choose to share.",
   "version": "0.1.0",
+  "author": {
+    "name": "Zach Tatman",
+    "email": "zach.c.tatman@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/ZTatman/myst/issues"
+  },
+  "homepage": "https://github.com/ZTatman/myst#readme",
   "private": true,
   "type": "module",
   "bin": {
-    "embargo": "./dist/index.js"
+    "myst": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -12,6 +21,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@embargo/shared": "workspace:*"
+    "@clack/prompts": "^1.2.0",
+    "@myst/shared": "workspace:*",
+    "yoctocolors": "^2.1.2"
   }
 }
