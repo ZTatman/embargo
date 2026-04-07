@@ -12,7 +12,8 @@ function escapeEnvValue(value: string): string {
   return `"${value
     .replace(/\\/g, "\\\\") // Escape backslashes
     .replace(/"/g, '\\"') // Escape double quotes
-    .replace(/\r?\n/g, "\\n")}"`; // Escape newlines
+    .replace(/\r?\n/g, "\\n") // Escape newlines
+    .replace(/\$/g, "\\$")}"`; // Escape dollar signs
 }
 
 /**

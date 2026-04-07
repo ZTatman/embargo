@@ -174,23 +174,24 @@ export async function initCommand(_args: string[]): Promise<void> {
         }),
       forgejoBotUsername: () =>
         p.text({
-          message: "What dedicated Forgejo username should Myst use for API access?",
+          message:
+            "What dedicated Forgejo username should Myst use for API access?",
           placeholder: "myst-bot",
           validate: (v) =>
-            v?.trim()
-              ? undefined
-              : "Dedicated Forgejo username is required",
+            v?.trim() ? undefined : "Dedicated Forgejo username is required",
         }),
       forgejoPat: () =>
         p.password({
           message:
             "Paste the Forgejo personal access token for that dedicated Forgejo user",
+          mask: "*",
           validate: (v) => (v?.trim() ? undefined : "Forgejo PAT is required"),
         }),
       grantTokenSecret: () =>
         p.password({
           message:
             "Paste a grant token secret, or press enter to generate one automatically",
+          mask: "*",
           validate: () => undefined,
         }),
     },
@@ -203,70 +204,71 @@ export async function initCommand(_args: string[]): Promise<void> {
   );
 
   const s = p.spinner();
-  s.start("Generating config files");
-  const publicUrl = normalizeHttpUrl(answers.publicUrl);
-  const adminUrl = normalizeHttpUrl(answers.adminUrl);
-  const forgejoBaseUrl = normalizeHttpUrl(answers.forgejoBaseUrl);
-  const grantTokenSecret = answers.grantTokenSecret?.trim() || generateSecret();
-  const envContent = generateEnvFile({
-    adminUrl,
-    databaseUrl: answers.databaseUrl,
-    forgejoBaseUrl,
-    forgejoBotUsername: answers.forgejoBotUsername,
-    forgejoPat: answers.forgejoPat,
-    grantTokenSecret,
-    publicUrl,
-  });
-  const configContent = JSON.stringify(
-    {
-      adminUrl,
-      forgejoBaseUrl,
-      forgejoBotUsername: answers.forgejoBotUsername,
-      publicUrl,
-    },
-    null,
-    2,
-  );
-
-  const outDir = process.cwd();
-  const envPath = path.join(outDir, ".env");
-  const configPath = path.join(outDir, "myst.config.json");
 
   try {
+    s.start("Generating config files");
+
+    const publicUrl = normalizeHttpUrl(answers.publicUrl);
+    const adminUrl = normalizeHttpUrl(answers.adminUrl);
+    const forgejoBaseUrl = normalizeHttpUrl(answers.forgejoBaseUrl);
+    const grantTokenSecret =
+      answers.grantTokenSecret?.trim() || generateSecret();
+
+    const envContent = generateEnvFile({
+      adminUrl,
+      databaseUrl: answers.databaseUrl,
+      forgejoBaseUrl,
+      forgejoBotUsername: answers.forgejoBotUsername,
+      forgejoPat: answers.forgejoPat,
+      grantTokenSecret,
+      publicUrl,
+    });
+
+    const configContent = JSON.stringify(
+      {
+        adminUrl,
+        forgejoBaseUrl,
+        forgejoBotUsername: answers.forgejoBotUsername,
+        publicUrl,
+      },
+      null,
+      2,
+    );
+
+    const outDir = process.cwd();
+    const envPath = path.join(outDir, ".env");
+    const configPath = path.join(outDir, "myst.config.json");
+
     await preflightWriteTargets([envPath, configPath]);
     await writePrivateFile(envPath, envContent);
     await writePrivateFile(configPath, configContent);
-  } catch (e) {
+
+    s.stop("Config files generated");
+    p.note(
+      [c.green(".env"), c.green("myst.config.json")].join("\n"),
+      c.yellow("Files written to current directory"),
+    );
+    p.note(
+      [
+        `${c.bold("Public viewer URL:")} ${c.cyan(publicUrl)}`,
+        `${c.bold("Private admin URL:")} ${c.cyan(adminUrl)}`,
+        `${c.bold("Forgejo base URL:")} ${c.cyan(forgejoBaseUrl)}`,
+        `${c.bold("Forgejo bot username:")} ${c.green(answers.forgejoBotUsername)}`,
+        "",
+        `${c.bold("Admin URL reminder:")} protect this upstream with Tailscale, VPN, Cloudflare Access, or reverse-proxy auth.`,
+      ].join("\n"),
+      c.yellow("Next steps"),
+    );
+    p.outro(
+      c.green(
+        "Done. Deploy Myst, then run forgejo bootstrap and doctor commands to verify setup.",
+      ),
+    );
+  } catch (error) {
     s.stop();
     p.cancel(
-      e instanceof Error
-        ? e.message
-        : `Failed to write config files to ${outDir}`,
+      error instanceof Error ? error.message : "Failed to initialize Myst",
     );
-    return;
+    process.exitCode = 1;
   }
-
-  s.stop("Config files generated");
-
-  p.note(
-    [c.green(".env"), c.green("myst.config.json")].join("\n"),
-    c.yellow("Files written to current directory"),
-  );
-
-  p.note(
-    [
-      `${c.bold("Public viewer URL:")} ${c.cyan(publicUrl)}`,
-      `${c.bold("Private admin URL:")} ${c.cyan(adminUrl)}`,
-      `${c.bold("Forgejo base URL:")} ${c.cyan(forgejoBaseUrl)}`,
-      `${c.bold("Forgejo bot username:")} ${c.green(answers.forgejoBotUsername)}`,
-      "",
-      `${c.bold("Admin URL reminder:")} protect this upstream with Tailscale, VPN, Cloudflare Access, or reverse-proxy auth.`,
-    ].join("\n"),
-    c.yellow("Next steps"),
-  );
-  p.outro(
-    c.green(
-      "Done. Deploy Myst, then run forgejo bootstrap and doctor commands to verify setup.",
-    ),
-  );
 }
