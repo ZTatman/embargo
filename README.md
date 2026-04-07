@@ -102,7 +102,7 @@ GRANT_TOKEN_SECRET="your-secret-here"
 - [ ] Repo ownership verification
 - [ ] Private link creation (email-verified)
 - [ ] Public link creation (time-expired)
-- [ ] Web-based code viewer (Jinja2 + HTMX)
+- [ ] Web-based code viewer
 - [ ] User dashboard
 - [ ] SMTP configuration UI
 - [ ] Access logs
