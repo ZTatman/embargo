@@ -223,30 +223,14 @@ export async function initCommand(args?: string[]): Promise<void> {
       publicUrl,
     });
 
-    const configContent = JSON.stringify(
-      {
-        adminUrl,
-        forgejoBaseUrl,
-        forgejoBotUsername: answers.forgejoBotUsername,
-        publicUrl,
-      },
-      null,
-      2,
-    );
-
     const outDir = process.cwd();
     const envPath = path.join(outDir, ".env");
-    const configPath = path.join(outDir, "myst.config.json");
 
-    await preflightWriteTargets([envPath, configPath]);
+    await preflightWriteTargets([envPath]);
     await writePrivateFile(envPath, envContent);
-    await writePrivateFile(configPath, configContent);
 
     s.stop("Config files generated");
-    p.note(
-      [c.green(".env"), c.green("myst.config.json")].join("\n"),
-      c.yellow("Files written to current directory"),
-    );
+    p.note(c.green(".env"), c.yellow("File written to current directory"));
     p.note(
       [
         `${c.bold("Public viewer URL:")} ${c.cyan(publicUrl)}`,

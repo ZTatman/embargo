@@ -208,7 +208,6 @@ The CLI is the primary way to configure and validate Myst against an existing Fo
 - generate a grant token secret by default unless the operator pastes one
 - generate all Myst-owned config files needed for deployment in Phase 1
 - write `.env`
-- write `myst.config.json`
 - print manual follow-up actions for admin URL protection, app deployment, and Forgejo validation
 - show links to Forgejo docs for API usage, token scopes, repo permissions, and the admin CLI
 - remind operators to run `myst init` in the directory where Myst will be deployed, usually on the target VPS or server workspace
@@ -285,7 +284,6 @@ Forgejo docs to link directly from CLI output:
 Expected outputs from `init`:
 
 - `.env`
-- `myst.config.json`
 - optional platform templates for Myst only (e.g., Docker Compose for Dokploy)
 
 ## Data Model

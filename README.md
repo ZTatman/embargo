@@ -93,7 +93,7 @@ GRANT_TOKEN_SECRET="your-secret-here"
 
 - [x] Project renamed from Embargo to Myst
 - [x] CLI scaffold (`myst init`)
-- [x] Config generation (`.env`, `myst.config.json`)
+- [x] Config generation (`.env`)
 - [ ] Service foundation (FastAPI + PostgreSQL)
 - [ ] `myst forgejo bootstrap` — verify Forgejo connectivity
 - [ ] `myst doctor` — validate configuration
