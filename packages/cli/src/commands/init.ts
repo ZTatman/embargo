@@ -39,7 +39,6 @@ function validateHttpUrlOrHost(
   try {
     const normalized = normalizeHttpUrl(value);
     const url = new URL(normalized);
-
     if (!url.hostname) {
       return `${label} must include a domain or hostname`;
     }
@@ -125,7 +124,7 @@ async function preflightWriteTargets(filePaths: string[]): Promise<void> {
  * @param _args - The command arguments.
  * @returns {Promise<void>} A promise that resolves when the initialization is complete.
  */
-export async function initCommand(_args: string[]): Promise<void> {
+export async function initCommand(args?: string[]): Promise<void> {
   p.intro(c.bold("myst init"));
   p.note(
     [
