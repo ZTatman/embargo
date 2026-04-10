@@ -5,14 +5,20 @@ import * as c from "yoctocolors";
 import pkg from "../package.json" with { type: "json" };
 
 import { initCommand } from "./commands/init.js";
+import { configCommand } from "./commands/config.js";
+import { verifyCommand } from "./commands/verify.js";
+import { doctorCommand } from "./commands/doctor.js";
 import { getHelpText } from "./help.js";
 
-type CommandName = "init";
+type CommandName = "init" | "config" | "verify" | "doctor";
 
 type CommandHandler = (args?: string[]) => Promise<void>;
 
 const commandHandlers: Record<CommandName, CommandHandler> = {
   init: initCommand,
+  config: configCommand,
+  verify: verifyCommand,
+  doctor: doctorCommand,
 };
 
 async function main(): Promise<void> {
