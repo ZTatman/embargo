@@ -1,61 +1,8 @@
-import fs from "node:fs";
 import path from "node:path";
 
 import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
-
-interface MystConfig {
-  publicUrl?: string;
-  adminUrl?: string;
-  databaseUrl?: string;
-  forgejoBaseUrl?: string;
-  forgejoBotUsername?: string;
-  forgejoPat?: string;
-  grantTokenSecret?: string;
-}
-
-function parseEnvFile(envPath: string): MystConfig {
-  const config: MystConfig = {};
-
-  const content = fs.readFileSync(envPath, "utf-8");
-  const lines = content.split("\n");
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-
-    const [key, ...valueParts] = trimmed.split("=");
-    if (!key) continue;
-
-    const value = valueParts.join("=").trim();
-
-    switch (key) {
-      case "MYST_PUBLIC_URL":
-        config.publicUrl = value;
-        break;
-      case "MYST_ADMIN_URL":
-        config.adminUrl = value;
-        break;
-      case "DATABASE_URL":
-        config.databaseUrl = value;
-        break;
-      case "FORGEJO_BASE_URL":
-        config.forgejoBaseUrl = value;
-        break;
-      case "FORGEJO_BOT_USERNAME":
-        config.forgejoBotUsername = value;
-        break;
-      case "FORGEJO_PAT":
-        config.forgejoPat = value;
-        break;
-      case "GRANT_TOKEN_SECRET":
-        config.grantTokenSecret = value;
-        break;
-    }
-  }
-
-  return config;
-}
+import { ENV_MAPPING, MystEnvironmentVariables, parseEnvFile, validateDatabaseUrl, REQUIRED_KEYS } from "../config.js";
 
 type CheckResult = {
   name: string;
@@ -134,7 +81,7 @@ export async function doctorCommand(): Promise<void> {
   const envPath = path.join(process.cwd(), ".env");
   const results: CheckResult[] = [];
 
-  let config: MystConfig;
+  let config: Partial<MystEnvironmentVariables>;
 
   try {
     config = parseEnvFile(envPath);
@@ -154,30 +101,14 @@ export async function doctorCommand(): Promise<void> {
 
   addResult("Config file exists", true, envPath);
 
-  const requiredFields = [
-    { key: "publicUrl", name: "MYST_PUBLIC_URL" },
-    { key: "adminUrl", name: "MYST_ADMIN_URL" },
-    { key: "databaseUrl", name: "DATABASE_URL" },
-    { key: "forgejoBaseUrl", name: "FORGEJO_BASE_URL" },
-    { key: "forgejoBotUsername", name: "FORGEJO_BOT_USERNAME" },
-    { key: "forgejoPat", name: "FORGEJO_PAT" },
-    { key: "grantTokenSecret", name: "GRANT_TOKEN_SECRET" },
-  ];
-
-  for (const field of requiredFields) {
-    const value = config[field.key as keyof MystConfig];
-    addResult(`${field.name} set`, !!value, value ? "configured" : "missing");
+  for (const [envKey, configKey] of Object.entries(ENV_MAPPING)) {
+    const value = config[configKey];
+    addResult(`${envKey} set`, !!value, value ? "configured" : "missing");
   }
 
   if (config.databaseUrl) {
-    try {
-      const url = new URL(config.databaseUrl);
-      const valid = url.protocol === "postgres:" ||
-        url.protocol === "postgresql:";
-      addResult("Database URL format", valid, valid ? "valid" : "invalid");
-    } catch {
-      addResult("Database URL format", false, "invalid format");
-    }
+    const valid = validateDatabaseUrl(config.databaseUrl);
+    addResult("Database URL format", valid, valid ? "valid" : "invalid");
   }
 
   if (config.forgejoBaseUrl && config.forgejoPat) {

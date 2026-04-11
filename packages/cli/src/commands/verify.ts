@@ -1,45 +1,8 @@
-import fs from "node:fs";
 import path from "node:path";
 
 import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
-
-interface MystConfig {
-  forgejoBaseUrl?: string;
-  forgejoBotUsername?: string;
-  forgejoPat?: string;
-}
-
-function parseEnvFile(envPath: string): MystConfig {
-  const config: MystConfig = {};
-
-  const content = fs.readFileSync(envPath, "utf-8");
-  const lines = content.split("\n");
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-
-    const [key, ...valueParts] = trimmed.split("=");
-    if (!key) continue;
-
-    const value = valueParts.join("=").trim();
-
-    switch (key) {
-      case "FORGEJO_BASE_URL":
-        config.forgejoBaseUrl = value;
-        break;
-      case "FORGEJO_BOT_USERNAME":
-        config.forgejoBotUsername = value;
-        break;
-      case "FORGEJO_PAT":
-        config.forgejoPat = value;
-        break;
-    }
-  }
-
-  return config;
-}
+import { MystEnvironmentVariables, parseEnvFile, REQUIRED_KEYS } from "../config.js";
 
 type CheckResult = {
   name: string;
@@ -100,7 +63,7 @@ async function checkForgejoApi(
     return {
       name: "Forgejo API token",
       success: true,
-      message: `Authenticated as ${c.green(user.login)}`,
+      message: `Authenticated as ${user.login}`,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -130,31 +93,30 @@ async function checkRepoAccess(
 
     if (!response.ok) {
       return {
-        name: "Repository access",
+        name: "Repo access",
         success: false,
         message: `HTTP ${response.status}`,
       };
     }
 
-    const repos = (await response.json()) as Array<{ name: string }>;
+    const repos = (await response.json()) as { name: string }[];
     if (repos.length > 0) {
-      const firstRepo = repos[0]!;
       return {
-        name: "Repository access",
+        name: "Repo access",
         success: true,
-        message: `Can access repos (sample: ${c.green(firstRepo.name)})`,
+        message: `Found ${repos.length} repo(s)`,
       };
     }
 
     return {
-      name: "Repository access",
+      name: "Repo access",
       success: true,
-      message: "Token valid but no repos found",
+      message: "No repos found (service account may not have repo access)",
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return {
-      name: "Repository access",
+      name: "Repo access",
       success: false,
       message,
     };
@@ -166,7 +128,7 @@ export async function verifyCommand(): Promise<void> {
 
   const envPath = path.join(process.cwd(), ".env");
 
-  let config: MystConfig;
+  let config: Partial<MystEnvironmentVariables>;
 
   try {
     config = parseEnvFile(envPath);
@@ -184,14 +146,15 @@ export async function verifyCommand(): Promise<void> {
 
   const missing: string[] = [];
 
-  if (!config.forgejoBaseUrl) {
-    missing.push("FORGEJO_BASE_URL");
-  }
-  if (!config.forgejoPat) {
-    missing.push("FORGEJO_PAT");
-  }
-  if (!config.forgejoBotUsername) {
-    missing.push("FORGEJO_BOT_USERNAME");
+  for (const key of REQUIRED_KEYS) {
+    if (!config[key]) {
+      const envKey = Object.entries({
+        forgejoBaseUrl: "FORGEJO_BASE_URL",
+        forgejoBotUsername: "FORGEJO_BOT_USERNAME",
+        forgejoPat: "FORGEJO_PAT",
+      }).find(([, v]) => v === key)?.[0];
+      if (envKey) missing.push(envKey);
+    }
   }
 
   if (missing.length > 0) {
@@ -207,7 +170,9 @@ export async function verifyCommand(): Promise<void> {
   try {
     s.start("Verifying Forgejo configuration");
 
-    const reachability = await checkForgejoReachability(config.forgejoBaseUrl!);
+    const reachability: CheckResult = await checkForgejoReachability(
+      config.forgejoBaseUrl!,
+    );
 
     if (!reachability.success) {
       s.stop(reachability.message);
@@ -216,7 +181,7 @@ export async function verifyCommand(): Promise<void> {
       return;
     }
 
-    const apiToken = await checkForgejoApi(
+    const apiToken: CheckResult = await checkForgejoApi(
       config.forgejoBaseUrl!,
       config.forgejoPat!,
     );

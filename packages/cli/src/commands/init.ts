@@ -5,7 +5,7 @@ import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
 
 import { generateSecret } from "../utils/crypto.js";
-import { generateEnvFile } from "../utils/env.js";
+import { generateEnvFile } from "../config.js";
 
 /**
  * Normalizes a URL to use https:// if no protocol is specified.
