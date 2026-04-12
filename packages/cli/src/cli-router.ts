@@ -123,7 +123,8 @@ function showCommandHelp(
       });
     }
 
-    const colWidth = Math.max(...optionRows.map((r) => r.name.length)) + PADDING;
+    const colWidth =
+      Math.max(...optionRows.map((r) => r.name.length)) + PADDING;
 
     lines.push(c.bold("Options:"));
     for (const row of optionRows) {
@@ -154,7 +155,7 @@ export async function runCli(
 
   // Check for version flag (early exit)
   if (argv.length > 0 && argv.every(isVersionFlag)) {
-    process.stdout.write(version);
+    process.stdout.write(version + "\n");
     return;
   }
 
@@ -193,7 +194,7 @@ export async function runCli(
   // Check if subcommand was passed and if it's a valid subcommand (not an option flag)
   const subcommands = cmdConf.subcommands;
   const isSubcommandAnOption = subcommand && subcommand.startsWith("-");
-  
+
   if (isSubcommandAnOption) {
     // Subcommand looks like an option (e.g., --diagnostic), treat as option for parent
     targetCmdConf = cmdConf.handler ? cmdConf : undefined;
@@ -221,8 +222,8 @@ export async function runCli(
   }
 
   // Build args for parseArgs - if subcommand is an option, include it
-  const argsForOptions = isSubcommandAnOption 
-    ? [subcommand, ...remainingArgs] 
+  const argsForOptions = isSubcommandAnOption
+    ? [subcommand, ...remainingArgs]
     : remainingArgs;
 
   // Parse target command options
