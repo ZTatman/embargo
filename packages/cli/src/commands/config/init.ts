@@ -5,70 +5,58 @@ import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
 
 import { generateSecret } from "../../utils/crypto.js";
-import { generateEnvFile, DATABASE_PROTOCOLS } from "../../utils/config.js";
+import { generateEnvFile } from "../../utils/config.js";
 import { CommandConfig } from "../../cli-router.js";
 
+function normalizeHttpUrl(value: string): string {
+  const trimmed = value.trim();
+  const hasProtocol = /^[a-z]+:\/\//i.test(trimmed);
+  const isNotHttp = !/^https?:\/\//i.test(trimmed);
+
+  if (hasProtocol && isNotHttp) {
+    throw new Error("URLs must use http:// or https://");
+  }
+
+  return hasProtocol ? trimmed : `https://${trimmed}`;
+}
+
+function validateHttpUrlOrHost(
+  value: string | undefined,
+  label: string,
+): string | undefined {
+  if (!value?.trim()) return `${label} is required`;
+
+  try {
+    const normalized = normalizeHttpUrl(value);
+    const url = new URL(normalized);
+    if (!url.hostname) {
+      return `${label} must include a domain or hostname`;
+    }
+  } catch {
+    return `${label} must be a valid URL or hostname`;
+  }
+
+  return undefined;
+}
+
+function validatePostgresUrl(value: string | undefined): string | undefined {
+  if (!value?.trim()) {
+    return "Database URL is required";
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "postgres:" && url.protocol !== "postgresql:") {
+      return "Database URL must start with postgres:// or postgresql://";
+    }
+  } catch {
+    return "Database URL must be a valid Postgres connection string";
+  }
+
+  return undefined;
+}
+
 async function init(opts: { output?: string }) {
-  // Helper functions scoped to init
-  function normalizeHttpUrl(value: string): string {
-    const trimmed = value.trim();
-    const hasProtocol = /^[a-z]+:\/\//i.test(trimmed);
-    const isNotHttp = !/^https?:\/\//i.test(trimmed);
-
-    if (hasProtocol && isNotHttp) {
-      throw new Error("URLs must use http:// or https://");
-    }
-
-    return hasProtocol ? trimmed : `https://${trimmed}`;
-  }
-
-  function validateHttpUrlOrHost(
-    value: string | undefined,
-    label: string,
-  ): string | undefined {
-    if (!value?.trim()) return `${label} is required`;
-
-    try {
-      const normalized = normalizeHttpUrl(value);
-      const url = new URL(normalized);
-      if (!url.hostname) {
-        return `${label} must include a domain or hostname`;
-      }
-    } catch {
-      return `${label} must be a valid URL or hostname`;
-    }
-
-    return undefined;
-  }
-
-  function validatePostgresUrl(value: string | undefined): string | undefined {
-    if (!value?.trim()) {
-      return "Database URL is required";
-    }
-
-    try {
-      const url = new URL(value);
-      if (!DATABASE_PROTOCOLS.includes(url.protocol as "postgres:" | "postgresql:")) {
-        return "Database URL must start with postgres:// or postgresql://";
-      }
-    } catch {
-      return "Database URL must be a valid Postgres connection string";
-    }
-
-    return undefined;
-  }
-
-  async function writePrivateFile(
-    filePath: string,
-    content: string,
-  ): Promise<void> {
-    await fs.writeFile(filePath, content, {
-      encoding: "utf8",
-      flag: "wx",
-      mode: 0o600,
-    });
-  }
-
   p.intro(c.bold("myst config init"));
   p.note(
     [
@@ -92,6 +80,7 @@ async function init(opts: { output?: string }) {
   const outDir = opts.output ? path.dirname(opts.output) : process.cwd();
   const envPath = opts.output || path.join(outDir, ".env");
 
+  // Check if .env file already exists
   let envExists = false;
   try {
     await fs.stat(envPath);
@@ -100,6 +89,7 @@ async function init(opts: { output?: string }) {
     // .env file does not exist
   }
 
+  // Handle existing .env file
   if (envExists) {
     while (true) {
       const choice = await p.select({
@@ -209,7 +199,11 @@ async function init(opts: { output?: string }) {
       publicUrl,
     });
 
-    await writePrivateFile(envPath, envContent);
+    await fs.writeFile(envPath, envContent, {
+      encoding: "utf8",
+      flag: "wx",
+      mode: 0o600,
+    });
 
     s.stop(c.yellow(`.env created at ${envPath}`));
     p.note(

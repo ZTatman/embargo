@@ -57,38 +57,32 @@ export function validateDatabaseUrl(url: string | undefined): boolean {
   if (!url) return false;
   try {
     const parsed = new URL(url);
-    return DATABASE_PROTOCOLS.includes(parsed.protocol as "postgres:" | "postgresql:");
+    return DATABASE_PROTOCOLS.includes(
+      parsed.protocol as "postgres:" | "postgresql:",
+    );
   } catch {
     return false;
   }
 }
 
-function escapeEnvValue(value: string): string {
-  return `"${value
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/\r?\n/g, "\\n")
-    .replace(/\$/g, "\\$")}"`;
-}
-
 export function generateEnvFile(options: MystEnvironmentVariables): string {
   const lines = [
     `# Public URL used for share links.`,
-    `${ENV_MAPPING.MYST_PUBLIC_URL}=${escapeEnvValue(options.publicUrl)}`,
+    `MYST_PUBLIC_URL=${options.publicUrl}`,
     ``,
     `# Private operator URL for the admin UI. Protect this upstream.`,
-    `${ENV_MAPPING.MYST_ADMIN_URL}=${escapeEnvValue(options.adminUrl)}`,
+    `MYST_ADMIN_URL=${options.adminUrl}`,
     ``,
     `# Myst's own Postgres database.`,
-    `${ENV_MAPPING.DATABASE_URL}=${escapeEnvValue(options.databaseUrl)}`,
+    `DATABASE_URL=${options.databaseUrl}`,
     ``,
     `# Existing Forgejo instance and operator-created PAT for the dedicated Forgejo user.`,
-    `${ENV_MAPPING.FORGEJO_BASE_URL}=${escapeEnvValue(options.forgejoBaseUrl)}`,
-    `${ENV_MAPPING.FORGEJO_BOT_USERNAME}=${escapeEnvValue(options.forgejoBotUsername)}`,
-    `${ENV_MAPPING.FORGEJO_PAT}=${escapeEnvValue(options.forgejoPat)}`,
+    `FORGEJO_BASE_URL=${options.forgejoBaseUrl}`,
+    `FORGEJO_BOT_USERNAME=${options.forgejoBotUsername}`,
+    `FORGEJO_PAT=${options.forgejoPat}`,
     ``,
     `# Secret used to sign or derive grant tokens.`,
-    `${ENV_MAPPING.GRANT_TOKEN_SECRET}=${escapeEnvValue(options.grantTokenSecret)}`,
+    `GRANT_TOKEN_SECRET=${options.grantTokenSecret}`,
   ];
 
   return lines.join("\n");
