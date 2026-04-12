@@ -52,7 +52,7 @@ async function verifyCommand(opts: VerifyOptions): Promise<void> {
 
     for (const [envKey, configKey] of Object.entries(ENV_MAPPING)) {
       const value = config[configKey];
-      addResult(`${envKey} set`, !!value, value ? "configured" : "missing");
+      addResult(`${configKey} set`, !!value, value ? "configured" : "missing");
     }
 
     if (config.databaseUrl) {
@@ -64,23 +64,27 @@ async function verifyCommand(opts: VerifyOptions): Promise<void> {
   const forgejoConfigured =
     config.forgejoBaseUrl && config.forgejoPat && config.forgejoBotUsername;
 
-  if (forgejoConfigured && config.forgejoBaseUrl && config.forgejoPat) {
-    const reachability = await checkForgejoReachability(config.forgejoBaseUrl);
+  if (forgejoConfigured) {
+    const forgejoBaseUrl = config.forgejoBaseUrl!;
+    const forgejoPat = config.forgejoPat!;
+    const forgejoBotUsername = config.forgejoBotUsername!;
+
+    const reachability = await checkForgejoReachability(forgejoBaseUrl);
     results.push(reachability);
 
     if (reachability.success) {
       const apiToken = await checkForgejoApi(
-        config.forgejoBaseUrl,
-        config.forgejoPat,
+        forgejoBaseUrl,
+        forgejoPat,
         diagnostic,
       );
       results.push(apiToken);
 
-      if (apiToken.success && config.forgejoBotUsername) {
+      if (apiToken.success) {
         const repoAccess = await checkRepoAccess(
-          config.forgejoBaseUrl,
-          config.forgejoPat,
-          config.forgejoBotUsername,
+          forgejoBaseUrl,
+          forgejoPat,
+          forgejoBotUsername,
         );
         results.push(repoAccess);
       }
@@ -116,12 +120,7 @@ async function verifyCommand(opts: VerifyOptions): Promise<void> {
 
       for (const key of REQUIRED_KEYS) {
         if (!config[key]) {
-          const envKey = Object.entries({
-            forgejoBaseUrl: "FORGEJO_BASE_URL",
-            forgejoBotUsername: "FORGEJO_BOT_USERNAME",
-            forgejoPat: "FORGEJO_PAT",
-          }).find(([, v]) => v === key)?.[0];
-          if (envKey) missing.push(envKey);
+          missing.push(key.replace(/(?<=[a-z])(?=[A-Z])/g, "_").toUpperCase());
         }
       }
 
@@ -133,11 +132,19 @@ async function verifyCommand(opts: VerifyOptions): Promise<void> {
         return;
       }
 
+      // After this point, required keys are guaranteed to exist
+      if (!config.forgejoBaseUrl || !config.forgejoPat || !config.forgejoBotUsername) {
+        process.exitCode = 1;
+        return;
+      }
+
+      const forgejoBaseUrl = config.forgejoBaseUrl;
+      const forgejoPat = config.forgejoPat;
+      const forgejoBotUsername = config.forgejoBotUsername;
+
       s.start("Verifying Forgejo configuration");
 
-      const reachability = await checkForgejoReachability(
-        config.forgejoBaseUrl!,
-      );
+      const reachability = await checkForgejoReachability(forgejoBaseUrl);
 
       if (!reachability.success) {
         s.stop(reachability.message);
@@ -147,8 +154,8 @@ async function verifyCommand(opts: VerifyOptions): Promise<void> {
       }
 
       const apiToken = await checkForgejoApi(
-        config.forgejoBaseUrl!,
-        config.forgejoPat!,
+        forgejoBaseUrl,
+        forgejoPat,
       );
 
       if (!apiToken.success) {
@@ -159,9 +166,9 @@ async function verifyCommand(opts: VerifyOptions): Promise<void> {
       }
 
       const repoAccess = await checkRepoAccess(
-        config.forgejoBaseUrl!,
-        config.forgejoPat!,
-        config.forgejoBotUsername!,
+        forgejoBaseUrl,
+        forgejoPat,
+        forgejoBotUsername,
       );
 
       s.stop("Verification complete");
