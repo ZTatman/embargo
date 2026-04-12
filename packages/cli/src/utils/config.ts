@@ -28,10 +28,9 @@ export const REQUIRED_KEYS = [
 
 export const DATABASE_PROTOCOLS = ["postgres:", "postgresql:"] as const;
 
-export type EnvKey = keyof typeof ENV_MAPPING;
-export type ConfigKey = (typeof ENV_MAPPING)[EnvKey];
-
-export function parseEnvFile(envPath: string): Partial<MystEnvironmentVariables> {
+export function parseEnvFile(
+  envPath: string,
+): Partial<MystEnvironmentVariables> {
   const config: Partial<MystEnvironmentVariables> = {};
   const content = fs.readFileSync(envPath, "utf-8");
   const lines = content.split("\n");
@@ -44,7 +43,7 @@ export function parseEnvFile(envPath: string): Partial<MystEnvironmentVariables>
     if (!key) continue;
 
     const value = valueParts.join("=").trim();
-    const configKey = ENV_MAPPING[key as EnvKey];
+    const configKey = ENV_MAPPING[key as keyof typeof ENV_MAPPING];
 
     if (configKey) {
       config[configKey] = value;
@@ -58,7 +57,7 @@ export function validateDatabaseUrl(url: string | undefined): boolean {
   if (!url) return false;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "postgres:" || parsed.protocol === "postgresql:";
+    return DATABASE_PROTOCOLS.includes(parsed.protocol as "postgres:" | "postgresql:");
   } catch {
     return false;
   }

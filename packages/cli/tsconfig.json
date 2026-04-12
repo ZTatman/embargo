@@ -3,10 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
   },
-  "references": [
-    { "path": "../shared" }
-  ],
-  "include": ["src/**/*.ts"]
+  "references": [{ "path": "../shared" }],
+  "include": ["src/**/*.ts"],
 }

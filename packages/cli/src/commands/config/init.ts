@@ -4,128 +4,72 @@ import path from "node:path";
 import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
 
-import { generateSecret } from "../utils/crypto.js";
-import { generateEnvFile } from "../config.js";
+import { generateSecret } from "../../utils/crypto.js";
+import { generateEnvFile, DATABASE_PROTOCOLS } from "../../utils/config.js";
+import { CommandConfig } from "../../cli-router.js";
 
-/**
- * Normalizes a URL to use https:// if no protocol is specified.
- * @param value - The URL to normalize.
- * @returns {string} The normalized URL.
- */
-function normalizeHttpUrl(value: string): string {
-  const trimmed = value.trim();
-  const hasProtocol = /^[a-z]+:\/\//i.test(trimmed);
-  const isNotHttp = !/^https?:\/\//i.test(trimmed);
+async function init(opts: { output?: string }) {
+  // Helper functions scoped to init
+  function normalizeHttpUrl(value: string): string {
+    const trimmed = value.trim();
+    const hasProtocol = /^[a-z]+:\/\//i.test(trimmed);
+    const isNotHttp = !/^https?:\/\//i.test(trimmed);
 
-  if (hasProtocol && isNotHttp) {
-    throw new Error("URLs must use http:// or https://");
-  }
-
-  return hasProtocol ? trimmed : `https://${trimmed}`;
-}
-
-/**
- * Validates a URL or host, returning the normalized URL or undefined if valid.
- * @param value - The URL or host to validate.
- * @param label - The label to use in error messages.
- * @returns {string | undefined} The normalized URL or undefined if valid.
- */
-function validateHttpUrlOrHost(
-  value: string | undefined,
-  label: string,
-): string | undefined {
-  if (!value?.trim()) return `${label} is required`;
-
-  try {
-    const normalized = normalizeHttpUrl(value);
-    const url = new URL(normalized);
-    if (!url.hostname) {
-      return `${label} must include a domain or hostname`;
+    if (hasProtocol && isNotHttp) {
+      throw new Error("URLs must use http:// or https://");
     }
-  } catch {
-    return `${label} must be a valid URL or hostname`;
+
+    return hasProtocol ? trimmed : `https://${trimmed}`;
   }
 
-  return undefined;
-}
+  function validateHttpUrlOrHost(
+    value: string | undefined,
+    label: string,
+  ): string | undefined {
+    if (!value?.trim()) return `${label} is required`;
 
-/**
- * Validates a Postgres URL, returning undefined if valid.
- * @param value - The Postgres URL to validate.
- * @returns {string | undefined} The error message or undefined if valid.
- */
-function validatePostgresUrl(value: string | undefined): string | undefined {
-  if (!value?.trim()) {
-    return "Database URL is required";
-  }
-
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "postgres:" && url.protocol !== "postgresql:") {
-      return "Database URL must start with postgres:// or postgresql://";
+    try {
+      const normalized = normalizeHttpUrl(value);
+      const url = new URL(normalized);
+      if (!url.hostname) {
+        return `${label} must include a domain or hostname`;
+      }
+    } catch {
+      return `${label} must be a valid URL or hostname`;
     }
-  } catch {
-    return "Database URL must be a valid Postgres connection string";
+
+    return undefined;
   }
 
-  return undefined;
-}
+  function validatePostgresUrl(value: string | undefined): string | undefined {
+    if (!value?.trim()) {
+      return "Database URL is required";
+    }
 
-/**
- * Writes a private file to disk, throwing an error if the file already exists.
- * @param filePath - The path to the file to write.
- * @param content - The content to write to the file.
- * @returns {Promise<void>} A promise that resolves when the file is written.
- */
-async function writePrivateFile(
-  filePath: string,
-  content: string,
-): Promise<void> {
-  try {
+    try {
+      const url = new URL(value);
+      if (!DATABASE_PROTOCOLS.includes(url.protocol as "postgres:" | "postgresql:")) {
+        return "Database URL must start with postgres:// or postgresql://";
+      }
+    } catch {
+      return "Database URL must be a valid Postgres connection string";
+    }
+
+    return undefined;
+  }
+
+  async function writePrivateFile(
+    filePath: string,
+    content: string,
+  ): Promise<void> {
     await fs.writeFile(filePath, content, {
       encoding: "utf8",
       flag: "wx",
       mode: 0o600,
     });
-  } catch (e) {
-    const error = e as NodeJS.ErrnoException;
-    if (error.code === "EEXIST") {
-      throw new Error(
-        `Error: the file '${c.underline(path.basename(filePath))}' already exists in directory ${c.underline(path.dirname(filePath))}`,
-      );
-    }
-    throw error; // throw any other errors back if not EEXIST code
   }
-}
 
-/**
- * Preflight check for write targets, throwing an error if any target file already exists.
- * @param filePaths - The paths of the files to write.
- * @returns {Promise<void>} A promise that resolves when all targets are checked.
- */
-async function preflightWriteTargets(filePaths: string[]): Promise<void> {
-  for (const filePath of filePaths) {
-    try {
-      await fs.access(filePath);
-      throw new Error(
-        `Error: the file '${c.underline(path.basename(filePath))}' already exists in directory ${c.underline(path.dirname(filePath))}`,
-      );
-    } catch (error) {
-      const err = error as NodeJS.ErrnoException;
-      if (err.code !== "ENOENT") {
-        throw error;
-      }
-    }
-  }
-}
-
-/**
- * Initializes a Myst project by creating the necessary configuration files.
- * @param _args - The command arguments.
- * @returns {Promise<void>} A promise that resolves when the initialization is complete.
- */
-export async function initCommand(args?: string[]): Promise<void> {
-  p.intro(c.bold("myst init"));
+  p.intro(c.bold("myst config init"));
   p.note(
     [
       `${c.bold("Run this in the directory where you plan to deploy Myst.")}`,
@@ -144,6 +88,48 @@ export async function initCommand(args?: string[]): Promise<void> {
     ].join("\n"),
     c.yellow("Before you start:"),
   );
+
+  const outDir = opts.output ? path.dirname(opts.output) : process.cwd();
+  const envPath = opts.output || path.join(outDir, ".env");
+
+  let envExists = false;
+  try {
+    await fs.stat(envPath);
+    envExists = true;
+  } catch {
+    // .env file does not exist
+  }
+
+  if (envExists) {
+    while (true) {
+      const choice = await p.select({
+        message: c.red(
+          `The file .env already exists at ${envPath}. What would you like to do?`,
+        ),
+        options: [
+          { value: "view", label: "View .env content" },
+          { value: "overwrite", label: "Overwrite .env" },
+          { value: "cancel", label: "Cancel" },
+        ],
+      });
+
+      if (p.isCancel(choice) || choice === "cancel") {
+        p.cancel("\nOperation cancelled.");
+        process.exit(0);
+      }
+
+      if (choice === "view") {
+        const envContent = await fs.readFile(envPath, { encoding: "utf-8" });
+        p.note(c.dim(envContent), c.yellow("Current .env"));
+        continue;
+      }
+
+      if (choice === "overwrite") {
+        await fs.unlink(envPath);
+        break;
+      }
+    }
+  }
 
   const answers = await p.group(
     {
@@ -223,29 +209,21 @@ export async function initCommand(args?: string[]): Promise<void> {
       publicUrl,
     });
 
-    const outDir = process.cwd();
-    const envPath = path.join(outDir, ".env");
-
-    await preflightWriteTargets([envPath]);
     await writePrivateFile(envPath, envContent);
 
-    s.stop("Config files generated");
-    p.note(c.green(".env"), c.yellow("File written to current directory"));
+    s.stop(c.yellow(`.env created at ${envPath}`));
     p.note(
       [
         `${c.bold("Public viewer URL:")} ${c.cyan(publicUrl)}`,
-        `${c.bold("Private admin URL:")} ${c.cyan(adminUrl)}`,
+        `${c.bold("Admin URL:")} ${c.cyan(adminUrl)}`,
         `${c.bold("Forgejo base URL:")} ${c.cyan(forgejoBaseUrl)}`,
-        `${c.bold("Forgejo bot username:")} ${c.green(answers.forgejoBotUsername)}`,
+        `${c.bold("Myst bot username:")} ${c.cyan(answers.forgejoBotUsername)}`,
         "",
         `${c.bold("Admin URL reminder:")} protect this upstream with Tailscale, VPN, Cloudflare Access, or reverse-proxy auth.`,
       ].join("\n"),
-      c.yellow("Next steps"),
     );
-    p.outro(
-      c.green(
-        "Done. Deploy Myst, then run forgejo bootstrap and doctor commands to verify setup.",
-      ),
+    p.log.success(
+      "Done. Verify myst's connection using the 'verify' command.\nOnce verified, deploy!",
     );
   } catch (error) {
     s.stop();
@@ -255,3 +233,11 @@ export async function initCommand(args?: string[]): Promise<void> {
     process.exitCode = 1;
   }
 }
+
+export const commandConfig: CommandConfig = {
+  description: "Generate .env file",
+  options: {
+    output: { type: "string", short: "o" },
+  },
+  handler: init,
+};
