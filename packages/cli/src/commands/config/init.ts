@@ -77,8 +77,7 @@ async function init(opts: { output?: string }) {
     c.yellow("Before you start:"),
   );
 
-  const outDir = opts.output ? path.dirname(opts.output) : process.cwd();
-  const envPath = opts.output || path.join(outDir, ".env");
+  const envPath = opts.output || path.join(process.cwd(), ".env");
 
   // Check if .env file already exists
   let envExists = false;
