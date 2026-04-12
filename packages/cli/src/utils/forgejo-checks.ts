@@ -1,3 +1,5 @@
+const TIMEOUT = 5000;
+
 export type CheckResult = {
   name: string;
   success: boolean;
@@ -16,11 +18,18 @@ export function createCheckResult(
   return result;
 }
 
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+): Promise<Response> {
+  return fetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT) });
+}
+
 export async function checkForgejoReachability(
   baseUrl: string,
 ): Promise<CheckResult> {
   try {
-    const response = await fetch(baseUrl, { method: "GET" });
+    const response = await fetchWithTimeout(baseUrl, { method: "GET" });
     if (response.ok || response.status === 200) {
       return createCheckResult("Forgejo reachability", true);
     }
@@ -41,7 +50,7 @@ export async function checkForgejoApi(
   colorize = false,
 ): Promise<CheckResult> {
   try {
-    const response = await fetch(`${baseUrl}/api/v1/user`, {
+    const response = await fetchWithTimeout(`${baseUrl}/api/v1/user`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${pat}`,
@@ -87,7 +96,7 @@ export async function checkRepoAccess(
   username: string,
 ): Promise<CheckResult> {
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${baseUrl}/api/v1/users/${username}/repos?limit=1`,
       {
         method: "GET",
@@ -112,7 +121,7 @@ export async function checkRepoAccess(
 
     return createCheckResult(
       "Repo access",
-      true,
+      false,
       "No repos found (service account may not have repo access)",
     );
   } catch (error) {
