@@ -105,7 +105,8 @@ async function init(opts: { output?: string }) {
 
       if (p.isCancel(choice) || choice === "cancel") {
         p.cancel("\nOperation cancelled.");
-        process.exit(0);
+        process.exitCode = 0;
+        return;
       }
 
       if (choice === "view") {
@@ -173,7 +174,8 @@ async function init(opts: { output?: string }) {
     {
       onCancel: () => {
         p.cancel("\nOperation cancelled.");
-        process.exit(0);
+        process.exitCode = 0;
+        throw new Error("Operation cancelled");
       },
     },
   );
