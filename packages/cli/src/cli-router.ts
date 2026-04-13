@@ -191,7 +191,6 @@ export async function runCli(
 
   // If help is requested for a specific command, show command-specific help
   if (wantsCommandHelp) {
-    const isHelpFlag = (arg: string) => arg === "--help" || arg === "-h";
     const actualSubcommand = isHelpFlag(subcommand) ? undefined : subcommand;
     showCommandHelp(command, cmdConf, actualSubcommand);
     return;

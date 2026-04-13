@@ -30,7 +30,7 @@ export async function checkForgejoReachability(
 ): Promise<CheckResult> {
   try {
     const response = await fetchWithTimeout(baseUrl, { method: "GET" });
-    if (response.ok || response.status === 200) {
+    if (response.ok) {
       return createCheckResult("Forgejo reachability", true);
     }
     return createCheckResult(

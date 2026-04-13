@@ -86,16 +86,12 @@ function collectResults(
     addResult("Database URL format", isDbValid, isDbValid ? "valid" : "invalid");
   }
 
-  const isConfigured =
+  const isForgejoConfigured =
     config.forgejoBaseUrl && config.forgejoPat && config.forgejoBotUsername;
 
-  if (!isConfigured) {
-    return results;
+  if (isForgejoConfigured) {
+    addResult("Forgejo configured", true);
   }
-
-  const { forgejoBaseUrl, forgejoPat, forgejoBotUsername } = config;
-
-  addResult("Forgejo configured", true);
 
   return results;
 }
@@ -186,9 +182,16 @@ async function verifyResults(
     return;
   }
 
-  if (forgejoResults.length < 3) {
+  if (forgejoResults.length === 0) {
     s.stop("No Forgejo configuration");
     p.cancel(`${c.red("Error:")} Forgejo not configured`);
+    process.exitCode = 1;
+    return;
+  }
+
+  if (forgejoResults.length < 3) {
+    s.stop("Incomplete Forgejo checks");
+    p.cancel(`${c.red("Error:")} Could not complete all Forgejo checks`);
     process.exitCode = 1;
     return;
   }
