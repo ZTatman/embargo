@@ -191,7 +191,11 @@ export async function runCli(
 
   // If help is requested for a specific command, show command-specific help
   if (wantsCommandHelp) {
-    const actualSubcommand = isHelpFlag(subcommand) ? undefined : subcommand;
+    const subcommands = cmdConf.subcommands;
+    const actualSubcommand =
+      subcommand && subcommands && subcommand in subcommands
+        ? subcommand
+        : undefined;
     showCommandHelp(command, cmdConf, actualSubcommand);
     return;
   }
@@ -233,14 +237,22 @@ export async function runCli(
     ? [subcommand, ...remainingArgs]
     : remainingArgs;
 
-  // Parse target command options
-  const { values: cmdOpts } = parseArgs({
-    args: argsForOptions,
-    options: targetCmdConf.options || {},
-    allowPositionals: true,
-  });
-
   try {
+    // Parse target command options
+    const { values: cmdOpts, positionals } = parseArgs({
+      args: argsForOptions,
+      options: targetCmdConf.options || {},
+      allowPositionals: true,
+    });
+
+    if (positionals.length > 0) {
+      process.stderr.write(
+        `${c.red("Error:")} Unexpected argument: ${positionals[0]}\n`,
+      );
+      process.exitCode = 1;
+      return;
+    }
+
     // Execute the target command handler
     await targetCmdConf.handler(cmdOpts);
   } catch (error) {

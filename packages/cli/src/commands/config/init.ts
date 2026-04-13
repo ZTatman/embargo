@@ -115,7 +115,6 @@ async function init(opts: { output?: string }) {
       }
 
       if (choice === "overwrite") {
-        await fs.unlink(envPath);
         break;
       }
     }
@@ -174,7 +173,6 @@ async function init(opts: { output?: string }) {
       onCancel: () => {
         p.cancel("\nOperation cancelled.");
         process.exitCode = 0;
-        throw new Error("Operation cancelled");
       },
     },
   );
@@ -200,11 +198,23 @@ async function init(opts: { output?: string }) {
       publicUrl,
     });
 
-    await fs.writeFile(envPath, envContent, {
-      encoding: "utf8",
-      flag: "wx",
-      mode: 0o600,
-    });
+    if (envExists) {
+      const tempPath = envPath + ".tmp";
+      await fs.writeFile(tempPath, envContent, {
+        encoding: "utf8",
+        flag: "wx",
+        mode: 0o600,
+      });
+
+      await fs.unlink(envPath).catch(() => {});
+      await fs.rename(tempPath, envPath);
+    } else {
+      await fs.writeFile(envPath, envContent, {
+        encoding: "utf8",
+        flag: "wx",
+        mode: 0o600,
+      });
+    }
 
     s.stop(c.yellow(`.env created at ${envPath}`));
     p.note(
