@@ -130,8 +130,7 @@ Only repo owners can create view links for their repos.
 
 `myst init` should generate all Myst-owned deployment config needed for Phase 1:
 
-- `.env`
-- `myst.config.json`
+- `.env` (environment variables for Docker/container deployment)
 - any future Myst-only deployment templates, but never Forgejo provisioning files
 
 `myst init` should provide inline guidance that:

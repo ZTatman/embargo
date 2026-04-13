@@ -46,10 +46,10 @@ HTMX provides interactivity (filtering, form submissions) with minimal JavaScrip
 
 ## Quick Start
 
-### 1. Run `myst init`
+### 1. Run `myst config init`
 
 ```bash
-myst init
+myst config init
 ```
 
 Prompts for:
@@ -92,12 +92,12 @@ GRANT_TOKEN_SECRET="your-secret-here"
 ## Phase 1 Progress
 
 - [x] Project renamed from Embargo to Myst
-- [x] CLI scaffold (`myst init`)
-- [x] Config generation (`.env`, `myst.config.json`)
+- [x] CLI scaffold (`myst config init`)
+- [x] Config generation (`.env`)
 - [ ] Service foundation (FastAPI + PostgreSQL)
-- [ ] `myst forgejo bootstrap` — verify Forgejo connectivity
-- [ ] `myst doctor` — validate configuration
-- [ ] `myst config print` — show current config
+- [x] `myst config verify` — verify Forgejo connectivity
+- [x] `myst config verify --diagnostic` — comprehensive diagnostics
+- [x] `myst config view` — show current config
 - [ ] Forgejo session authentication
 - [ ] Repo ownership verification
 - [ ] Private link creation (email-verified)
