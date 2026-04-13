@@ -95,9 +95,9 @@ GRANT_TOKEN_SECRET="your-secret-here"
 - [x] CLI scaffold (`myst config init`)
 - [x] Config generation (`.env`)
 - [ ] Service foundation (FastAPI + PostgreSQL)
-- [ ] `myst verify` — verify Forgejo connectivity
-- [ ] `myst verify --diagnostic` — validate configuration
-- [ ] `myst config view` — show current config
+- [x] `myst config verify` — verify Forgejo connectivity
+- [x] `myst config verify --diagnostic` — comprehensive diagnostics
+- [x] `myst config view` — show current config
 - [ ] Forgejo session authentication
 - [ ] Repo ownership verification
 - [ ] Private link creation (email-verified)

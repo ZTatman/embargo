@@ -21,24 +21,6 @@ interface CheckResult {
   message?: string;
 }
 
-async function verifyCommand(opts: VerifyOptions): Promise<void> {
-  const isDiagnostic = opts.diagnostic ?? false;
-  p.intro(c.bold("myst config verify"));
-
-  const config = loadConfig();
-  if (!config) {
-    return;
-  }
-
-  const missing = getMissingKeys(config);
-
-  if (isDiagnostic) {
-    await runDiagnosticMode(config, missing);
-  } else {
-    await runVerifyMode(config, missing);
-  }
-}
-
 function loadConfig(): Record<string, string> | null {
   const envPath = path.join(process.cwd(), ".env");
 
@@ -190,6 +172,24 @@ async function runForgejoChecks(
   results.push(repoAccess);
 
   return results;
+}
+
+async function verifyCommand(opts: VerifyOptions): Promise<void> {
+  const isDiagnostic = opts.diagnostic ?? false;
+  p.intro(c.bold("myst verify"));
+
+  const config = loadConfig();
+  if (!config) {
+    return;
+  }
+
+  const missing = getMissingKeys(config);
+
+  if (isDiagnostic) {
+    await runDiagnosticMode(config, missing);
+  } else {
+    await runVerifyMode(config, missing);
+  }
 }
 
 export const commandConfig: CommandConfig = {
