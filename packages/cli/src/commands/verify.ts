@@ -12,7 +12,7 @@ import {
 } from "../utils/config.js";
 import {
   checkForgejoReachability,
-  checkForgejoApi,
+  checkForgejoApiAuthentication,
   checkRepoAccess,
 } from "../utils/forgejo-checks.js";
 import { CommandConfig } from "../cli-router.js";
@@ -21,180 +21,194 @@ interface VerifyOptions {
   diagnostic?: boolean;
 }
 
+interface CheckResult {
+  name: string;
+  success: boolean;
+  message?: string;
+}
+
 async function verifyCommand(opts: VerifyOptions): Promise<void> {
-  const diagnostic = opts.diagnostic ?? false;
+  const isDiagnostic = opts.diagnostic ?? false;
   p.intro(c.bold("myst config verify"));
 
+  const config = loadConfig();
+  const results: CheckResult[] = collectResults(config);
+
+  if (isDiagnostic) {
+    await displayDiagnosticResults(results, config);
+  } else {
+    await verifyResults(results, config);
+  }
+}
+
+function loadConfig(): Partial<MystEnvironmentVariables> {
   const envPath = path.join(process.cwd(), ".env");
 
-  let config: Partial<MystEnvironmentVariables>;
-
   try {
-    config = parseEnvFile(envPath);
+    return parseEnvFile(envPath);
   } catch (error) {
     const err = error as NodeJS.ErrnoException;
     if (err.code === "ENOENT") {
       p.cancel(`${c.red("Error:")} .env file not found in ${process.cwd()}`);
       process.exitCode = 1;
-      return;
     }
     throw error;
   }
+}
 
-  const results: { name: string; success: boolean; message?: string }[] = [];
+function collectResults(
+  config: Partial<MystEnvironmentVariables>,
+): CheckResult[] {
+  const results: CheckResult[] = [];
 
   function addResult(name: string, success: boolean, message?: string) {
     results.push({ name, success, ...(message !== undefined && { message }) });
   }
 
-  if (diagnostic) {
-    addResult("Config file exists", true, envPath);
-
-    for (const [envKey, configKey] of Object.entries(ENV_MAPPING)) {
-      const value = config[configKey];
-      addResult(`${configKey} set`, !!value, value ? "configured" : "missing");
-    }
-
-    if (config.databaseUrl) {
-      const valid = validateDatabaseUrl(config.databaseUrl);
-      addResult("Database URL format", valid, valid ? "valid" : "invalid");
+  const missing: string[] = [];
+  for (const key of REQUIRED_KEYS) {
+    if (!config[key]) {
+      missing.push(key.replace(/(?<=[a-z])(?=[A-Z])/g, "_").toUpperCase());
     }
   }
 
-  const forgejoConfigured =
+  if (missing.length > 0) {
+    addResult("Required config", false, `Missing: ${missing.join(", ")}`);
+  }
+
+  for (const [, configKey] of Object.entries(ENV_MAPPING)) {
+    const value = config[configKey];
+    addResult(`${configKey} set`, !!value, value ? "configured" : "missing");
+  }
+
+  if (config.databaseUrl) {
+    const isDbValid = validateDatabaseUrl(config.databaseUrl);
+    addResult("Database URL format", isDbValid, isDbValid ? "valid" : "invalid");
+  }
+
+  const isConfigured =
     config.forgejoBaseUrl && config.forgejoPat && config.forgejoBotUsername;
 
-  if (forgejoConfigured) {
-    const forgejoBaseUrl = config.forgejoBaseUrl!;
-    const forgejoPat = config.forgejoPat!;
-    const forgejoBotUsername = config.forgejoBotUsername!;
+  if (!isConfigured) {
+    return results;
+  }
 
-    const reachability = await checkForgejoReachability(forgejoBaseUrl);
-    results.push(reachability);
+  const { forgejoBaseUrl, forgejoPat, forgejoBotUsername } = config;
 
-    if (reachability.success) {
-      const apiToken = await checkForgejoApi(
-        forgejoBaseUrl,
-        forgejoPat,
-        diagnostic,
-      );
-      results.push(apiToken);
+  addResult("Forgejo configured", true);
 
-      if (apiToken.success) {
-        const repoAccess = await checkRepoAccess(
-          forgejoBaseUrl,
-          forgejoPat,
-          forgejoBotUsername,
-        );
-        results.push(repoAccess);
-      }
-    }
+  return results;
+}
+
+async function runForgejoChecks(config: Partial<MystEnvironmentVariables>): Promise<CheckResult[]> {
+  const results: CheckResult[] = [];
+
+  const { forgejoBaseUrl, forgejoPat, forgejoBotUsername } = config;
+
+  if (!forgejoBaseUrl || !forgejoPat || !forgejoBotUsername) {
+    return results;
+  }
+
+  const reachability = await checkForgejoReachability(forgejoBaseUrl);
+  results.push(reachability);
+
+  if (!reachability.success) {
+    return results;
+  }
+
+  const auth = await checkForgejoApiAuthentication(forgejoBaseUrl, forgejoPat);
+  results.push(auth);
+
+  if (!auth.success) {
+    return results;
+  }
+
+  const repoAccess = await checkRepoAccess(
+    forgejoBaseUrl,
+    forgejoPat,
+    forgejoBotUsername,
+  );
+  results.push(repoAccess);
+
+  return results;
+}
+
+async function displayDiagnosticResults(
+  results: CheckResult[],
+  config: Partial<MystEnvironmentVariables>,
+): Promise<void> {
+  const forgejoResults = await runForgejoChecks(config);
+  const allResults = [...results, ...forgejoResults];
+
+  const lines = allResults.map((r) => {
+    const icon = r.success ? c.green("✓") : c.red("✗");
+    const msg = r.message ? ` ${r.message}` : "";
+    return `${icon} ${r.name}${msg}`;
+  });
+
+  p.note(lines.join("\n"), c.yellow("Results"));
+
+  const failures = allResults.filter((r) => !r.success);
+
+  if (failures.length > 0) {
+    p.outro(c.red(`${failures.length} issue(s) found`));
+    process.exitCode = 1;
+    return;
+  }
+
+  p.outro(c.green("All checks passed"));
+}
+
+async function verifyResults(
+  results: CheckResult[],
+  config: Partial<MystEnvironmentVariables>,
+): Promise<void> {
+  const failures = results.filter((r) => !r.success);
+
+  if (failures.length > 0) {
+    const msg = failures[0]?.message ?? "Unknown error";
+    p.cancel(`${c.red("Error:")} ${msg}`);
+    process.exitCode = 1;
+    return;
   }
 
   const s = p.spinner();
+  s.start("Verifying Forgejo configuration");
 
-  try {
-    if (diagnostic) {
-      s.start("Running diagnostics");
-      s.stop("Diagnostics complete");
+  const forgejoResults = await runForgejoChecks(config);
 
-      const lines = results.map((r) => {
-        const icon = r.success ? c.green("✓") : c.red("✗");
-        const msg = r.message ? ` ${r.message}` : "";
-        return `${icon} ${r.name}${msg}`;
-      });
+  const firstFailure = forgejoResults.find((r) => !r.success);
 
-      p.note(lines.join("\n"), c.yellow("Results"));
-
-      const failures = results.filter((r) => !r.success);
-
-      if (failures.length > 0) {
-        p.outro(c.red(`${failures.length} issue(s) found`));
-        process.exitCode = 1;
-        return;
-      }
-
-      p.outro(c.green("All checks passed"));
-    } else {
-      const missing: string[] = [];
-
-      for (const key of REQUIRED_KEYS) {
-        if (!config[key]) {
-          missing.push(key.replace(/(?<=[a-z])(?=[A-Z])/g, "_").toUpperCase());
-        }
-      }
-
-      if (missing.length > 0) {
-        p.cancel(
-          `${c.red("Error:")} Missing required config: ${missing.join(", ")}`,
-        );
-        process.exitCode = 1;
-        return;
-      }
-
-      // After this point, required keys are guaranteed to exist
-      if (!config.forgejoBaseUrl || !config.forgejoPat || !config.forgejoBotUsername) {
-        process.exitCode = 1;
-        return;
-      }
-
-      const forgejoBaseUrl = config.forgejoBaseUrl;
-      const forgejoPat = config.forgejoPat;
-      const forgejoBotUsername = config.forgejoBotUsername;
-
-      s.start("Verifying Forgejo configuration");
-
-      const reachability = await checkForgejoReachability(forgejoBaseUrl);
-
-      if (!reachability.success) {
-        s.stop(reachability.message);
-        p.cancel(`${c.red("✗")} ${reachability.name}: ${reachability.message}`);
-        process.exitCode = 1;
-        return;
-      }
-
-      const apiToken = await checkForgejoApi(
-        forgejoBaseUrl,
-        forgejoPat,
-      );
-
-      if (!apiToken.success) {
-        s.stop(apiToken.message);
-        p.cancel(`${c.red("✗")} ${apiToken.name}: ${apiToken.message}`);
-        process.exitCode = 1;
-        return;
-      }
-
-      const repoAccess = await checkRepoAccess(
-        forgejoBaseUrl,
-        forgejoPat,
-        forgejoBotUsername,
-      );
-
-      s.stop("Verification complete");
-
-      p.note(
-        [
-          `${c.green("✓")} ${reachability.name}`,
-          `${c.green("✓")} ${apiToken.name}: ${apiToken.message}`,
-          `${c.green(repoAccess.success ? "✓" : "✗")} ${repoAccess.name}: ${repoAccess.message}`,
-        ].join("\n"),
-        c.yellow("Results"),
-      );
-
-      if (!repoAccess.success) {
-        process.exitCode = 1;
-        return;
-      }
-
-      p.outro(c.green("Verification passed"));
-    }
-  } catch (error) {
-    s.stop();
-    const message = error instanceof Error ? error.message : "Unknown error";
-    p.cancel(`${c.red("Error:")} ${message}`);
+  if (firstFailure) {
+    s.stop(firstFailure.message);
+    p.cancel(`${c.red("✗")} ${firstFailure.name}: ${firstFailure.message}`);
     process.exitCode = 1;
+    return;
   }
+
+  if (forgejoResults.length < 3) {
+    s.stop("No Forgejo configuration");
+    p.cancel(`${c.red("Error:")} Forgejo not configured`);
+    process.exitCode = 1;
+    return;
+  }
+
+  s.stop("Verification complete");
+
+  const reachability = forgejoResults[0]!;
+  const auth = forgejoResults[1]!;
+  const repoAccess = forgejoResults[2]!;
+
+  p.note(
+    [
+      `${c.green("✓")} ${reachability.name}`,
+      `${c.green("✓")} ${auth.name}: ${auth.message}`,
+      `${c.green(repoAccess.success ? "✓" : "✗")} ${repoAccess.name}: ${repoAccess.message}`,
+    ].join("\n"),
+    c.yellow("Results"),
+  );
+
+  p.outro(c.green("Verification passed"));
 }
 
 export const commandConfig: CommandConfig = {
