@@ -6,14 +6,9 @@ import {
   ENV_MAPPING,
   MystEnvironmentVariables,
   parseEnvFile,
+  SECRET_KEYS,
 } from "../../utils/config.js";
 import { CommandConfig } from "../../cli-router.js";
-
-function redactSecret(value: string | undefined): string {
-  if (!value) return c.dim("not set");
-  if (value.length <= 4) return c.dim("****");
-  return value.slice(0, 4) + c.dim("****");
-}
 
 export const commandConfig: CommandConfig = {
   description: "Display current configuration",
@@ -41,10 +36,11 @@ export const commandConfig: CommandConfig = {
 
     for (const [envKey, configKey] of Object.entries(ENV_MAPPING)) {
       const value = config[configKey];
-      const displayValue =
-        configKey === "forgejoPat" || configKey === "grantTokenSecret"
-          ? redactSecret(value)
-          : value || c.dim("not set");
+      const displayValue = SECRET_KEYS.includes(
+        configKey as (typeof SECRET_KEYS)[number],
+      )
+        ? c.dim("****")
+        : value || c.dim("not set");
       process.stdout.write(`${c.bold(envKey + ":")} ${displayValue}\n`);
     }
 

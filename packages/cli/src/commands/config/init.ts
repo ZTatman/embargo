@@ -5,7 +5,10 @@ import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
 
 import { generateSecret } from "../../utils/crypto.js";
-import { generateEnvFile } from "../../utils/config.js";
+import {
+  generateEnvFile,
+  SECRET_ENV_KEYS,
+} from "../../utils/config.js";
 import { CommandConfig } from "../../cli-router.js";
 
 function normalizeHttpUrl(value: string): string {
@@ -110,7 +113,17 @@ async function init(opts: { output?: string }) {
 
       if (choice === "view") {
         const envContent = await fs.readFile(envPath, { encoding: "utf-8" });
-        p.note(c.dim(envContent), c.yellow("Current .env"));
+        const maskedEnvContent = envContent
+          .split("\n")
+          .map((line) => {
+            if (!line.includes("=")) return line;
+            const [key] = line.split("=");
+            return SECRET_ENV_KEYS.includes(key as typeof SECRET_ENV_KEYS[number])
+              ? `${key}=****`
+              : line;
+          })
+          .join("\n");
+        p.note(c.dim(maskedEnvContent), c.yellow("Current .env"));
         continue;
       }
 

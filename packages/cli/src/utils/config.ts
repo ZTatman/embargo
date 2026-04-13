@@ -28,6 +28,20 @@ export const REQUIRED_KEYS = [
 
 export const DATABASE_PROTOCOLS = ["postgres:", "postgresql:"] as const;
 
+export const SECRET_KEYS = [
+  "forgejoPat",
+  "grantTokenSecret",
+  "databaseUrl",
+  "adminUrl",
+] as const;
+
+export const SECRET_ENV_KEYS = [
+  "DATABASE_URL",
+  "FORGEJO_PAT",
+  "GRANT_TOKEN_SECRET",
+  "MYST_ADMIN_URL",
+] as const;
+
 export function parseEnvFile(
   envPath: string,
 ): Partial<MystEnvironmentVariables> {
