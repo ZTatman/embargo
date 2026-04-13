@@ -183,7 +183,7 @@ export async function runCli(
   const isVersionFlag = (arg: string) => arg === "--version" || arg === "-v";
 
   // Check for version flag (early exit)
-  if (argv.length > 0 && argv.every(isVersionFlag)) {
+  if (argv.some(isVersionFlag)) {
     process.stdout.write(version + "\n");
     return;
   }
