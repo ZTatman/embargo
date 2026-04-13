@@ -8,7 +8,7 @@ export const commandRegistry = {
     subcommands: {
       init: configInit.commandConfig,
       view: configView.commandConfig,
+      verify: verify.commandConfig,
     },
   },
-  verify: verify.commandConfig,
 };

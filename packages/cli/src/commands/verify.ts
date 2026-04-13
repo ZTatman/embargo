@@ -214,7 +214,7 @@ async function verifyResults(
 export const commandConfig: CommandConfig = {
   description: "Verify Myst configuration and connection to Forgejo",
   options: {
-    diagnostic: { type: "boolean" },
+    diagnostic: { type: "boolean", description: "Show diagnostic information for all checks" },
   },
   handler: verifyCommand,
 };

@@ -8,6 +8,7 @@ interface OptionSpec {
   type: "string" | "boolean";
   short?: string;
   default?: string | boolean | string[] | boolean[];
+  description?: string;
 }
 
 type OptionsSpec = Record<string, OptionSpec>;
@@ -117,9 +118,10 @@ function showCommandHelp(
     for (const [optName, optSpec] of Object.entries(targetConf.options)) {
       const short = optSpec.short ? `, -${optSpec.short}` : "";
       const typeHint = optSpec.type === "string" ? " <value>" : "";
+      const desc = optSpec.description ?? "";
       optionRows.push({
         name: `--${optName}${short}${typeHint}`,
-        desc: "",
+        desc,
       });
     }
 
@@ -128,7 +130,11 @@ function showCommandHelp(
 
     lines.push(c.bold("Options:"));
     for (const row of optionRows) {
-      lines.push(`${INDENT}${row.name.padEnd(colWidth)}`);
+      if (row.desc) {
+        lines.push(`${INDENT}${row.name.padEnd(colWidth)}${c.dim(row.desc)}`);
+      } else {
+        lines.push(`${INDENT}${row.name}`);
+      }
     }
     lines.push("");
   }

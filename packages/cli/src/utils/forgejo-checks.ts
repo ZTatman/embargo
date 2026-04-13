@@ -44,7 +44,7 @@ export async function checkForgejoReachability(
   }
 }
 
-export async function checkForgejoApi(
+export async function checkForgejoApiAuthentication(
   baseUrl: string,
   pat: string,
   colorize = false,
