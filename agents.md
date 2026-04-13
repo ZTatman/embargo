@@ -14,7 +14,7 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 
 ## Entry format
 
-```
+```text
 ### [Short problem title]
 **Area:** [file, module, or system this affects]
 **Obstacle:** What the problem is and where it appears.

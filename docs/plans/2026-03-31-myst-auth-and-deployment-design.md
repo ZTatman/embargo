@@ -45,7 +45,7 @@ Myst is a companion service deployed beside an existing Forgejo instance. It own
                   v                 v
            Myst Database     Forgejo API
            (Postgres)           (existing instance)
-```
+```ascii
 
 Deployment boundaries:
 
