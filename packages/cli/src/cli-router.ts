@@ -107,10 +107,33 @@ function showCommandHelp(
     lines.push("");
   }
 
+  const hasSubcommands = cmdConf.subcommands && Object.keys(cmdConf.subcommands).length > 0;
   const usageCmd = subcommand ? `${command} ${subcommand}` : command;
+  const usageLine = hasSubcommands && !subcommand
+    ? `myst ${command} <subcommand> [options]`
+    : `myst ${usageCmd} [options]`;
   lines.push(c.bold("Usage:"));
-  lines.push(`${INDENT}myst ${usageCmd} [options]`);
+  lines.push(`${INDENT}${usageLine}`);
   lines.push("");
+
+  if (hasSubcommands && !subcommand) {
+    const subcommandRows: HelpRow[] = [];
+    for (const [name, conf] of Object.entries(cmdConf.subcommands!)) {
+      subcommandRows.push({ name, desc: conf.description ?? "" });
+    }
+    const colWidth =
+      Math.max(...subcommandRows.map((r) => r.name.length)) + PADDING;
+
+    lines.push(c.bold("Subcommands:"));
+    for (const row of subcommandRows) {
+      if (row.desc) {
+        lines.push(`${INDENT}${row.name.padEnd(colWidth)}${c.dim(row.desc)}`);
+      } else {
+        lines.push(`${INDENT}${row.name}`);
+      }
+    }
+    lines.push("");
+  }
 
   if (targetConf.options && Object.keys(targetConf.options).length > 0) {
     const optionRows: HelpRow[] = [];
