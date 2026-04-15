@@ -4,11 +4,7 @@ import path from "node:path";
 import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
 
-import { generateSecret } from "../../utils/crypto.js";
-import {
-  generateEnvFile,
-  SECRET_ENV_KEYS,
-} from "../../utils/config.js";
+import { generateEnvFile, SECRET_ENV_KEYS } from "../../utils/config.js";
 import { CommandConfig } from "../../cli-router.js";
 
 function normalizeHttpUrl(value: string): string {
@@ -42,23 +38,6 @@ function validateHttpUrlOrHost(
   return undefined;
 }
 
-function validatePostgresUrl(value: string | undefined): string | undefined {
-  if (!value?.trim()) {
-    return "Database URL is required";
-  }
-
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "postgres:" && url.protocol !== "postgresql:") {
-      return "Database URL must start with postgres:// or postgresql://";
-    }
-  } catch {
-    return "Database URL must be a valid Postgres connection string";
-  }
-
-  return undefined;
-}
-
 async function init(opts: { output?: string }) {
   p.intro(c.bold("myst config init"));
   p.note(
@@ -72,7 +51,7 @@ async function init(opts: { output?: string }) {
       `- Repo permissions: ${c.cyan("https://forgejo.org/docs/latest/user/repo-permissions/")}`,
       `- Admin CLI: ${c.cyan("https://forgejo.org/docs/latest/admin/command-line/")}`,
       "",
-      `1. Create a dedicated Forgejo user such as ${c.bold("myst-bot")} and generate its PAT in Forgejo ${c.bold("Settings -> Applications")}.`,
+      `1. Generate a PAT in Forgejo ${c.bold("Settings -> Applications")}.`,
       `2. Generate a PAT with the appropriate scopes for your Forgejo setup.`,
       "",
       `Recommended PAT scopes:\n - ${c.bold("read:user")}\n - ${c.bold("read:repository")}\n - ${c.bold("read:organization")} (optional)`,
@@ -133,53 +112,19 @@ async function init(opts: { output?: string }) {
     }
   }
 
-  const answers = await p.group(
+const answers = await p.group(
     {
-      publicUrl: () =>
-        p.text({
-          message: "Domain name or URL for the public viewer",
-          placeholder: "share.example.com",
-          validate: (v) => validateHttpUrlOrHost(v, "Public viewer URL"),
-        }),
-      adminUrl: () =>
-        p.text({
-          message: "Domain name or URL for the Myst admin UI",
-          placeholder: "admin.example.com",
-          validate: (v) => validateHttpUrlOrHost(v, "Private admin URL"),
-        }),
       forgejoBaseUrl: () =>
         p.text({
           message: "Domain name or URL for your existing Forgejo instance?",
           placeholder: "git.example.com",
           validate: (v) => validateHttpUrlOrHost(v, "Forgejo base URL"),
         }),
-      databaseUrl: () =>
-        p.text({
-          message: "What Postgres connection string should Myst use?",
-          placeholder: "postgresql://myst:password@db.example.com:5432/myst",
-          validate: validatePostgresUrl,
-        }),
-      forgejoBotUsername: () =>
-        p.text({
-          message:
-            "What dedicated Forgejo username should Myst use for API access?",
-          placeholder: "myst-bot",
-          validate: (v) =>
-            v?.trim() ? undefined : "Dedicated Forgejo username is required",
-        }),
       forgejoPat: () =>
         p.password({
-          message:
-            "Paste the Forgejo personal access token for that dedicated Forgejo user",
+          message: "Paste the Forgejo personal access token",
           mask: "*",
           validate: (v) => (v?.trim() ? undefined : "Forgejo PAT is required"),
-        }),
-      grantTokenSecret: () =>
-        p.password({
-          message:
-            "Paste a grant token secret, or press enter to generate one automatically",
-          mask: "*",
-          validate: () => undefined,
         }),
     },
     {
@@ -195,20 +140,11 @@ async function init(opts: { output?: string }) {
   try {
     s.start("Generating config files");
 
-    const publicUrl = normalizeHttpUrl(answers.publicUrl);
-    const adminUrl = normalizeHttpUrl(answers.adminUrl);
     const forgejoBaseUrl = normalizeHttpUrl(answers.forgejoBaseUrl);
-    const grantTokenSecret =
-      answers.grantTokenSecret?.trim() || generateSecret();
 
     const envContent = generateEnvFile({
-      adminUrl,
-      databaseUrl: answers.databaseUrl,
       forgejoBaseUrl,
-      forgejoBotUsername: answers.forgejoBotUsername,
       forgejoPat: answers.forgejoPat,
-      grantTokenSecret,
-      publicUrl,
     });
 
     if (envExists) {
@@ -232,12 +168,9 @@ async function init(opts: { output?: string }) {
     s.stop(c.yellow(`.env created at ${envPath}`));
     p.note(
       [
-        `${c.bold("Public viewer URL:")} ${c.cyan(publicUrl)}`,
-        `${c.bold("Admin URL:")} ${c.cyan(adminUrl)}`,
         `${c.bold("Forgejo base URL:")} ${c.cyan(forgejoBaseUrl)}`,
-        `${c.bold("Myst bot username:")} ${c.cyan(answers.forgejoBotUsername)}`,
         "",
-        `${c.bold("Admin URL reminder:")} protect this upstream with Tailscale, VPN, Cloudflare Access, or reverse-proxy auth.`,
+        `Configure your public and admin URLs using your reverse proxy (Caddy, Nginx, etc.).`,
       ].join("\n"),
     );
     p.log.success(

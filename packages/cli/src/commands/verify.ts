@@ -4,11 +4,7 @@ import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
 
 import { ENV_MAPPING, parseEnvFile, REQUIRED_KEYS } from "../utils/config.js";
-import {
-  checkForgejoReachability,
-  checkForgejoApiAuthentication,
-  checkRepoAccess,
-} from "../utils/forgejo-checks.js";
+import { checkForgejoReachability, checkRepoAccess } from "../utils/forgejo-checks.js";
 import { CommandConfig } from "../cli-router.js";
 
 interface VerifyOptions {
@@ -47,6 +43,12 @@ function getMissingKeys(config: Record<string, string>): string[] {
   return missing;
 }
 
+function formatCheck(result: CheckResult): string {
+  const icon = result.success ? c.green("✓") : c.red("✗");
+  const msg = result.message ? ` ${result.message}` : "";
+  return `${icon} ${result.name}${msg}`;
+}
+
 async function runDiagnosticMode(
   config: Record<string, string>,
   missing: string[],
@@ -73,11 +75,7 @@ async function runDiagnosticMode(
   const forgejoResults = await runForgejoChecks(config);
   const allResults = [...results, ...forgejoResults];
 
-  const lines = allResults.map((r) => {
-    const icon = r.success ? c.green("✓") : c.red("✗");
-    const msg = r.message ? ` ${r.message}` : "";
-    return `${icon} ${r.name}${msg}`;
-  });
+  const lines = allResults.map(formatCheck);
 
   p.note(lines.join("\n"), c.yellow("Results"));
 
@@ -111,7 +109,7 @@ async function runVerifyMode(
   const firstFailure = forgejoResults.find((r) => !r.success);
   if (firstFailure) {
     s.stop(firstFailure.message);
-    p.cancel(`${c.red("✗")} ${firstFailure.name}: ${firstFailure.message}`);
+    p.cancel(formatCheck(firstFailure));
     process.exitCode = 1;
     return;
   }
@@ -125,14 +123,10 @@ async function runVerifyMode(
 
   s.stop("Verification complete");
 
-  const [reachability, auth, repoAccess] = forgejoResults;
+  const [reachability, repoAccess] = forgejoResults;
 
   p.note(
-    [
-      `${c.green("✓")} ${reachability.name}`,
-      `${c.green("✓")} ${auth.name}: ${auth.message}`,
-      `${c.green(repoAccess.success ? "✓" : "✗")} ${repoAccess.name}: ${repoAccess.message}`,
-    ].join("\n"),
+    [formatCheck(reachability), formatCheck(repoAccess)].join("\n"),
     c.yellow("Results"),
   );
 
@@ -142,9 +136,9 @@ async function runVerifyMode(
 async function runForgejoChecks(
   config: Record<string, string>,
 ): Promise<CheckResult[]> {
-  const { forgejoBaseUrl, forgejoPat, forgejoBotUsername } = config;
+  const { forgejoBaseUrl, forgejoPat } = config;
 
-  if (!forgejoBaseUrl || !forgejoPat || !forgejoBotUsername) {
+  if (!forgejoBaseUrl || !forgejoPat) {
     return [];
   }
 
@@ -157,18 +151,7 @@ async function runForgejoChecks(
     return results;
   }
 
-  const auth = await checkForgejoApiAuthentication(forgejoBaseUrl, forgejoPat);
-  results.push(auth);
-
-  if (!auth.success) {
-    return results;
-  }
-
-  const repoAccess = await checkRepoAccess(
-    forgejoBaseUrl,
-    forgejoPat,
-    forgejoBotUsername,
-  );
+  const repoAccess = await checkRepoAccess(forgejoBaseUrl, forgejoPat);
   results.push(repoAccess);
 
   return results;

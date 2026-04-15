@@ -1,0 +1,42 @@
+# Docker Compose example for deploying Myst with PostgreSQL
+#
+# Usage:
+#   1. Copy to docker-compose.yml: cp examples/docker-compose.example.yml docker-compose.yml
+#   2. Edit .env with your Forgejo config
+#   3. Run: docker compose up -d
+#
+# The DATABASE_URL is auto-handled by Docker Compose networking.
+
+services:
+  myst:
+    image: myst:latest
+    container_name: myst
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://myst:myst@db:5432/myst
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    container_name: myst-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=myst
+      - POSTGRES_PASSWORD=myst
+      - POSTGRES_DB=myst
+    volumes:
+      - myst-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myst -d myst"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  myst-postgres:
