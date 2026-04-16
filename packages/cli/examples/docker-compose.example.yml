@@ -1,7 +1,7 @@
 # Docker Compose example for deploying Myst with PostgreSQL
 #
 # Usage:
-#   1. Copy to docker-compose.yml: cp examples/docker-compose.example.yml docker-compose.yml
+#   1. Copy to docker-compose.yml: cp packages/cli/examples/docker-compose.example.yml docker-compose.yml
 #   2. Edit .env with your Forgejo config
 #   3. Run: docker compose up -d
 #

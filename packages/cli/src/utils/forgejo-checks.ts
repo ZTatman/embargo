@@ -71,36 +71,41 @@ export async function checkRepoAccess(
   pat: string,
 ): Promise<CheckResult> {
   try {
-    const response = await fetchWithTimeout(`${baseUrl}/api/v1/user/repos`, {
-      method: "GET",
-      headers: {
-        Authorization: `token ${pat}`,
-      },
-    });
+    const responses = await Promise.all([
+      fetchWithTimeout(`${baseUrl}/api/v1/user`, {
+        method: "GET",
+        headers: {
+          Authorization: `token ${pat}`,
+        },
+      }),
+      fetchWithTimeout(`${baseUrl}/api/v1/user/repos`, {
+        method: "GET",
+        headers: {
+          Authorization: `token ${pat}`,
+        },
+      }),
+    ]);
 
-    if (response.status === 401 || response.status === 403) {
-      const result = (await response.json()) as { message: string };
-      return createCheckResult("Forgejo", false, result.message);
-    }
-
-    if (!response.ok) {
-      const result = (await response.json()) as {
+    const errorResponse = responses.find((res) => !res.ok);
+    if (errorResponse) {
+      const error = (await errorResponse.json()) as {
         message: string;
         url: string;
       };
-      return createCheckResult("Forgejo", false, result.message);
+      return createCheckResult("Forgejo", false, error.message);
     }
 
-    const repos = (await response.json()) as {
-      name: string;
-      owner: { login: string };
-    }[];
-    if (repos.length > 0) {
-      const username = repos[0].owner.login;
+    const [userResponse, reposResponse] = responses;
+    const user = (await userResponse.json()) as { login: string };
+    const totalRepos = parseInt(
+      reposResponse.headers.get("x-total-count") ?? "0",
+    );
+
+    if (user) {
       return createCheckResult(
         "Forgejo",
         true,
-        `User ${username} has ${repos.length} ${repos.length === 1 ? "repository" : "repositories"}`,
+        `User ${user.login} has ${totalRepos} ${totalRepos === 1 ? "repository" : "repositories"}`,
       );
     }
 

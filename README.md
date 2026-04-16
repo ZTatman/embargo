@@ -82,8 +82,8 @@ Myst should not assume a VPS-only environment. The requirement is an existing Fo
 Create a `.env` file with:
 
 ```env
-FORGEJO_BASE_URL="https://git.example.com"
-FORGEJO_PAT="forgejo_pat_xxxxxxxxxxxx"
+FORGEJO_BASE_URL=https://git.example.com
+FORGEJO_PAT=forgejo_pat_xxxxxxxxxxxx
 ```
 
 When using the provided Docker Compose example, DATABASE_URL is injected automatically. For other deployment approaches (e.g., bare metal, Kubernetes), you must supply DATABASE_URL yourself.
