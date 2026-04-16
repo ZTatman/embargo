@@ -78,7 +78,7 @@ export async function checkRepoAccess(
           Authorization: `token ${pat}`,
         },
       }),
-      fetchWithTimeout(`${baseUrl}/api/v1/user/repos`, {
+      fetchWithTimeout(`${baseUrl}/api/v1/user/repos?limit=1`, {
         method: "GET",
         headers: {
           Authorization: `token ${pat}`,

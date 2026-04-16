@@ -16,7 +16,20 @@ function normalizeHttpUrl(value: string): string {
     throw new Error("URLs must use http:// or https://");
   }
 
-  return hasProtocol ? trimmed : `https://${trimmed}`;
+  if (hasProtocol) return trimmed;
+
+  // Infer scheme from the host shape:
+  //   - localhost, IP literals, or single-label hosts (Docker service names
+  //     like `forgejo`) default to http:// since they're typically internal.
+  //   - Anything that looks like a public DNS name (contains a dot) defaults
+  //     to https:// to preserve the existing behavior for `git.example.com`.
+  const host = trimmed.split("/")[0]?.split(":")[0] ?? "";
+  const isInternalHost =
+    host === "localhost" ||
+    /^\d{1,3}(\.\d{1,3}){3}$/.test(host) ||
+    !host.includes(".");
+
+  return `${isInternalHost ? "http" : "https"}://${trimmed}`;
 }
 
 function validateHttpUrlOrHost(
@@ -118,8 +131,8 @@ async function init(opts: { output?: string }) {
     {
       forgejoBaseUrl: () =>
         p.text({
-          message: "Domain name or URL for your existing Forgejo instance?",
-          placeholder: "git.example.com",
+          message: "Forgejo API URL (how Myst reaches Forgejo, not your browser URL)?",
+          placeholder: "http://forgejo:3000",
           validate: (v) => validateHttpUrlOrHost(v, "Forgejo base URL"),
         }),
       forgejoPat: () =>
@@ -170,9 +183,11 @@ async function init(opts: { output?: string }) {
     s.stop(c.yellow(`.env created at ${envPath}`));
     p.note(
       [
-        `${c.bold("Forgejo base URL:")} ${c.cyan(forgejoBaseUrl)}`,
+        `${c.bold("Forgejo API URL:")} ${c.cyan(forgejoBaseUrl)}`,
         "",
-        `Configure your public and admin URLs using your reverse proxy (Caddy, Nginx, etc.).`,
+        `Myst will use this URL to call Forgejo's API.`,
+        `- Same host / Docker network: http://forgejo:3000 or http://localhost:3000`,
+        `- Cross-host deployment: https://git.example.com`,
       ].join("\n"),
     );
     p.log.success(
