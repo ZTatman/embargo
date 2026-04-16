@@ -97,7 +97,9 @@ async function init(opts: { output?: string }) {
           .map((line) => {
             if (!line.includes("=")) return line;
             const [key] = line.split("=");
-            return SECRET_ENV_KEYS.includes(key as typeof SECRET_ENV_KEYS[number])
+            return SECRET_ENV_KEYS.includes(
+              key as (typeof SECRET_ENV_KEYS)[number],
+            )
               ? `${key}=****`
               : line;
           })
@@ -112,7 +114,7 @@ async function init(opts: { output?: string }) {
     }
   }
 
-const answers = await p.group(
+  const answers = await p.group(
     {
       forgejoBaseUrl: () =>
         p.text({

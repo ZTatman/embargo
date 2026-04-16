@@ -4,7 +4,10 @@ import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
 
 import { ENV_MAPPING, parseEnvFile, REQUIRED_KEYS } from "../utils/config.js";
-import { checkForgejoReachability, checkRepoAccess } from "../utils/forgejo-checks.js";
+import {
+  checkForgejoReachability,
+  checkRepoAccess,
+} from "../utils/forgejo-checks.js";
 import { CommandConfig } from "../cli-router.js";
 
 interface VerifyOptions {

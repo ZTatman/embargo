@@ -105,7 +105,7 @@ export async function checkRepoAccess(
       return createCheckResult(
         "Forgejo",
         true,
-        `User ${user.login} has ${totalRepos} ${totalRepos === 1 ? "repository" : "repositories"}`,
+        `${user.login} has ${totalRepos} ${totalRepos === 1 ? "repository" : "repositories"}`,
       );
     }
 

@@ -10,10 +10,7 @@ export const ENV_MAPPING = {
   FORGEJO_PAT: "forgejoPat",
 } as const;
 
-export const REQUIRED_KEYS = [
-  "forgejoBaseUrl",
-  "forgejoPat",
-] as const;
+export const REQUIRED_KEYS = ["forgejoBaseUrl", "forgejoPat"] as const;
 
 export const SECRET_KEYS = ["forgejoPat"] as const;
 
