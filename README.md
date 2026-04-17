@@ -54,7 +54,7 @@ myst config init
 
 Prompts for:
 
-- Forgejo API URL — internal address when co-located (`http://forgejo:3000`) or public URL for cross-host (`https://git.example.com`)
+- Forgejo API URL — Docker: `http://forgejo:3000`, bare metal: `http://localhost:3000`, cross-host: `https://git.example.com`
 - Forgejo PAT (with `read:user` and `read:repository` scopes)
 
 ### 2. Deploy with Docker Compose
@@ -82,9 +82,11 @@ Myst should not assume a VPS-only environment. The requirement is an existing Fo
 Create a `.env` file with:
 
 ```env
-# Same-host (Docker network or localhost):
+# Docker (same Compose network):
 FORGEJO_BASE_URL=http://forgejo:3000
-# Cross-host alternative:
+# Bare metal / non-container:
+# FORGEJO_BASE_URL=http://localhost:3000
+# Cross-host:
 # FORGEJO_BASE_URL=https://git.example.com
 FORGEJO_PAT=forgejo_pat_xxxxxxxxxxxx
 ```

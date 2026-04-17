@@ -44,8 +44,9 @@ export function parseEnvFile(
 export function generateEnvFile(options: MystEnvironmentVariables): string {
   const lines = [
     `# Forgejo API endpoint that Myst calls.`,
-    `# Same-host / Docker: http://forgejo:3000 or http://localhost:3000`,
-    `# Cross-host: https://git.example.com`,
+    `# Docker (same Compose network): http://forgejo:3000`,
+    `# Bare metal / non-container:    http://localhost:3000`,
+    `# Cross-host:                    https://git.example.com`,
     `FORGEJO_BASE_URL=${options.forgejoBaseUrl}`,
     `FORGEJO_PAT=${options.forgejoPat}`,
   ];

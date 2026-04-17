@@ -7,45 +7,29 @@ import * as p from "@clack/prompts";
 import { generateEnvFile, SECRET_ENV_KEYS } from "../../utils/config.js";
 import { CommandConfig } from "../../cli-router.js";
 
-function normalizeHttpUrl(value: string): string {
-  const trimmed = value.trim();
-  const hasProtocol = /^[a-z]+:\/\//i.test(trimmed);
-  const isNotHttp = !/^https?:\/\//i.test(trimmed);
-
-  if (hasProtocol && isNotHttp) {
-    throw new Error("URLs must use http:// or https://");
-  }
-
-  if (hasProtocol) return trimmed;
-
-  // Infer scheme from the host shape:
-  //   - localhost, IP literals, or single-label hosts (Docker service names
-  //     like `forgejo`) default to http:// since they're typically internal.
-  //   - Anything that looks like a public DNS name (contains a dot) defaults
-  //     to https:// to preserve the existing behavior for `git.example.com`.
-  const host = trimmed.split("/")[0]?.split(":")[0] ?? "";
-  const isInternalHost =
-    host === "localhost" ||
-    /^\d{1,3}(\.\d{1,3}){3}$/.test(host) ||
-    !host.includes(".");
-
-  return `${isInternalHost ? "http" : "https"}://${trimmed}`;
-}
-
 function validateHttpUrlOrHost(
   value: string | undefined,
   label: string,
 ): string | undefined {
-  if (!value?.trim()) return `${label} is required`;
+  const trimmed = value?.trim();
+  if (!trimmed) return `${label} is required`;
+
+  const hasProtocol = /^[a-z]+:\/\//i.test(trimmed);
+  const isHttp = /^https?:\/\//i.test(trimmed);
+
+  if (hasProtocol && !isHttp) {
+    return `${label} must use http:// or https://`;
+  }
+
+  if (!hasProtocol) {
+    return `${label} must include a scheme — e.g. http://forgejo:3000 or https://git.example.com`;
+  }
 
   try {
-    const normalized = normalizeHttpUrl(value);
-    const url = new URL(normalized);
-    if (!url.hostname) {
-      return `${label} must include a domain or hostname`;
-    }
+    const url = new URL(trimmed);
+    if (!url.hostname) return `${label} must include a domain or hostname`;
   } catch {
-    return `${label} must be a valid URL or hostname`;
+    return `${label} must be a valid URL`;
   }
 
   return undefined;
@@ -155,7 +139,7 @@ async function init(opts: { output?: string }) {
   try {
     s.start("Generating config files");
 
-    const forgejoBaseUrl = normalizeHttpUrl(answers.forgejoBaseUrl);
+    const forgejoBaseUrl = answers.forgejoBaseUrl.trim();
 
     const envContent = generateEnvFile({
       forgejoBaseUrl,
@@ -186,8 +170,9 @@ async function init(opts: { output?: string }) {
         `${c.bold("Forgejo API URL:")} ${c.cyan(forgejoBaseUrl)}`,
         "",
         `Myst will use this URL to call Forgejo's API.`,
-        `- Same host / Docker network: http://forgejo:3000 or http://localhost:3000`,
-        `- Cross-host deployment: https://git.example.com`,
+        `- Docker (same Compose network): http://forgejo:3000`,
+        `- Bare metal / non-container:    http://localhost:3000`,
+        `- Cross-host deployment:         https://git.example.com`,
       ].join("\n"),
     );
     p.log.success(
