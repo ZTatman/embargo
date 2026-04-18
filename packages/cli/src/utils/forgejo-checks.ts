@@ -33,7 +33,10 @@ function getErrorMessage(error: unknown, context: string): string {
     if (error.message.includes("ECONNREFUSED")) {
       return `${context}: connection refused`;
     }
-    if (error.message.includes("ENOTFOUND") || error.message.includes("getaddrinfo")) {
+    if (
+      error.message.includes("ENOTFOUND") ||
+      error.message.includes("getaddrinfo")
+    ) {
       return `${context}: host not found`;
     }
     return `${context}: ${error.message}`;
@@ -47,69 +50,18 @@ export async function checkForgejoReachability(
   try {
     const response = await fetchWithTimeout(baseUrl, { method: "GET" });
     if (response.ok) {
-      return createCheckResult("Forgejo reachability", true, "connected");
+      return createCheckResult("Forgejo", true, "is reachable");
     }
     return createCheckResult(
-      "Forgejo reachability",
+      "Forgejo",
       false,
       `server returned ${response.status} ${response.statusText}`,
     );
   } catch (error) {
     return createCheckResult(
-      "Forgejo reachability",
+      "Forgejo",
       false,
       getErrorMessage(error, "cannot reach server"),
-    );
-  }
-}
-
-export async function checkForgejoApiAuthentication(
-  baseUrl: string,
-  pat: string,
-): Promise<CheckResult> {
-  try {
-    const response = await fetchWithTimeout(`${baseUrl}/api/v1/user`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${pat}`,
-      },
-    });
-
-    if (response.status === 401) {
-      return createCheckResult(
-        "Forgejo API token",
-        false,
-        "token is invalid or expired",
-      );
-    }
-
-    if (response.status === 403) {
-      return createCheckResult(
-        "Forgejo API token",
-        false,
-        "token lacks sufficient permissions",
-      );
-    }
-
-    if (!response.ok) {
-      return createCheckResult(
-        "Forgejo API token",
-        false,
-        `server returned ${response.status}`,
-      );
-    }
-
-    const user = (await response.json()) as { login: string };
-    return createCheckResult(
-      "Forgejo API token",
-      true,
-      `authenticated as ${user.login}`,
-    );
-  } catch (error) {
-    return createCheckResult(
-      "Forgejo API token",
-      false,
-      getErrorMessage(error, "cannot connect to API"),
     );
   }
 }
@@ -117,52 +69,54 @@ export async function checkForgejoApiAuthentication(
 export async function checkRepoAccess(
   baseUrl: string,
   pat: string,
-  username: string,
 ): Promise<CheckResult> {
   try {
-    const response = await fetchWithTimeout(
-      `${baseUrl}/api/v1/users/${username}/repos?limit=1`,
-      {
+    const responses = await Promise.all([
+      fetchWithTimeout(`${baseUrl}/api/v1/user`, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${pat}`,
+          Authorization: `token ${pat}`,
         },
-      },
+      }),
+      fetchWithTimeout(`${baseUrl}/api/v1/user/repos?limit=1`, {
+        method: "GET",
+        headers: {
+          Authorization: `token ${pat}`,
+        },
+      }),
+    ]);
+
+    const errorResponse = responses.find((res) => !res.ok);
+    if (errorResponse) {
+      const error = (await errorResponse.json()) as {
+        message: string;
+        url: string;
+      };
+      return createCheckResult("Forgejo", false, error.message);
+    }
+
+    const [userResponse, reposResponse] = responses;
+    const user = (await userResponse.json()) as { login: string };
+    const totalRepos = parseInt(
+      reposResponse.headers.get("x-total-count") ?? "0",
     );
 
-    if (response.status === 401 || response.status === 403) {
+    if (user) {
       return createCheckResult(
-        "Repo access",
-        false,
-        "token lacks permission to list repositories",
-      );
-    }
-
-    if (!response.ok) {
-      return createCheckResult(
-        "Repo access",
-        false,
-        `server returned ${response.status}`,
-      );
-    }
-
-    const repos = (await response.json()) as { name: string }[];
-    if (repos.length > 0) {
-      return createCheckResult(
-        "Repo access",
+        "Forgejo",
         true,
-        `found ${repos.length} repository`,
+        `${user.login} has ${totalRepos} ${totalRepos === 1 ? "repository" : "repositories"}`,
       );
     }
 
     return createCheckResult(
-      "Repo access",
+      "Forgejo",
       false,
       "no repositories found for user",
     );
   } catch (error) {
     return createCheckResult(
-      "Repo access",
+      "Forgejo",
       false,
       getErrorMessage(error, "cannot list repositories"),
     );

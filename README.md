@@ -54,23 +54,23 @@ myst config init
 
 Prompts for:
 
-- Public viewer URL (`share.example.com`)
-- Private admin URL (`admin.example.com`)
-- Forgejo base URL (`git.example.com`)
-- PostgreSQL connection string
-- Dedicated Forgejo username and PAT
-- Grant token secret
+- Forgejo API URL — Docker: `http://forgejo:3000`, bare metal: `http://localhost:3000`, cross-host: `https://git.example.com`
+- Forgejo PAT (with `read:user` and `read:repository` scopes)
 
-### 2. Configure Dedicated Forgejo User
+### 2. Deploy with Docker Compose
 
-Create a dedicated Forgejo user (e.g., `myst-bot`) with a PAT:
+```bash
+cd packages/cli/examples
+cp docker-compose.example.yml docker-compose.yml
+# Edit .env with your FORGEJO_BASE_URL and FORGEJO_PAT
+docker compose up -d
+```
 
-- `read:user`
-- `read:repository`
+The DATABASE_URL is injected automatically by Docker Compose.
 
-### 3. Deploy
+### 3. Alternative Deployments
 
-Deploy Myst anywhere you can run a normal web app beside Forgejo. Phase 1 should explicitly support both of these examples:
+For non-Docker deployments, you must supply DATABASE_URL yourself:
 
 - VPS deployment: Hostinger or another VPS with Dokploy, Traefik, UFW, Myst, Forgejo, and a shared Postgres instance that contains separate `forgejo` and `myst` databases.
 - Self-hosted server deployment: a home server, mini PC, NAS, or other self-hosted Linux machine running Myst with Docker, Podman, Docker Compose, Coolify, Caddy, Nginx, or another reverse proxy.
@@ -79,15 +79,19 @@ Myst should not assume a VPS-only environment. The requirement is an existing Fo
 
 ## Example Configuration
 
+Create a `.env` file with:
+
 ```env
-MYST_PUBLIC_URL="https://share.example.com"
-MYST_ADMIN_URL="https://admin.example.com"
-DATABASE_URL="postgresql://myst:secret@localhost:5432/myst"
-FORGEJO_BASE_URL="https://git.example.com"
-FORGEJO_BOT_USERNAME="myst-bot"
-FORGEJO_PAT="fgp_xxxxxxxxxxxxxxxxxxxx"
-GRANT_TOKEN_SECRET="your-secret-here"
+# Docker (same Compose network):
+FORGEJO_BASE_URL=http://forgejo:3000
+# Bare metal / non-container:
+# FORGEJO_BASE_URL=http://localhost:3000
+# Cross-host:
+# FORGEJO_BASE_URL=https://git.example.com
+FORGEJO_PAT=forgejo_pat_xxxxxxxxxxxx
 ```
+
+When using the provided Docker Compose example, DATABASE_URL is injected automatically. For other deployment approaches (e.g., bare metal, Kubernetes), you must supply DATABASE_URL yourself.
 
 ## Phase 1 Progress
 
