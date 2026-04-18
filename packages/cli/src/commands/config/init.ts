@@ -115,7 +115,8 @@ async function init(opts: { output?: string }) {
     {
       forgejoBaseUrl: () =>
         p.text({
-          message: "Forgejo API URL (how Myst reaches Forgejo, not your browser URL)?",
+          message:
+            "Forgejo API URL (how Myst reaches Forgejo, not your browser URL)?",
           placeholder: "http://forgejo:3000",
           validate: (v) => validateHttpUrlOrHost(v, "Forgejo base URL"),
         }),
@@ -148,6 +149,7 @@ async function init(opts: { output?: string }) {
 
     if (envExists) {
       const tempPath = envPath + ".tmp";
+      await fs.unlink(tempPath).catch(() => {});
       await fs.writeFile(tempPath, envContent, {
         encoding: "utf8",
         flag: "wx",
