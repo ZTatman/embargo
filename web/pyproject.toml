@@ -1,0 +1,13 @@
+[project]
+name = "myst-web"
+version = "0.1.0"
+description = "Myst: FastAPI + HTMX web interface for managing Forgejo repositories"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.136.0",
+]
+
+[dependency-groups]
+dev = [
+    "uvicorn[standard]>=0.44.0",
+]
