@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.2.0",
-    "@myst/shared": "workspace:*",
     "yoctocolors": "^2.1.2"
   }
 }
