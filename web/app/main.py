@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.routers import links
+
+app = FastAPI(title="Myst")
+
+app.include_router(links.router)
 
 
 @app.get("/")
