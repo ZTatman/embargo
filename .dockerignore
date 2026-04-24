@@ -1,4 +1,15 @@
+# Node.js / npm
 node_modules
+package-lock.json
+pnpm-lock.yaml
+
+# Python / uv
+web/.venv
+web/__pycache__
+web/*.pyc
+uv.lock
+
+# General
 .git
 *.log
 .env
