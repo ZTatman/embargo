@@ -5,6 +5,6 @@ from sqlalchemy.types import DateTime
 
 
 class Base(DeclarativeBase):
-    type_annotations_map = {
+    type_annotation_map = {
         datetime.datetime: DateTime(timezone=True),
     }
