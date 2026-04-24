@@ -60,8 +60,7 @@ Prompts for:
 ### 2. Deploy with Docker Compose
 
 ```bash
-cd packages/cli/examples
-cp docker-compose.example.yml docker-compose.yml
+cp examples/.env.example .env
 # Edit .env with your FORGEJO_BASE_URL and FORGEJO_PAT
 docker compose up -d
 ```
