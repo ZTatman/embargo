@@ -13,3 +13,5 @@ coverage/
 web/.venv/
 web/__pycache__/
 web/*.py[cod]
+**/__pycache__/
+**/*.pyc

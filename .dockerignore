@@ -5,8 +5,8 @@ pnpm-lock.yaml
 
 # Python / uv
 web/.venv
-web/__pycache__
-web/*.pyc
+**/__pycache__/
+**/*.pyc
 uv.lock
 
 # General
