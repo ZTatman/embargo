@@ -107,11 +107,13 @@ function showCommandHelp(
     lines.push("");
   }
 
-  const hasSubcommands = cmdConf.subcommands && Object.keys(cmdConf.subcommands).length > 0;
+  const hasSubcommands =
+    cmdConf.subcommands && Object.keys(cmdConf.subcommands).length > 0;
   const usageCmd = subcommand ? `${command} ${subcommand}` : command;
-  const usageLine = hasSubcommands && !subcommand
-    ? `myst ${command} <subcommand> [options]`
-    : `myst ${usageCmd} [options]`;
+  const usageLine =
+    hasSubcommands && !subcommand
+      ? `myst ${command} <subcommand> [options]`
+      : `myst ${usageCmd} [options]`;
   lines.push(c.bold("Usage:"));
   lines.push(`${INDENT}${usageLine}`);
   lines.push("");

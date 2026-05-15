@@ -1,3 +1,7 @@
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
 [project]
 name = "myst-web"
 version = "0.1.0"
@@ -5,7 +9,9 @@ description = "Myst: FastAPI + HTMX web interface for managing Forgejo repositor
 requires-python = ">=3.13"
 dependencies = [
     "asyncpg>=0.31.0",
+    "cryptography>=46.0.0",
     "fastapi>=0.136.0",
+    "httpx>=0.28.1",
     "pydantic-settings>=2.13.1",
     "pydantic[email]>=2.13.2",
     "sqlalchemy[asyncio]>=2.0.49",
@@ -13,5 +19,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "ruff>=0.11.0",
     "uvicorn[standard]>=0.44.0",
 ]
