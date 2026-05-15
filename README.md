@@ -92,6 +92,30 @@ FORGEJO_PAT=forgejo_pat_xxxxxxxxxxxx
 
 When using the provided Docker Compose example, DATABASE_URL is injected automatically. For other deployment approaches (e.g., bare metal, Kubernetes), you must supply DATABASE_URL yourself.
 
+### 4. Register an OAuth application in Forgejo
+
+The web service authenticates users via Forgejo OAuth. You need to register Myst as an OAuth consumer:
+
+1. In Forgejo, go to **Settings** → **Applications** → **Create OAuth2 Application**
+2. Set the redirect URI to `https://your-myst-domain.com/auth/callback/forgejo` (or `http://localhost:8000/auth/callback/forgejo` for local dev)
+3. Copy the **Client ID** and **Client Secret** Forgejo gives you
+4. Generate a Fernet encryption key for OAuth token storage:
+
+   ```bash
+   python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+   ```
+
+5. Add these to your `.env`:
+
+   ```env
+   FORGEJO_OAUTH_CLIENT_ID=your_client_id
+   FORGEJO_OAUTH_CLIENT_SECRET=your_client_secret
+   OAUTH_TOKEN_ENCRYPTION_KEY=your_fernet_key_from_step_4
+   MYST_PUBLIC_BASE_URL=https://your-myst-domain.com  # omit trailing slash; omit for local dev
+   ```
+
+   `MYST_PUBLIC_BASE_URL` is used as the OAuth redirect URI base. In local development, the redirect URI is inferred from the request (Default: `http://localhost:8000/auth/callback/forgejo`). In production, set this to your public Myst domain.
+
 ## Phase 1 Progress
 
 - [x] Project renamed from Embargo to Myst

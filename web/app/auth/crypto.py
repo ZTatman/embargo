@@ -13,12 +13,12 @@ def fernet_from_encryption_key(key: SecretStr) -> Fernet | None:
     return Fernet(raw.encode())
 
 
-def encrypt_oauth_token(fernet: Fernet, plain: str) -> str:
-    return fernet.encrypt(plain.encode()).decode()
+def encrypt_oauth_token(fernet: Fernet, raw_token: str) -> str:
+    return fernet.encrypt(raw_token.encode()).decode()
 
 
-def encrypt_optional(fernet: Fernet | None, plain: str | None) -> str | None:
-    if plain is None:
+def encrypt_optional(fernet: Fernet | None, raw_token: str | None) -> str | None:
+    if raw_token is None:
         return None
     if fernet is None:
         msg = (
@@ -26,4 +26,4 @@ def encrypt_optional(fernet: Fernet | None, plain: str | None) -> str | None:
             "to the output of cryptography.fernet.Fernet.generate_key().decode()"
         )
         raise ValueError(msg)
-    return encrypt_oauth_token(fernet, plain)
+    return encrypt_oauth_token(fernet, raw_token)

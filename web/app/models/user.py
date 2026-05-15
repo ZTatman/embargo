@@ -2,11 +2,16 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String, Text, UniqueConstraint, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from .session import Session
+
+if TYPE_CHECKING:
+    from .grant import Grant
 
 
 class User(Base):
@@ -17,18 +22,19 @@ class User(Base):
     )
     display_name: Mapped[str | None] = mapped_column(String, nullable=True)
     email: Mapped[str | None] = mapped_column(String, nullable=True)
+    pat_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     identities: Mapped[list[LinkedIdentity]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    sessions: Mapped[list["Session"]] = relationship(
-        "Session",
+    sessions: Mapped[list[Session]] = relationship(
+        Session,
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    grants: Mapped[list["Grant"]] = relationship(
+    grants: Mapped[list[Grant]] = relationship(
         "Grant",
         back_populates="user",
     )

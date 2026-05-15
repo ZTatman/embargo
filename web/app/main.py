@@ -3,13 +3,12 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+import app.models  # noqa: F401 - register ORM tables on metadata
 from app.auth.session import get_current_session
 from app.config import get_settings
 from app.database import Base
 from app.models.session import Session as UserBrowserSession
 from app.routers import auth, links
-
-import app.models  # noqa: F401 - register ORM tables on metadata
 
 
 @asynccontextmanager
@@ -46,6 +45,7 @@ async def root():
 @app.get("/dashboard")
 async def dashboard(sess: UserBrowserSession = Depends(get_current_session)):
     return {
+        "session": sess,
         "display_name": sess.user.display_name,
         "email": sess.user.email,
     }

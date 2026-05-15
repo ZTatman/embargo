@@ -32,7 +32,6 @@ async def create_session(db: AsyncSession, response: Response, user_id: uuid.UUI
         key=SESSION_COOKIE,
         value=raw_token,
         httponly=True,
-        secure=True,
         samesite="lax",
         max_age=60 * 60 * 24 * SESSION_DURATION_DAYS,
         path="/",
@@ -72,15 +71,12 @@ async def get_current_session(
     return sess
 
 
-async def revoke_session(
-    db: AsyncSession, response: Response, myst_session: str | None
-) -> None:
+async def revoke_session(db: AsyncSession, response: Response, myst_session: str | None) -> None:
     response.delete_cookie(
         key=SESSION_COOKIE,
         path="/",
         samesite="lax",
         httponly=True,
-        secure=True,
     )
     if not myst_session:
         return

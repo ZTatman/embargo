@@ -1,3 +1,7 @@
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
 [project]
 name = "myst-web"
 version = "0.1.0"
@@ -15,5 +19,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "ruff>=0.11.0",
     "uvicorn[standard]>=0.44.0",
 ]
