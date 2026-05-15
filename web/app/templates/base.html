@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="jade">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Myst{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.jade.min.css">
+  <script src="https://unpkg.com/htmx.org@2"></script>
+</head>
+<body>
+  <header class="container">
+    <nav>
+      <ul>
+        <li><strong><a href="/">Myst</a></strong></li>
+      </ul>
+      <ul>
+        {% if user %}
+          <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/auth/logout">Logout</a></li>
+        {% else %}
+          <li><a href="/auth/login/forgejo" role="button">Sign in with Forgejo</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

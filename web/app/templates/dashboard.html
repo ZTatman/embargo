@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Myst{% endblock %}
+
+{% block content %}
+  <h1>Dashboard</h1>
+  <p>Welcome, {{ user.display_name or user.email }}!</p>
+
+  <section>
+    <h2>Forgejo Personal Access Token</h2>
+    <p>Register a <code>read:repository</code>-scoped PAT to enable share link viewing.</p>
+    <!-- TODO: PAT registration form -->
+  </section>
+
+  <section>
+    <h2>Share Links</h2>
+    <p>You haven't created any share links yet.</p>
+    <!-- TODO: share link list -->
+  </section>
+{% endblock %}
