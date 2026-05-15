@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Myst — share Forgejo repositories easily{% endblock %}
+{% block title %}Myst{% endblock %}
 
 {% block content %}
-  <section>
-    <hgroup>
-      <h1>Myst</h1>
-      <p>Share Forgejo repository snapshots via time-limited links.</p>
-    </hgroup>
-    <a href="/auth/login/forgejo" role="button">Sign in with Forgejo</a>
-  </section>
+<div class="flex flex-col items-center justify-center py-24 text-center">
+  <h1 class="text-5xl font-bold text-white">Myst</h1>
+  <p class="mt-4 text-lg text-text-muted max-w-md">
+    Share self-hosted repository snapshots via time-limited, view-only links.
+  </p>
+  {% if not user %}
+    <a href="/auth/login/forgejo" class="mt-8 rounded-lg bg-primary px-6 py-3 font-medium text-white hover:bg-primary-hover transition">
+      Sign in with Forgejo
+    </a>
+  {% endif %}
+</div>
 {% endblock %}

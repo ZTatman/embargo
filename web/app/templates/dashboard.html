@@ -3,18 +3,18 @@
 {% block title %}Dashboard — Myst{% endblock %}
 
 {% block content %}
-  <h1>Dashboard</h1>
-  <p>Welcome, {{ user.display_name or user.email }}!</p>
+<h1 class="text-2xl font-bold text-white">Dashboard</h1>
+<p class="mt-1 text-text-muted">Welcome, {{ user.display_name or user.email }}!</p>
 
-  <section>
-    <h2>Forgejo Personal Access Token</h2>
-    <p>Register a <code>read:repository</code>-scoped PAT to enable share link viewing.</p>
-    <!-- TODO: PAT registration form -->
-  </section>
+<section class="mt-8 rounded-lg border border-border bg-surface-alt p-6">
+  <h2 class="text-lg font-semibold text-white">Forgejo Access Token</h2>
+  <p class="mt-1 text-sm text-text-muted">Register a <code class="text-primary">read:repository</code>-scoped PAT to enable share link viewing.</p>
+  <!-- TODO: PAT registration form -->
+</section>
 
-  <section>
-    <h2>Share Links</h2>
-    <p>You haven't created any share links yet.</p>
-    <!-- TODO: share link list -->
-  </section>
+<section class="mt-6 rounded-lg border border-border bg-surface-alt p-6">
+  <h2 class="text-lg font-semibold text-white">Share Links</h2>
+  <p class="mt-1 text-sm text-text-muted">You haven't created any share links yet.</p>
+  <!-- TODO: share link list -->
+</section>
 {% endblock %}

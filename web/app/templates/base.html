@@ -1,29 +1,27 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="jade">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Myst{% endblock %}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.jade.min.css">
+  <link rel="stylesheet" href="/static/css/output.css">
   <script src="https://unpkg.com/htmx.org@2"></script>
 </head>
-<body>
-  <header class="container">
-    <nav>
-      <ul>
-        <li><strong><a href="/">Myst</a></strong></li>
-      </ul>
-      <ul>
+<body class="bg-surface text-text min-h-screen">
+  <header class="border-b border-border-light">
+    <div class="mx-auto max-w-6xl flex items-center justify-between px-4 py-3">
+      <a href="/" class="text-xl font-bold text-primary hover:text-primary-hover">Myst</a>
+      <nav class="flex items-center gap-4">
         {% if user %}
-          <li><a href="/dashboard">Dashboard</a></li>
-          <li><a href="/auth/logout">Logout</a></li>
+          <a href="/dashboard" class="text-text-muted hover:text-text transition">Dashboard</a>
+          <a href="/auth/logout" class="rounded bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover transition">Logout</a>
         {% else %}
-          <li><a href="/auth/login/forgejo" role="button">Sign in with Forgejo</a></li>
+          <a href="/auth/login/forgejo" class="rounded bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover transition">Sign in with Forgejo</a>
         {% endif %}
-      </ul>
-    </nav>
+      </nav>
+    </div>
   </header>
-  <main class="container">
+  <main class="mx-auto max-w-6xl px-4 py-8">
     {% block content %}{% endblock %}
   </main>
 </body>

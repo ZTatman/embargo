@@ -15,3 +15,7 @@ web/__pycache__/
 web/*.py[cod]
 **/__pycache__/
 **/*.pyc
+
+# Tailwind standalone CLI
+web/tailwindcss
+web/app/static/css/output.css
