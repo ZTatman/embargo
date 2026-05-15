@@ -67,3 +67,27 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Obstacle:** process.exit(0) stops execution immediately, never runs cleanup code.
 **Solution:** Use process.exitCode = 1 and return instead of process.exit().
 **Preference:** Set exitCode and return to allow cleanup.
+
+### Logout cookie not reaching browser
+**Area:** web/app/routers/auth.py, web/app/auth/session.py
+**Obstacle:** `revoke_session` set cookies on the injected `Response` parameter, but the logout handler returned a new `RedirectResponse` — so `Set-Cookie` was discarded.
+**Solution:** Create `RedirectResponse` first, then pass it into `revoke_session`. Same pattern used in `callback_forgejo` for `create_session`.
+**Preference:** Pass the actual response object that will be returned.
+
+### Dashboard leaking ORM session object
+**Area:** web/app/main.py
+**Obstacle:** `/dashboard` returned the full ORM `Session` object (`sess`), leaking `token_hash`, `revoked_at`, etc. to the client.
+**Solution:** Return a plain dict with only safe fields: `user_id`, `display_name`, `email`, `session_id`, `created_at`.
+**Preference:** Never return ORM objects directly in API responses.
+
+### crypto.py decrypt functions kept proactively
+**Area:** web/app/auth/crypto.py
+**Obstacle:** CodeRabbit flagged missing decryption functions and key validation. Added `decrypt_oauth_token`/`decrypt_optional` + key format validation in `fernet_from_encryption_key`.
+**Solution:** Added the functions even though no consumer exists yet. They will be used for PAT decryption in share link flow.
+**Preference:** Keep dead code if it's small, symmetric (`encrypt`/`decrypt`), and has an obvious future consumer.
+
+### User model Session import direct instead of TYPE_CHECKING
+**Area:** web/app/models/user.py
+**Obstacle:** `Session` was imported directly (`from .session import Session`) while `Grant` used `TYPE_CHECKING`. Inconsistent and risked circular imports.
+**Solution:** Moved `Session` import under `TYPE_CHECKING`, changed relationship to string ref `"Session"`.
+**Preference:** Always use `TYPE_CHECKING` for model references within models to avoid circular imports.

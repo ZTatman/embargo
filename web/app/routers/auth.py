@@ -65,6 +65,7 @@ def _set_oauth_state_cookie(response: Response, state: str) -> None:
         value=state,
         httponly=True,
         samesite="lax",
+        path="/",
         max_age=600,
     )
 
@@ -176,6 +177,12 @@ async def callback_forgejo(
     _require_forgejo_oauth_config(settings)
     _verify_oauth_state(state, oauth_state)
 
+    if not code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Forgejo did not return an authorization code. The user may have denied consent.",
+        )
+
     redirect = RedirectResponse("/dashboard", status_code=status.HTTP_302_FOUND)
     redirect.delete_cookie("oauth_state")
 
@@ -207,15 +214,15 @@ async def callback_forgejo(
         refresh_token_raw=refresh_plain,
     )
 
-    await create_session(db, redirect, user.id)
+    await create_session(db, redirect, user.id, secure=request.url.scheme == "https")
     return redirect
 
 
 @router.get("/logout")
 async def logout(
-    response: Response,
     db: AsyncSession = Depends(get_db),
     myst_session: str | None = Cookie(default=None),
 ) -> RedirectResponse:
-    await revoke_session(db, response, myst_session)
-    return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+    redirect = RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+    await revoke_session(db, redirect, myst_session)
+    return redirect

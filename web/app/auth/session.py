@@ -17,7 +17,9 @@ SESSION_COOKIE = "myst_session"
 SESSION_DURATION_DAYS = 7
 
 
-async def create_session(db: AsyncSession, response: Response, user_id: uuid.UUID) -> None:
+async def create_session(
+    db: AsyncSession, response: Response, user_id: uuid.UUID, secure: bool = True
+) -> None:
     raw_token = secrets.token_hex(32)
     token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
     expires_at = datetime.now(UTC) + timedelta(days=SESSION_DURATION_DAYS)
@@ -33,6 +35,7 @@ async def create_session(db: AsyncSession, response: Response, user_id: uuid.UUI
         value=raw_token,
         httponly=True,
         samesite="lax",
+        secure=secure,
         max_age=60 * 60 * 24 * SESSION_DURATION_DAYS,
         path="/",
     )

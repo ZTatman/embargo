@@ -45,7 +45,9 @@ async def root():
 @app.get("/dashboard")
 async def dashboard(sess: UserBrowserSession = Depends(get_current_session)):
     return {
-        "session": sess,
+        "user_id": str(sess.user.id),
         "display_name": sess.user.display_name,
         "email": sess.user.email,
+        "session_id": str(sess.id),
+        "created_at": sess.created_at.isoformat(),
     }

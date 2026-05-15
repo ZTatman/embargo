@@ -8,10 +8,10 @@ from sqlalchemy import ForeignKey, String, Text, UniqueConstraint, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from .session import Session
 
 if TYPE_CHECKING:
     from .grant import Grant
+    from .session import Session
 
 
 class User(Base):
@@ -21,7 +21,7 @@ class User(Base):
         Uuid, primary_key=True, server_default=func.gen_random_uuid()
     )
     display_name: Mapped[str | None] = mapped_column(String, nullable=True)
-    email: Mapped[str | None] = mapped_column(String, nullable=True)
+    email: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
     pat_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
@@ -30,7 +30,7 @@ class User(Base):
         cascade="all, delete-orphan",
     )
     sessions: Mapped[list[Session]] = relationship(
-        Session,
+        "Session",
         back_populates="user",
         cascade="all, delete-orphan",
     )
@@ -47,7 +47,7 @@ class LinkedIdentity(Base):
         Uuid, primary_key=True, server_default=func.gen_random_uuid()
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     provider: Mapped[str] = mapped_column(String, nullable=False)
     provider_user_id: Mapped[str] = mapped_column(String, nullable=False)
