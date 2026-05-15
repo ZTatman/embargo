@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from pydantic import SecretStr
 
 
@@ -37,7 +37,13 @@ def encrypt_optional(fernet: Fernet | None, raw_token: str | None) -> str | None
 
 
 def decrypt_oauth_token(fernet: Fernet, encrypted_token: str) -> str:
-    return fernet.decrypt(encrypted_token.encode()).decode()
+    try:
+        return fernet.decrypt(encrypted_token.encode()).decode()
+    except InvalidToken:
+        raise ValueError(
+            "Cannot decrypt stored token — the encryption key may have changed or the "
+            "token data is corrupted. The user may need to re-connect their account."
+        ) from None
 
 
 def decrypt_optional(fernet: Fernet | None, encrypted_token: str | None) -> str | None:
