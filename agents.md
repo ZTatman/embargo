@@ -91,3 +91,9 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Obstacle:** `Session` was imported directly (`from .session import Session`) while `Grant` used `TYPE_CHECKING`. Inconsistent and risked circular imports.
 **Solution:** Moved `Session` import under `TYPE_CHECKING`, changed relationship to string ref `"Session"`.
 **Preference:** Always use `TYPE_CHECKING` for model references within models to avoid circular imports.
+
+### Boilerplate UI must follow attached light vault system
+**Area:** web/app/static/css/input.css, web/app/templates/*.html
+**Obstacle:** Existing boilerplate used dark-mode pink tokens that conflicted with the attached "Mystique Minimalist Security" design system.
+**Solution/Workaround:** Use light Geist/JetBrains Mono typography, glacier-blue primary actions, white/off-white tonal surfaces, hairline slate borders, compact labels, mono technical strings, and pill status badges.
+**Preference:** Keep visual changes in Tailwind tokens and boilerplate templates; avoid backend route changes for design-only updates.

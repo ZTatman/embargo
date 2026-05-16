@@ -1,17 +1,72 @@
 {% extends "base.html" %}
-
-{% block title %}Myst{% endblock %}
-
+{% block title %}Myst — share Forgejo repositories easily{% endblock %}
 {% block content %}
-<div class="flex flex-col items-center justify-center py-24 text-center">
-  <h1 class="text-5xl font-bold text-white">Myst</h1>
-  <p class="mt-4 text-lg text-text-muted max-w-md">
-    Share self-hosted repository snapshots via time-limited, view-only links.
-  </p>
-  {% if not user %}
-    <a href="/auth/login/forgejo" class="mt-8 rounded-lg bg-primary px-6 py-3 font-medium text-white hover:bg-primary-hover transition">
-      Sign in with Forgejo
-    </a>
-  {% endif %}
-</div>
+  <section class="grid min-h-[calc(100vh-9rem)] items-center gap-8 py-6 lg:grid-cols-[0.9fr_1.1fr]">
+    <div class="max-w-2xl">
+      <p class="text-xs font-semibold uppercase tracking-[0.05em] text-primary">
+        Secure repository sharing
+      </p>
+      <h1 class="mt-4 text-4xl font-semibold leading-tight tracking-normal text-text sm:text-[3.25rem] sm:leading-[1.05]">
+        Myst
+      </h1>
+      <p class="mt-4 max-w-xl text-base leading-7 text-text-muted">
+        Share pinned Forgejo repository snapshots through view-only links with expiration,
+        revocation, and audit visibility built in.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        {% if user %}
+          <a href="/dashboard"
+             class="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover focus:ring-2 focus:ring-primary-muted">
+            Open dashboard
+          </a>
+        {% else %}
+          <a href="/auth/login/forgejo"
+             class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover focus:ring-2 focus:ring-primary-muted">
+            <span class="grid size-5 place-items-center rounded-sm bg-white p-0.5">
+              <img src="http://myst-forgejo-pk9mpr-31e452-76-13-111-87.sslip.io/assets/img/logo.svg"
+                   alt=""
+                   width="16"
+                   height="16"
+                   class="size-4"
+                   aria-hidden="true" />
+            </span>
+            <span>Sign in with Forgejo</span>
+          </a>
+        {% endif %}
+        <span class="text-sm text-text-subtle">Time-limited. Read-only. Auditable.</span>
+      </div>
+    </div>
+    <div class="rounded-xl border border-border bg-white">
+      <div class="flex items-center justify-between border-b border-border px-4 py-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.05em] text-text-subtle">Vault activity</p>
+          <h2 class="mt-1 text-base font-semibold text-text">Repository snapshots</h2>
+        </div>
+        <span class="rounded-full bg-success-surface px-2.5 py-1 text-xs font-medium text-success">Protected</span>
+      </div>
+      <div class="divide-y divide-border-light">
+        <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-3">
+          <div>
+            <p class="font-mono text-[13px] leading-5 text-text">infra/deployment</p>
+            <p class="mt-1 text-xs text-text-subtle">Pinned commit 9f2a1c8 · expires in 7 days</p>
+          </div>
+          <span class="self-start rounded-full bg-success-surface px-2.5 py-1 text-xs font-medium text-success">Active</span>
+        </div>
+        <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-3">
+          <div>
+            <p class="font-mono text-[13px] leading-5 text-text">platform/secrets</p>
+            <p class="mt-1 text-xs text-text-subtle">Pinned commit a81dc40 · 14 views</p>
+          </div>
+          <span class="self-start rounded-full bg-warning-surface px-2.5 py-1 text-xs font-medium text-warning">Review</span>
+        </div>
+        <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-3">
+          <div>
+            <p class="font-mono text-[13px] leading-5 text-text">audit/policies</p>
+            <p class="mt-1 text-xs text-text-subtle">Pinned commit 31e0b77 · revoked yesterday</p>
+          </div>
+          <span class="self-start rounded-full bg-danger-surface px-2.5 py-1 text-xs font-medium text-danger">Revoked</span>
+        </div>
+      </div>
+    </div>
+  </section>
 {% endblock %}
