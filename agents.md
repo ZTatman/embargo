@@ -97,3 +97,9 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Obstacle:** Existing boilerplate used dark-mode pink tokens that conflicted with the attached "Mystique Minimalist Security" design system.
 **Solution/Workaround:** Use light Geist/JetBrains Mono typography, glacier-blue primary actions, white/off-white tonal surfaces, hairline slate borders, compact labels, mono technical strings, and pill status badges.
 **Preference:** Keep visual changes in Tailwind tokens and boilerplate templates; avoid backend route changes for design-only updates.
+
+### Tailwind design tokens should use paired semantic roles
+**Area:** web/app/static/css/input.css, web/app/templates/*.html
+**Obstacle:** Early UI templates mixed old role names (`background-*`, `text-*`, `stroke`) and hardcoded `white` values inside component classes, which made dark mode and future theming brittle.
+**Solution/Workaround:** Use Tailwind v4 `@theme` tokens with semantic pairs such as `background/foreground`, `card/card-foreground`, `primary/primary-foreground`, `secondary/secondary-foreground`, `border`, `input`, and `ring`. Keep shared component structure in base classes like `.btn`, with variant classes only setting semantic colors.
+**Preference:** Prefer semantic token names over appearance-based names; add dark mode by overriding CSS variables under `.dark`.
