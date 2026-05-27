@@ -3,25 +3,20 @@
 {% block content %}
   <section class="grid min-h-[calc(100vh-9rem)] items-center gap-8 py-6 lg:grid-cols-[0.9fr_1.1fr]">
     <div class="max-w-2xl">
-      <p class="text-xs font-semibold uppercase tracking-[0.05em] text-primary">
-        Secure repository sharing
-      </p>
-      <h1 class="mt-4 text-4xl font-semibold leading-tight tracking-normal text-text sm:text-[3.25rem] sm:leading-[1.05]">
+      <p class="section-header-primary">Secure repository snapshots</p>
+      <h1 class="mt-4 text-4xl font-semibold leading-tight tracking-normal text-foreground sm:text-[3.25rem] sm:leading-[1.05]">
         Myst
       </h1>
-      <p class="mt-4 max-w-xl text-base leading-7 text-text-muted">
-        Share pinned Forgejo repository snapshots through view-only links with expiration,
+      <p class="max-w-xl mt-4 text-base leading-7 text-text-secondary">
+        Share pinned Forgejo repository snapshots through read-only links with expiration,
         revocation, and audit visibility built in.
       </p>
-      <div class="mt-8 flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3 mt-8">
         {% if user %}
-          <a href="/dashboard"
-             class="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover focus:ring-2 focus:ring-primary-muted">
-            Open dashboard
-          </a>
+          <a href="/dashboard" class="btn-primary">Open dashboard</a>
         {% else %}
           <a href="/auth/login/forgejo"
-             class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover focus:ring-2 focus:ring-primary-muted">
+             class="inline-flex items-center gap-2 btn-primary">
             <img src="http://myst-forgejo-pk9mpr-31e452-76-13-111-87.sslip.io/assets/img/logo.svg"
                  alt=""
                  width="16"
@@ -31,38 +26,53 @@
             <span>Sign in with Forgejo</span>
           </a>
         {% endif %}
-        <span class="text-sm text-text-subtle">Time-limited. Read-only. Auditable.</span>
+        <span class="text-sm text-text-tertiary">Time-limited. Read-only. Auditable.</span>
       </div>
     </div>
-    <div class="rounded-xl border border-border bg-white">
-      <div class="flex items-center justify-between border-b border-border px-4 py-3">
+    <div class="card rounded-xl">
+      <div class="flex items-center justify-between card-header">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.05em] text-text-subtle">Vault activity</p>
-          <h2 class="mt-1 text-base font-semibold text-text">Repository snapshots</h2>
+          <p class="card-header-label">Activity</p>
+          <h2 class="card-header-title">Repository snapshots</h2>
         </div>
-        <span class="rounded-full bg-success-surface px-2.5 py-1 text-xs font-medium text-success">Protected</span>
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg"
+               width="24"
+               height="24"
+               fill="#000000"
+               viewBox="0 0 256 256">
+            <path d="M200,136a8,8,0,0,1-8,8H64a8,8,0,0,1,0-16H192A8,8,0,0,1,200,136Zm32-56H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16Zm-80,96H104a8,8,0,0,0,0,16h48a8,8,0,0,0,0-16Z">
+            </path>
+          </svg>
+        </span>
       </div>
-      <div class="divide-y divide-border-light">
-        <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-3">
+      <div>
+        <div class="flex justify-between items-center px-4 py-3 border-b border-stroke">
           <div>
-            <p class="font-mono text-[13px] leading-5 text-text">infra/deployment</p>
-            <p class="mt-1 text-xs text-text-subtle">Pinned commit 9f2a1c8 · expires in 7 days</p>
+            <p class="font-mono text-[13px] leading-5 text-foreground">infra/deployment</p>
+            <p class="mt-1 text-xs text-text-tertiary">Pinned commit 9f2a1c8 · expires in 7 days</p>
           </div>
-          <span class="self-start rounded-full bg-success-surface px-2.5 py-1 text-xs font-medium text-success">Active</span>
+          <div class="place-content-center">
+            <span class="self-start badge-success">Active</span>
+          </div>
         </div>
-        <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-3">
+        <div class="flex justify-between items-center px-4 py-3 border-b border-stroke">
           <div>
-            <p class="font-mono text-[13px] leading-5 text-text">platform/secrets</p>
-            <p class="mt-1 text-xs text-text-subtle">Pinned commit a81dc40 · 14 views</p>
+            <p class="font-mono text-[13px] leading-5 text-foreground">audit/policies</p>
+            <p class="mt-1 text-xs text-text-tertiary">Pinned commit 31e0b77 · revoked yesterday</p>
           </div>
-          <span class="self-start rounded-full bg-warning-surface px-2.5 py-1 text-xs font-medium text-warning">Review</span>
+          <div class="place-content-center">
+            <span class="self-start badge-danger">Revoked</span>
+          </div>
         </div>
-        <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-3">
+        <div class="flex justify-between items-center px-4 py-3 border-b border-stroke">
           <div>
-            <p class="font-mono text-[13px] leading-5 text-text">audit/policies</p>
-            <p class="mt-1 text-xs text-text-subtle">Pinned commit 31e0b77 · revoked yesterday</p>
+            <p class="font-mono text-[13px] leading-5 text-foreground">platform/utils</p>
+            <p class="mt-1 text-xs text-text-tertiary">Pinned commit a81dc40 · 14 views</p>
           </div>
-          <span class="self-start rounded-full bg-danger-surface px-2.5 py-1 text-xs font-medium text-danger">Revoked</span>
+          <div class="place-content-center">
+            <span class="self-start badge-expired">Expired</span>
+          </div>
         </div>
       </div>
     </div>

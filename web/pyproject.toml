@@ -23,6 +23,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "djlint>=1.36.1",
     "ruff>=0.11.0",
     "uvicorn[standard]>=0.44.0",
 ]
+
+[tool.djlint]
+indent = 2
+profile = "jinja"
+max_line_length = 100
+extension = "html"

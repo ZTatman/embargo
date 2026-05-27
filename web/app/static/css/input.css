@@ -1,32 +1,107 @@
 @import "tailwindcss";
 
+/*
+  Design token usage guide
+
+  Color roles and recommended HTML usage:
+
+  background-base
+    - Use on <body>, main page containers, and outer layout panels.
+    - Example: page canvas, app shell background.
+
+  background-bright
+    - Use on elevated surfaces such as headers, cards, modals, and top bars.
+    - Example: <header>, <section>, and card containers.
+
+  background-secondary
+    - Use for subtle accent surfaces like tags, inline code pills, badge backgrounds.
+    - Example: <code>, status pills, inline labels.
+
+  background-muted
+    - Use on grouping surfaces and lightly separated table or form sections.
+    - Example: table header rows, section footers, secondary panels.
+
+  background-hover
+    - Use for hover/focus backgrounds on secondary interactive elements.
+    - Example: nav links, secondary buttons, list item hover states.
+
+  primary
+    - Use for the strongest action and brand accent.
+    - Example: primary buttons, active links, important badges.
+
+  primary-hover
+    - Use for hover state on primary actions.
+    - Example: hover state for .btn-primary.
+
+  primary-muted
+    - Use for soft focus rings, overlays, and low-contrast primary accents.
+    - Example: focus outlines, active ring shadows.
+
+  foreground
+    - Use for main readable text.
+    - Example: <h1>, <p>, <button>, <label> primary copy.
+
+  text-secondary
+    - Use for supporting text and secondary copy.
+    - Example: help text, paragraph subtitles, nav links.
+
+  text-tertiary
+    - Use for labels, metadata, captions, and subtle UI hints.
+    - Example: timestamps, table captions, badge text.
+
+  stroke
+    - Use for standard borders and dividers.
+    - Example: card borders, section separators, input outlines.
+
+  stroke-subtle
+    - Use for very soft borders or low-priority dividers.
+    - Example: muted form separators, background grid lines.
+
+  outline
+    - Use for interactive emphasis around controls.
+    - Example: focus states, hover border highlights.
+
+  success / warning / danger
+    - Use only for semantic feedback states.
+    - Example: status badges, alerts, validation states.
+
+  Best practice:
+    Use these tokens by semantic purpose, not by appearance alone.
+    Don’t use primary for neutral surfaces; reserve it for actions,
+    links, and important accents. Keep foreground text for main content,
+    text-secondary for supporting copy, and text-tertiary for labels.
+*/
+
 @theme {
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
   --color-background: #f8f9ff;
-  --color-surface: #f8f9ff;
-  --color-surface-bright: #ffffff;
-  --color-surface-alt: #eff4ff;
-  --color-surface-raised: #e5eeff;
-  --color-surface-muted: #f8fafc;
-  --color-surface-hover: #f1f5f9;
+  --color-background-base: #f8f9ff;
+  --color-background-bright: #ffffff;
+  --color-background-secondary: #eff4ff;
+  --color-background-raised: #e5eeff;
+  --color-background-muted: #f8fafc;
+  --color-background-hover: #f1f5f9;
   --color-primary: #006591;
   --color-primary-hover: #004c6e;
   --color-primary-container: #0ea5e9;
   --color-primary-muted: rgba(0, 101, 145, 0.12);
-  --color-text: #0b1c30;
-  --color-text-muted: #3e4850;
-  --color-text-subtle: #57657a;
-  --color-border: #e2e8f0;
-  --color-border-light: #f1f5f9;
+  --color-foreground: #0b1c30;
+  --color-text-secondary: #3e4850;
+  --color-text-tertiary: #57657a;
+  --color-stroke: #e2e8f0;
+  --color-stroke-subtle: #f1f5f9;
   --color-outline: #6e7881;
   --color-success: #15803d;
-  --color-success-surface: #dcfce7;
+  --color-surface-success: #dcfce7;
   --color-warning: #b45309;
-  --color-warning-surface: #fef3c7;
+  --color-surface-warning: #fef3c7;
   --color-danger: #ba1a1a;
-  --color-danger-surface: #ffdad6;
+  --color-surface-danger: #ffdad6;
+  --color-expired: #6e7881;
+  --color-surface-expired: #f1f5f9;
+  
 
   --radius-sm: 0.125rem;
   --radius-md: 0.25rem;
@@ -54,5 +129,72 @@
 
   code {
     font-family: var(--font-mono);
+  }
+}
+
+@layer components {
+  /* Section labels */
+  .section-header-primary {
+    @apply text-xs font-semibold uppercase tracking-[0.05em] text-primary;
+  }
+
+  .section-header-subtle {
+    @apply text-xs font-semibold uppercase tracking-[0.05em] text-text-tertiary;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover focus:ring-2 focus:ring-primary-muted;
+  }
+
+  .btn-secondary {
+    @apply px-3 py-2 text-sm font-medium transition bg-white border rounded-md border-stroke text-text-secondary hover:border-outline hover:text-foreground;
+  }
+
+  .btn-nav {
+    @apply px-3 py-2 text-sm font-medium transition rounded-md text-text-secondary hover:bg-background-hover hover:text-foreground;
+  }
+
+  /* Status badges */
+  .badge-success {
+    @apply rounded-full px-2.5 py-1 text-xs font-medium bg-surface-success text-success;
+  }
+
+  .badge-warning {
+    @apply rounded-full px-2.5 py-1 text-xs font-medium bg-surface-warning text-warning;
+  }
+
+  .badge-danger {
+    @apply rounded-full px-2.5 py-1 text-xs font-medium bg-surface-danger text-danger;
+  }
+
+  .badge-expired {
+    @apply rounded-full px-2.5 py-1 text-xs font-medium bg-surface-expired text-expired;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white border rounded-lg border-stroke;
+  }
+
+  .card-header {
+    @apply px-4 py-3 border-b border-stroke;
+  }
+
+  .card-header-label {
+    @apply text-xs font-semibold uppercase tracking-[0.05em] text-text-tertiary;
+  }
+
+  .card-header-title {
+    @apply mt-1 text-base font-semibold text-foreground;
+  }
+
+  .card-body {
+    @apply px-4 py-4;
+  }
+
+  /* Form inputs */
+  .input-mono {
+    @apply px-3 py-2 text-sm transition bg-white border rounded-md border-stroke placeholder:text-text-tertiary focus:border-primary focus:ring-2 focus:ring-primary-muted font-mono text-[13px] leading-5;
   }
 }
