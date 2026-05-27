@@ -29,6 +29,7 @@
     --color-input: oklch(100% 0 0);
     --color-ring: oklch(45.2% 0.115 235);
     --color-ring-muted: oklch(45.2% 0.115 235 / 12%);
+    --shadow-card: 0 12px 32px oklch(20.8% 0.04 255 / 6%);
 
     --color-success: oklch(47.8% 0.13 150);
     --color-success-foreground: oklch(47.8% 0.13 150);
@@ -81,6 +82,7 @@
     --color-input: oklch(22.8% 0.035 255);
     --color-ring: oklch(72% 0.125 235);
     --color-ring-muted: oklch(72% 0.125 235 / 20%);
+    --shadow-card: 0 18px 44px oklch(0% 0 0 / 22%);
 
     --color-success: oklch(75% 0.12 150);
     --color-success-foreground: oklch(82% 0.12 150);
@@ -170,6 +172,7 @@
 
     .card {
         @apply rounded-lg border border-border bg-card text-card-foreground;
+        box-shadow: var(--shadow-card);
     }
 
     .card-header {

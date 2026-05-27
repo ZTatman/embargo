@@ -26,65 +26,66 @@
         <p class="mt-2 text-xs text-muted-foreground">Viewer activity will appear here.</p>
       </div>
     </section>
-    <section class="card">
-      <div class="card-header">
+    <div class="space-y-3">
+      <div>
         <h2 class="text-base font-semibold text-foreground">Forgejo access token</h2>
         <p class="mt-2 text-sm text-muted-foreground">
           Register a <code class="rounded-sm bg-secondary px-1.5 py-0.5 text-primary">read:repository</code>-scoped PAT
           to enable share link viewing.
         </p>
       </div>
-      <form id="pat-form"
-            method="post"
-            action="/dashboard/pat"
-            novalidate
-            class="px-4 py-4">
-        <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-          <div>
-            <label for="pat" class="section-header-subtle">Forgejo access token</label>
-            <input type="text"
-                   id="pat"
-                   name="pat"
-                   class="block w-full mt-2 input-mono"
-                   placeholder="ad8j3..."
-                   aria-describedby="pat-error"
-                   aria-invalid="false"
-                   required />
+      <section class="card">
+        <form id="pat-form"
+              method="post"
+              action="/dashboard/pat"
+              novalidate
+              class="px-4 py-4">
+          <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div>
+              <label for="pat" class="section-header-subtle">Forgejo access token</label>
+              <input type="text"
+                     id="pat"
+                     name="pat"
+                     class="block w-full mt-2 input-mono"
+                     placeholder="ad8j3..."
+                     aria-describedby="pat-error"
+                     aria-invalid="false"
+                     required />
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
           </div>
-          <button type="submit" class="btn btn-primary">Register</button>
-        </div>
-        <div class="mt-2">
-          <p id="pat-error" class="input-error hidden">A Forgejo token is required.</p>
-        </div>
-      </form>
-    </section>
-    <section class="card">
-      <div class="flex items-center justify-between card-header">
-        <div>
-          <h2 class="text-base font-semibold text-foreground">Share links</h2>
-          <p class="mt-1 text-sm text-muted-foreground">Repository snapshots published from this account.</p>
-        </div>
-        <span class="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">Empty</span>
+          <div class="mt-2">
+            <p id="pat-error" class="input-error hidden">A Forgejo token is required.</p>
+          </div>
+        </form>
+      </section>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <h2 class="text-base font-semibold text-foreground">Share links</h2>
+        <p class="mt-2 text-sm text-muted-foreground">Repository snapshots published from this account.</p>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[720px] text-left text-sm">
-          <thead class="bg-muted text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-            <tr>
-              <th class="px-4 py-3">Repository</th>
-              <th class="px-4 py-3">Commit</th>
-              <th class="px-4 py-3">Status</th>
-              <th class="px-4 py-3">Views</th>
-              <th class="px-4 py-3">Expires</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-border-subtle">
-            <tr class="text-muted-foreground">
-              <td class="px-4 py-5" colspan="5">You have not created any share links yet.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+      <section class="card">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[720px] text-left text-sm">
+            <thead class="bg-muted text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+              <tr>
+                <th class="px-4 py-3">Repository</th>
+                <th class="px-4 py-3">Commit</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Views</th>
+                <th class="px-4 py-3">Expires</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-subtle">
+              <tr class="text-muted-foreground text-center">
+                <td class="px-4 py-5" colspan="5">You have not created any share links yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </div>
   <script>
     (() => {
