@@ -14,6 +14,12 @@ RUN UV_NO_DEV=1 uv sync --frozen --no-cache && chown -R appuser:appuser /app
 
 COPY --chown=appuser:appuser . .
 
+# Build Tailwind CSS
+RUN curl -sL https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.0/tailwindcss-linux-x64 -o /tmp/tailwindcss && \
+    chmod +x /tmp/tailwindcss && \
+    /tmp/tailwindcss -i app/static/css/input.css -o app/static/css/output.css --minify && \
+    rm /tmp/tailwindcss
+
 USER appuser
 
 EXPOSE 8000

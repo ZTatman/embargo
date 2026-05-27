@@ -1,0 +1,20 @@
+{
+  "lsp": {
+    "basedpyright": {
+      "settings": {
+        "python.pythonPath": "web/.venv/bin/python"
+      }
+    }
+  },
+  "languages": {
+    "HTML": {
+      "formatter": {
+        "external": {
+          "command": "uv",
+          "arguments": ["run", "--directory", "web", "djlint", "--reformat", "-"]
+        }
+      },
+      "format_on_save": "on"
+    }
+  }
+}

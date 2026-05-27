@@ -41,15 +41,12 @@ async def create_session(
     )
 
 
-async def get_current_session(
-    db: AsyncSession = Depends(get_db),
-    myst_session: str | None = Cookie(default=None),
-) -> Session:
+async def _lookup_session(
+    db: AsyncSession,
+    myst_session: str | None,
+) -> Session | None:
     if not myst_session:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not signed in",
-        )
+        return None
     token_hash = hashlib.sha256(myst_session.encode()).hexdigest()
     now = datetime.now(UTC)
     stmt = (
@@ -64,14 +61,31 @@ async def get_current_session(
     result = await db.execute(stmt)
     sess = result.scalar_one_or_none()
     if sess is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session invalid or expired",
-        )
+        return None
     sess.last_seen_at = now
     await db.commit()
     await db.refresh(sess, attribute_names=["user"])
     return sess
+
+
+async def get_current_session(
+    db: AsyncSession = Depends(get_db),
+    myst_session: str | None = Cookie(default=None),
+) -> Session:
+    sess = await _lookup_session(db, myst_session)
+    if sess is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not signed in",
+        )
+    return sess
+
+
+async def get_optional_session(
+    db: AsyncSession = Depends(get_db),
+    myst_session: str | None = Cookie(default=None),
+) -> Session | None:
+    return await _lookup_session(db, myst_session)
 
 
 async def revoke_session(db: AsyncSession, response: Response, myst_session: str | None) -> None:

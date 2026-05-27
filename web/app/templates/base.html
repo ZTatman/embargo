@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}Myst{% endblock %}
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/output.css" />
+    <script src="https://unpkg.com/htmx.org@2"></script>
+  </head>
+  <body class="min-h-screen bg-background text-sm text-foreground antialiased">
+    <header class="border-b-2 border-border bg-card">
+      <div class="flex items-center justify-between px-4 py-3 mx-auto max-w-7xl sm:px-8">
+        <a href="/"
+           class="flex items-center gap-2 text-base font-semibold tracking-normal transition text-foreground hover:text-primary">
+          <span class="grid text-xs font-semibold border rounded-md size-7 place-items-center border-primary/20 bg-primary text-primary-foreground">M</span>
+          <span>Myst</span>
+        </a>
+        <nav class="flex items-center gap-2">
+          {% if user %}
+            <a href="/dashboard" class="btn btn-sm btn-nav">Dashboard</a>
+            <a href="/auth/logout" class="btn btn-sm btn-secondary">Logout</a>
+          {% else %}
+            <a href="/auth/login/forgejo" class="btn btn-sm btn-primary">
+              <img src="/static/img/forgejo-logo.svg"
+                   alt=""
+                   width="16"
+                   height="16"
+                   class="size-4 shrink-0 brightness-0 invert dark:invert-0"
+                   aria-hidden="true" />
+              <span>Sign in with Forgejo</span>
+            </a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+    <main class="px-4 py-8 mx-auto max-w-7xl sm:px-8">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
