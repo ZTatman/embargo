@@ -26,7 +26,7 @@ async def find_or_create_user(
     """Find or create a user based on the given provider and identity details."""
 
     # Create a Fernet instance for encrypting tokens if a key is available
-    fernet = fernet_from_encryption_key(settings.oauth_token_encryption_key)
+    fernet = fernet_from_encryption_key(settings.token_encryption_key)
 
     # Query the database for an existing identity
     result = await db.execute(

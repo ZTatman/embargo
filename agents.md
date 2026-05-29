@@ -82,7 +82,7 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 
 ### crypto.py decrypt functions kept proactively
 **Area:** web/app/auth/crypto.py
-**Obstacle:** CodeRabbit flagged missing decryption functions and key validation. Added `decrypt_oauth_token`/`decrypt_optional` + key format validation in `fernet_from_encryption_key`.
+**Obstacle:** CodeRabbit flagged missing decryption functions and key validation. Added `decrypt_token`/`decrypt_optional` + key format validation in `fernet_from_encryption_key`.
 **Solution:** Added the functions even though no consumer exists yet. They will be used for PAT decryption in share link flow.
 **Preference:** Keep dead code if it's small, symmetric (`encrypt`/`decrypt`), and has an obvious future consumer.
 

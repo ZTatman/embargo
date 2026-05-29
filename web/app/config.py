@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import ClassVar
 
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -18,9 +19,9 @@ class Settings(BaseSettings):
     # Public Myst base URL for OAuth redirect_uri (no trailing slash). If empty, Request.base_url is used.
     myst_public_base_url: str = ""
     # URL-safe base64 Fernet key (see `cryptography.fernet.Fernet.generate_key()`). Required to persist OAuth tokens and user PATs.
-    oauth_token_encryption_key: SecretStr = SecretStr("")
+    token_encryption_key: SecretStr = SecretStr("")
 
-    model_config = SettingsConfigDict(env_file=str(env_file))
+    model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(env_file=str(env_file))
 
 
 @lru_cache
