@@ -1,125 +1,109 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — Myst{% endblock %}
 {% block content %}
-  <div class="flex flex-col gap-6">
-    <section class="flex flex-col justify-between gap-4 pb-6 border-b border-border sm:flex-row sm:items-end">
-      <div>
-        <h1 class="mt-2 text-3xl font-semibold leading-10 tracking-normal text-foreground">Dashboard</h1>
-        <p class="mt-1 text-sm text-muted-foreground">Welcome, {{ user.display_name or user.email }}.</p>
-      </div>
-      <a href="/links/create" class="btn btn-primary w-fit">Create share link</a>
-    </section>
-    <section class="grid gap-4 md:grid-cols-3">
-      <div class="p-4 card">
-        <p class="section-header-subtle">Active links</p>
-        <p class="mt-3 text-2xl font-semibold text-foreground">0</p>
-        <p class="mt-2 text-xs text-muted-foreground">No repository snapshots published yet.</p>
-      </div>
-      <div class="p-4 card">
-        <p class="section-header-subtle">Default expiry</p>
-        <p class="mt-3 text-2xl font-semibold text-foreground">7 days</p>
-        <p class="mt-2 text-xs text-muted-foreground">Applied to newly created links.</p>
-      </div>
-      <div class="p-4 card">
-        <p class="section-header-subtle">Audit events</p>
-        <p class="mt-3 text-2xl font-semibold text-foreground">0</p>
-        <p class="mt-2 text-xs text-muted-foreground">Viewer activity will appear here.</p>
-      </div>
-    </section>
-    <div id="forgejo-access-token" class="space-y-3 scroll-mt-6">
-      <div>
-        {% if pat_registered %}
-          <div class="mt-3 rounded-md border-l-4 border-success bg-success-muted px-4 py-3 text-sm font-semibold text-success-foreground"
-               role="status">Forgejo access token registered.</div>
-        {% else %}
-          <h2 class="text-base font-semibold text-foreground">Forgejo access token</h2>
-          <p class="mt-2 text-sm text-muted-foreground">
-            Register a <code class="rounded-sm bg-secondary px-1.5 py-0.5 text-primary">read:repository</code>-scoped PAT
-            to enable share link viewing.
-          </p>
-          <section class="card">
-            <form id="pat-form"
-                  method="post"
-                  action="/dashboard/pat"
-                  novalidate
-                  class="px-4 py-4">
-              <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-                <div>
-                  <label for="pat" class="section-header-subtle">Forgejo access token</label>
-                  <input type="text"
-                         id="pat"
-                         name="pat"
-                         class="block w-full mt-2 input-mono"
-                         placeholder="ad8j3..."
-                         aria-describedby="pat-error"
-                         aria-invalid="false"
-                         required />
-                </div>
-                <button type="submit" class="btn btn-primary">Register</button>
-              </div>
-              <div class="mt-2">
-                <p id="pat-error" class="input-error hidden">A Forgejo token is required.</p>
-              </div>
-            </form>
-          </section>
-        {% endif %}
-      </div>
+<div class="flex flex-col gap-6">
+  <section class="flex flex-col justify-between gap-4 pb-6 border-b border-border sm:flex-row sm:items-end">
+    <div>
+      <h1 class="mt-2 text-3xl font-semibold leading-10 tracking-normal">Welcome,</h1>
+      <p class=" text-2xl text-muted-foreground">{{ user.display_name or user.email }}.</p>
     </div>
-    <div class="space-y-3">
-      <div>
-        <h2 class="text-base font-semibold text-foreground">Share links</h2>
-        <p class="mt-2 text-sm text-muted-foreground">Repository snapshots published from this account.</p>
-      </div>
-      <section class="card">
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-[720px] text-left text-sm">
-            <thead class="bg-muted text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-              <tr>
-                <th class="px-4 py-3">Repository</th>
-                <th class="px-4 py-3">Commit</th>
-                <th class="px-4 py-3">Status</th>
-                <th class="px-4 py-3">Views</th>
-                <th class="px-4 py-3">Expires</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-border-subtle">
-              <tr class="text-muted-foreground text-center">
-                <td class="px-4 py-5" colspan="5">You have not created any share links yet.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+    <a href="/links/create" class="btn btn-primary w-fit">Create share link</a>
+  </section>
+  <section class="grid gap-4 md:grid-cols-3">
+    <div class="p-4 card">
+      <p class="section-header-subtle">Active links</p>
+      <p class="mt-3 text-2xl font-semibold text-foreground">0</p>
+      <p class="mt-2 text-xs text-muted-foreground">No repository snapshots published yet.</p>
     </div>
+    <div class="p-4 card">
+      <p class="section-header-subtle">Default expiry</p>
+      <p class="mt-3 text-2xl font-semibold text-foreground">7 days</p>
+      <p class="mt-2 text-xs text-muted-foreground">Applied to newly created links.</p>
+    </div>
+    <div class="p-4 card">
+      <p class="section-header-subtle">Audit events</p>
+      <p class="mt-3 text-2xl font-semibold text-foreground">0</p>
+      <p class="mt-2 text-xs text-muted-foreground">Viewer activity will appear here.</p>
+    </div>
+  </section>
+  <div id="forgejo-access-token">
+    {% if pat_registered %}
+    <div
+      class="mt-3 rounded-md border-l-4 border-success bg-success-muted px-4 py-3 text-sm font-semibold text-success-foreground"
+      role="status">Forgejo access token registered.</div>
+    {% else %}
+    <h2 class="text-base font-semibold">Forgejo access token</h2>
+    <p class="mt-2 text-sm text-muted-foreground">
+      Register a <code class="rounded-sm bg-secondary px-1.5 py-0.5 text-primary">read:repository</code>-scoped PAT
+      to enable share link viewing.
+    </p>
+    <form id="pat-form" class="mt-4" method="post" action="/dashboard/pat" novalidate>
+      <div class="grid gap-2 sm:gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+        <input type="text" id="pat" name="pat" class="block w-full input-mono" placeholder="ad8j3..."
+          aria-describedby="pat-error" aria-invalid="false" required />
+        <button type="submit" class="btn btn-sm btn-primary self-center">Register</button>
+      </div>
+      <div class="mt-2">
+        <p id="pat-error" class="input-error hidden">A Forgejo token is required.</p>
+      </div>
+    </form>
+    {% endif %}
   </div>
-  <script>
-    (() => {
-      const form = document.getElementById("pat-form");
-      const input = document.getElementById("pat");
-      const error = document.getElementById("pat-error");
+  <div class="space-y-3">
+    <div>
+      <h2 class="text-base font-semibold">Share links</h2>
+      <p class="mt-2 text-sm text-muted-foreground">Repository snapshots published from this account.</p>
+    </div>
+    <section class="card">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[720px] text-left text-sm">
+          <thead class="bg-muted text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+            <tr>
+              <th class="px-4 py-3">Repository</th>
+              <th class="px-4 py-3">Commit</th>
+              <th class="px-4 py-3">Status</th>
+              <th class="px-4 py-3">Views</th>
+              <th class="px-4 py-3">Expires</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle">
+            <tr class="text-muted-foreground text-center">
+              <td class="px-4 py-5" colspan="5">You have not created any share links yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+  (() => {
+    const form = document.getElementById("pat-form");
+    const input = document.getElementById("pat");
+    const error = document.getElementById("pat-error");
 
-      if (!form || !input || !error) return;
+    if (!form || !input || !error) return;
 
-      const showError = () => {
-        input.setAttribute("aria-invalid", "true");
-        input.classList.add("border-danger", "focus:border-danger", "focus:ring-danger-muted");
-        error.classList.remove("hidden");
-        input.focus();
-      };
+    const showError = () => {
+      input.setAttribute("aria-invalid", "true");
+      input.classList.add("border-danger", "focus:border-danger", "focus:ring-danger-muted");
+      error.classList.remove("hidden");
+      input.focus();
+    };
 
-      const clearError = () => {
-        input.setAttribute("aria-invalid", "false");
-        input.classList.remove("border-danger", "focus:border-danger", "focus:ring-danger-muted");
-        error.classList.add("hidden");
-      };
+    const clearError = () => {
+      input.setAttribute("aria-invalid", "false");
+      input.classList.remove("border-danger", "focus:border-danger", "focus:ring-danger-muted");
+      error.classList.add("hidden");
+    };
 
-      form.addEventListener("submit", (event) => {
-        if (input.value.trim()) return;
-        event.preventDefault();
-        showError();
-      });
+    form.addEventListener("submit", (event) => {
+      if (input.value.trim()) return;
+      event.preventDefault();
+      showError();
+    });
 
-      input.addEventListener("input", clearError);
-    })();
-  </script>
+    input.addEventListener("input", clearError);
+  })();
+</script>
 {% endblock %}
