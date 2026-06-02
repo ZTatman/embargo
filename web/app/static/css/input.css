@@ -3,7 +3,6 @@
 @theme {
     --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-    --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
 
     --color-background: #f8f8f6;
     --color-foreground: #17191c;
@@ -70,9 +69,9 @@
     --color-accent: #2f2728;
     --color-accent-foreground: #f7f2e8;
 
-    --color-primary: #f7f2e8;
-    --color-primary-foreground: #17191c;
-    --color-primary-hover: #fffdf8;
+    --color-primary: #2a2d31;
+    --color-primary-foreground: #f7f2e8;
+    --color-primary-hover: #17191c;
     --color-primary-muted: rgb(247 242 232 / 14%);
 
     --color-secondary: #282b30;
@@ -161,12 +160,66 @@
         @apply bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground;
     }
 
-    /* .btn-underline {
-        @apply bg-transparent text-base uppercase leading-5 tracking-[0.05em] text-[#294ba5] hover:underline hover:text-[#26479c] hover:underline-offset-4 hover:decoration-4 font-semibold;
-    } */
+    .app-header {
+        position: relative;
+        z-index: 10;
+        background: lab(0% 0 0);
+        border-bottom: 0;
+        box-shadow: none;
+    }
 
-    .section-header-primary {
-        @apply text-xs font-semibold uppercase tracking-[0.05em] text-primary;
+    .app-header a,
+    .app-header button,
+    .app-header nav svg {
+        color: #f7f2e8;
+        stroke: #f7f2e8;
+    }
+
+    .app-header .brand-link svg {
+        stroke: none;
+    }
+
+    .app-header .brand-link svg path[fill="#17191C"] {
+        fill: #f7f2e8;
+    }
+
+    .app-header .btn-borderless {
+        color: #f7f2e8;
+    }
+
+    .app-header .btn-borderless:hover {
+        background: rgb(247 242 232 / 10%);
+        color: #fffdf8;
+    }
+
+    .app-header .btn-secondary {
+        background: rgb(247 242 232 / 8%);
+        border-color: rgb(247 242 232 / 18%);
+        color: #f7f2e8;
+    }
+
+    .app-header .btn-secondary:hover {
+        background: rgb(247 242 232 / 14%);
+        border-color: rgb(247 242 232 / 28%);
+        color: #fffdf8;
+    }
+
+    .landing-page {
+        background: #17191c;
+    }
+
+    .brand-link svg {
+        @apply shrink-0;
+        stroke: none;
+    }
+
+    .brand-link svg:last-child {
+        width: 5.25rem;
+        height: auto;
+    }
+
+    .dark .brand-link svg path[fill="#17191C"] {
+        fill: var(--color-foreground);
     }
 
     .section-header-subtle {
@@ -220,14 +273,5 @@
 
     .input-error {
         @apply text-sm font-medium text-danger-foreground;
-    }
-}
-
-@layer utilities {
-    .firebreak-text {
-        @apply font-black tracking-tight normal-case;
-        font-family: var(--font-inter), sans-serif;
-        /* Use 900 for Black, or 800 for Extra Bold */
-        /* Tightens the spacing like the logo */
     }
 }
