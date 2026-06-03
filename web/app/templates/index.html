@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Firebreak — protect your code from scraping{% endblock %}
 {% block body_class %}landing-page{% endblock %}
+{% block main_class %}{% endblock %}
 {% block content %}
-  <section class="relative left-1/2 right-1/2 -mx-[50vw] -mt-8 -mb-8 flex min-h-[calc(100dvh-4.25rem)] w-screen items-center justify-center overflow-hidden bg-[#17191c] px-6 py-20 text-center text-[#f7f2e8]">
+  <section class="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-[#17191c] px-6 py-20 text-center text-[#f7f2e8]">
     <video class="absolute inset-0 h-full w-full object-cover"
            autoplay
            muted
@@ -45,6 +46,10 @@
           </a>
         {% endif %}
       </div>
+      <a href="/setup"
+         class="mt-5 text-xs text-[#f7f2e8]/30 hover:text-[#f7f2e8]/60 hover:underline decoration-1 underline-offset-4 transition">
+        Reconfigure Forgejo connection
+      </a>
     </div>
   </section>
 {% endblock %}

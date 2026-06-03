@@ -116,6 +116,12 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Solution/Workaround:** Use a real video-frame poster image (`firebreak-hero-poster.jpg`) or omit `poster`; do not use logo assets as full-bleed video posters.
 **Preference:** Keep logo sizing in the logo `<img>` and use a frame still for video loading states.
 
+### POST forms lack CSRF tokens
+**Area:** web/app/routers/setup.py, web/app/routers/settings.py, web/app/templates/setup.html, web/app/templates/settings.html
+**Obstacle:** All state-changing forms (`/setup`, `/settings/pat`, `/settings/pat/delete`) use plain POST with no CSRF token. SameSite=Lax on the session cookie mitigates most cross-origin attacks, but does not fully cover same-site subdomain scenarios.
+**Solution/Workaround:** Deferred. Low practical risk since Firebreak runs behind a VPN. Add server-generated CSRF tokens (hidden form field + server-side check) before exposing the app to the public internet.
+**Preference:** Use a FastAPI CSRF middleware or manual double-submit cookie pattern when addressing this.
+
 ### Firebreak UI is currently dark-only
 **Area:** web/app/templates/base.html, web/app/static/css/input.css
 **Obstacle:** Theme switching and persisted localStorage theme state conflicted with the current Firebreak brand pass, especially on the cinematic landing page.

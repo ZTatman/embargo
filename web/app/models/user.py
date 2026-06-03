@@ -23,7 +23,12 @@ class User(Base):
     display_name: Mapped[str | None] = mapped_column(String, nullable=True)
     email: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
     pat_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
+    pat_registered_at: Mapped[datetime | None] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    @property
+    def has_pat(self) -> bool:
+        return self.pat_encrypted is not None
 
     identities: Mapped[list[LinkedIdentity]] = relationship(
         back_populates="user",

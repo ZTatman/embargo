@@ -14,7 +14,7 @@ from sqlalchemy.orm import selectinload
 from app.deps import get_db
 from app.models.session import Session
 
-SESSION_COOKIE = "myst_session"
+SESSION_COOKIE = "firebreak_session"
 SESSION_DURATION_DAYS = 7
 
 
@@ -48,19 +48,15 @@ async def create_session(
     )
 
 
-async def _lookup_session(
+async def lookup_session(
     db: AsyncSession,
-    myst_session: str | None,
+    firebreak_session: str | None,
 ) -> Session | None:
     """Return the active session for a raw cookie token, if one exists."""
 
-    # Missing cookie means anonymous request. Callers decide whether anonymous is
-    # acceptable with get_optional_session or should become a 401.
-    if not myst_session:
+    if not firebreak_session:
         return None
-    # Match the incoming cookie by hashing it the same way create_session did.
-    # Only active, non-expired sessions are accepted.
-    token_hash = hashlib.sha256(myst_session.encode()).hexdigest()
+    token_hash = hashlib.sha256(firebreak_session.encode()).hexdigest()
     now = datetime.now(UTC)
     stmt = (
         select(Session)
@@ -85,12 +81,11 @@ async def _lookup_session(
 
 async def get_current_session(
     db: Annotated[AsyncSession, Depends(get_db)],
-    myst_session: Annotated[str | None, Cookie()] = None,
+    firebreak_session: Annotated[str | None, Cookie()] = None,
 ) -> Session:
     """FastAPI dependency that requires a valid signed-in session."""
 
-    # Use this dependency on routes that require a signed-in user.
-    sess = await _lookup_session(db, myst_session)
+    sess = await lookup_session(db, firebreak_session)
     if sess is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -101,37 +96,28 @@ async def get_current_session(
 
 async def get_optional_session(
     db: Annotated[AsyncSession, Depends(get_db)],
-    myst_session: Annotated[str | None, Cookie()] = None,
+    firebreak_session: Annotated[str | None, Cookie()] = None,
 ) -> Session | None:
-    """FastAPI dependency that returns the current session when available. Used on pages that can render differently for anonymous and signed-in users."""
+    """FastAPI dependency that returns the current session when available."""
 
-    return await _lookup_session(db, myst_session)
+    return await lookup_session(db, firebreak_session)
 
 
-async def revoke_session(db: AsyncSession, response: Response, myst_session: str | None) -> None:
+async def revoke_session(db: AsyncSession, response: Response, firebreak_session: str | None) -> None:
     """Delete the browser cookie and mark the matching session as revoked."""
 
-    # Always ask the browser to delete its cookie, even if the DB row is already
-    # missing or revoked.
     response.delete_cookie(
         key=SESSION_COOKIE,
         path="/",
         samesite="lax",
         httponly=True,
     )
-    if not myst_session:
+    if not firebreak_session:
         return
-    # Revoke by hash for the same reason we store sessions by hash: the raw
-    # cookie token should only exist in the browser.
-    token_hash = hashlib.sha256(myst_session.encode()).hexdigest()
+    token_hash = hashlib.sha256(firebreak_session.encode()).hexdigest()
     result = await db.execute(
         update(Session)
         .where(Session.token_hash == token_hash, Session.revoked_at.is_(None))
         .values(revoked_at=datetime.now(UTC))
     )
     await db.commit()
-
-    # Bypasses the strict static type checking check safely
-    rowcount = getattr(result, "rowcount", 0)
-    if rowcount == 0:
-        pass

@@ -204,6 +204,10 @@
         color: #fffdf8;
     }
 
+    .landing-page .app-header {
+        display: none;
+    }
+
     .landing-page {
         background: #17191c;
     }
