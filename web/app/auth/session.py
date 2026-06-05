@@ -103,7 +103,9 @@ async def get_optional_session(
     return await lookup_session(db, firebreak_session)
 
 
-async def revoke_session(db: AsyncSession, response: Response, firebreak_session: str | None) -> None:
+async def revoke_session(
+    db: AsyncSession, response: Response, firebreak_session: str | None
+) -> None:
     """Delete the browser cookie and mark the matching session as revoked."""
 
     response.delete_cookie(

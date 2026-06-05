@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, Form, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
+from starlette.responses import Response
 from sqlalchemy import func as sql_func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,7 +33,7 @@ async def _require_auth_if_configured(
         return
 
     # If no users exist, allow access — the setup token still protects POST
-    user_count = await db.scalar(select(sql_func.count()).select_from(User))
+    user_count = await db.scalar(select(sql_func.count()).select_from(User)) or 0
     if user_count == 0:
         return
 
@@ -44,16 +45,17 @@ async def _require_auth_if_configured(
         )
 
 
-@router.get("", dependencies=[Depends(_require_auth_if_configured)], response_class=HTMLResponse)
-async def setup_page(request: Request, db: Annotated[AsyncSession, Depends(get_db)]) -> HTMLResponse:
+@router.get("", dependencies=[Depends(_require_auth_if_configured)])
+async def setup_page(
+    request: Request, db: Annotated[AsyncSession, Depends(get_db)]
+) -> Response:
     """Render the setup wizard. Pre-fills fields when reconfiguring."""
     existing = request.app.state.app_settings
-    user_count = await db.scalar(select(sql_func.count()).select_from(User))
+    user_count = await db.scalar(select(sql_func.count()).select_from(User)) or 0
     has_users = user_count > 0
-    public_base = (
-        (existing.firebreak_public_base_url if existing else "")
-        or str(request.base_url).rstrip("/")
-    )
+    public_base = (existing.firebreak_public_base_url if existing else "") or str(
+        request.base_url
+    ).rstrip("/")
     ctx = {
         "reconfiguring": existing is not None and has_users,
         "forgejo_base_url": existing.forgejo_base_url if existing else "",
@@ -75,7 +77,7 @@ async def setup_submit(
     setup_token: Annotated[str, Form()] = "",
 ) -> RedirectResponse:
     """Process the setup wizard — creates or updates Forgejo settings."""
-    user_count = await db.scalar(select(sql_func.count()).select_from(User))
+    user_count = await db.scalar(select(sql_func.count()).select_from(User)) or 0
     has_users = user_count > 0
     is_reconfiguring = request.app.state.app_settings is not None and has_users
 

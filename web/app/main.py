@@ -4,9 +4,11 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.responses import Response
 from sqlalchemy import func as sql_func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -86,8 +88,10 @@ ERROR_TITLES = {
 }
 
 
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException) -> HTMLResponse | JSONResponse:
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(
+    request: Request, exc: StarletteHTTPException
+) -> Response:
     """Render a styled error page for browser requests, JSON for API clients."""
     accept = request.headers.get("accept", "")
     if "text/html" in accept:
@@ -107,7 +111,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> HTMLRe
 @app.get("/", response_class=HTMLResponse)
 async def root(
     request: Request, sess: Annotated[UserBrowserSession | None, Depends(get_optional_session)]
-) -> HTMLResponse:
+) -> Response:
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -118,7 +122,7 @@ async def root(
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(
     request: Request, sess: Annotated[UserBrowserSession, Depends(get_current_session)]
-) -> HTMLResponse:
+) -> Response:
     return templates.TemplateResponse(
         request,
         "dashboard.html",

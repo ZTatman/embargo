@@ -5,6 +5,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
+from starlette.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.crypto import encrypt_optional
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/settings", tags=["settings"])
 async def settings_page(
     request: Request,
     sess: Annotated[UserBrowserSession, Depends(get_current_session)],
-) -> HTMLResponse:
+) -> Response:
     return templates.TemplateResponse(
         request,
         "settings.html",

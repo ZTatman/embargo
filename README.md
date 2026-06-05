@@ -62,7 +62,7 @@ uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_
 
 Add the output to your `.env` file (or your deployment platform's environment variables):
 
-```
+```bash
 TOKEN_ENCRYPTION_KEY=your-generated-key-here
 ```
 
