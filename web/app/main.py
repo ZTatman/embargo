@@ -1,11 +1,13 @@
+import logging
+import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select
+from sqlalchemy import func as sql_func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app import models as _models  # noqa: F401 - register ORM tables on metadata
@@ -37,14 +39,29 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
 
     async with app.state.db_session() as db:
+        from app.models.user import User
+
         result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
         row = result.scalar_one_or_none()
-        if row:
-            app.state.setup_complete = True
-            app.state.app_settings = row
+        user_count = await db.scalar(select(sql_func.count()).select_from(User))
+
+        app.state.app_settings = row
+
+        # Generate a setup token whenever no users exist yet — whether it's
+        # a fresh install or a retry after bad OAuth config.
+        if not user_count:
+            app.state.setup_token = secrets.token_urlsafe(32)
+            logger = logging.getLogger("firebreak")
+            logger.warning(
+                "\n"
+                "╔══════════════════════════════════════════════════════════╗\n"
+                "║  SETUP TOKEN (paste this into the setup wizard):        ║\n"
+                "║  %-54s  ║\n"
+                "╚══════════════════════════════════════════════════════════╝",
+                app.state.setup_token,
+            )
         else:
-            app.state.setup_complete = False
-            app.state.app_settings = None
+            app.state.setup_token = None
 
     yield
     await engine.dispose()
@@ -58,6 +75,33 @@ app.include_router(auth.router)
 app.include_router(links.router)
 app.include_router(settings.router)
 app.include_router(setup.router)
+
+ERROR_TITLES = {
+    400: "Bad Request",
+    401: "Unauthorized",
+    403: "Forbidden",
+    404: "Not Found",
+    500: "Internal Server Error",
+    503: "Service Unavailable",
+}
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> HTMLResponse | JSONResponse:
+    """Render a styled error page for browser requests, JSON for API clients."""
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        return templates.TemplateResponse(
+            request,
+            "error.html",
+            {
+                "status_code": exc.status_code,
+                "title": ERROR_TITLES.get(exc.status_code, "Error"),
+                "detail": exc.detail,
+            },
+            status_code=exc.status_code,
+        )
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 
 
 @app.get("/", response_class=HTMLResponse)

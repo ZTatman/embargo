@@ -15,7 +15,8 @@ def fernet_from_encryption_key(key: SecretStr) -> Fernet | None:
     except Exception as e:
         msg = (
             f"Invalid TOKEN_ENCRYPTION_KEY: {e}. "
-            "Generate a valid key with cryptography.fernet.Fernet.generate_key().decode()"
+            "Generate a valid key with: uv run python -c "
+            "'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
         )
         raise ValueError(msg) from e
 
@@ -29,8 +30,8 @@ def encrypt_optional(fernet: Fernet | None, raw_token: str | None) -> str | None
         return None
     if fernet is None:
         msg = (
-            "Token encryption is not configured: set TOKEN_ENCRYPTION_KEY "
-            "to the output of cryptography.fernet.Fernet.generate_key().decode()"
+            "Token encryption is not configured. "
+            "Set TOKEN_ENCRYPTION_KEY in your .env file or deployment environment."
         )
         raise ValueError(msg)
     return encrypt_token(fernet, raw_token)
@@ -51,8 +52,8 @@ def decrypt_optional(fernet: Fernet | None, encrypted_token: str | None) -> str 
         return None
     if fernet is None:
         msg = (
-            "Token encryption is not configured: set TOKEN_ENCRYPTION_KEY "
-            "to the output of cryptography.fernet.Fernet.generate_key().decode()"
+            "Token encryption is not configured. "
+            "Set TOKEN_ENCRYPTION_KEY in your .env file or deployment environment."
         )
         raise ValueError(msg)
     return decrypt_token(fernet, encrypted_token)

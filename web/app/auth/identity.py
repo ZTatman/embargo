@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.auth.crypto import encrypt_optional
+from app.config import get_fernet
 from app.models.app_settings import AppSettings
 from app.models.user import LinkedIdentity, User
 
@@ -25,7 +26,7 @@ async def find_or_create_user(
 ) -> User:
     """Find or create a user based on the given provider and identity details."""
 
-    fernet = app_settings.get_fernet()
+    fernet = get_fernet()
 
     result = await db.execute(
         select(LinkedIdentity)

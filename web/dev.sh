@@ -3,8 +3,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-export DATABASE_URL="postgresql+asyncpg://myst:myst@localhost:5432/myst_db"
-export MYST_PUBLIC_BASE_URL="http://localhost:8000"
+export DATABASE_URL="postgresql+asyncpg://firebreak:firebreak@localhost:5432/firebreak_db"
+export FIREBREAK_PUBLIC_BASE_URL="http://localhost:8000"
 
 echo "Starting local Postgres and Adminer..."
 docker compose -f ../docker-compose.yml up -d db adminer
@@ -12,10 +12,10 @@ docker compose -f ../docker-compose.yml up -d db adminer
 echo "Building Tailwind CSS..."
 ./tailwindcss -i ./app/static/css/input.css -o ./app/static/css/output.css
 
-echo "Starting Myst dev server..."
+echo "Starting Firebreak dev server..."
 echo "  FastAPI: http://localhost:8000"
 echo "  Adminer: http://localhost:8080"
-echo "           PostgreSQL / db / myst / myst / myst_db"
+echo "           PostgreSQL / db / firebreak / firebreak / firebreak_db"
 echo "  CSS:     watching app/static/css/input.css"
 
 ./tailwindcss -i ./app/static/css/input.css -o ./app/static/css/output.css --watch &

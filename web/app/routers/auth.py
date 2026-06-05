@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.crypto import decrypt_token
 from app.auth.identity import find_or_create_user
 from app.auth.session import create_session, revoke_session
-from app.config import get_app_settings
+from app.config import get_app_settings, get_fernet
 from app.deps import get_db
 from app.models.app_settings import AppSettings
 
@@ -126,7 +126,7 @@ def _forgejo_oauth_redirect_uri(request: Request, app_settings: AppSettings) -> 
 
 def _get_oauth_client_secret(app_settings: AppSettings) -> str:
     try:
-        return decrypt_token(app_settings.get_fernet(), app_settings.forgejo_oauth_client_secret_encrypted)
+        return decrypt_token(get_fernet(), app_settings.forgejo_oauth_client_secret_encrypted)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -209,8 +209,11 @@ async def callback_forgejo(
         refresh_token_raw=refresh_plain,
     )
 
-    target = "/dashboard" if user.has_pat else "/settings"
-    redirect = RedirectResponse(target, status_code=status.HTTP_302_FOUND)
+    # Clear setup token on first successful login — setup is proven to work
+    if request.app.state.setup_token is not None:
+        request.app.state.setup_token = None
+
+    redirect = RedirectResponse("/dashboard", status_code=status.HTTP_302_FOUND)
     redirect.delete_cookie("oauth_state")
 
     await create_session(db, redirect, user.id, secure=request.url.scheme == "https")

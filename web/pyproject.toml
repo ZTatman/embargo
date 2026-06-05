@@ -3,9 +3,9 @@ target-version = "py313"
 line-length = 100
 
 [project]
-name = "myst-web"
+name = "firebreak-web"
 version = "0.1.0"
-description = "Myst: FastAPI + HTMX web interface for managing Forgejo repositories"
+description = "Firebreak: FastAPI + HTMX web interface for managing Forgejo repositories"
 requires-python = ">=3.13"
 dependencies = [
     "aiofiles>=24.1.0",

@@ -43,7 +43,7 @@
             <li>
               Set the redirect URI to
               <br />
-              <code class="mt-1 inline-block rounded bg-[#f7f2e8]/8 px-1.5 py-0.5 font-mono text-[10px] text-[#f7f2e8]/60">http://localhost:8000/auth/callback/forgejo</code>
+              <code class="mt-1 inline-block rounded bg-[#f7f2e8]/8 px-1.5 py-0.5 font-mono text-[10px] text-[#f7f2e8]/60">{{ oauth_callback_url }}</code>
             </li>
             <li>
               Copy the <strong class="text-[#f7f2e8]/70">Client ID</strong> and <strong class="text-[#f7f2e8]/70">Client Secret</strong> into the form below
@@ -52,6 +52,23 @@
         </div>
       {% endif %}
       <form method="post" action="/setup" class="space-y-5">
+        {% if not reconfiguring %}
+          <div>
+            <label for="setup_token"
+                   class="block text-xs font-semibold uppercase tracking-[0.05em] text-[#f7f2e8]/50 mb-1.5">
+              Setup Token
+            </label>
+            <input type="password"
+                   id="setup_token"
+                   name="setup_token"
+                   class="block w-full rounded-md border border-[#f7f2e8]/14 bg-[#1f2226] px-3 py-2.5 font-mono text-sm text-[#f7f2e8] placeholder:text-[#f7f2e8]/30 focus:border-[#f7f2e8]/30 focus:outline-none focus:ring-2 focus:ring-[#f7f2e8]/10"
+                   placeholder="Paste the token from your server logs"
+                   required />
+            <p class="mt-1.5 text-xs text-[#f7f2e8]/30">
+              Printed to the server console on first boot.
+            </p>
+          </div>
+        {% endif %}
         <div>
           <label for="forgejo_base_url"
                  class="block text-xs font-semibold uppercase tracking-[0.05em] text-[#f7f2e8]/50 mb-1.5">

@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}{{ status_code }} — Firebreak{% endblock %}
+{% block body_class %}landing-page{% endblock %}
+{% block main_class %}{% endblock %}
+{% block content %}
+  {% if status_code == 401 %}
+    <style>
+      @keyframes creep-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to   { transform: translateX(0);    opacity: 1; }
+      }
+      @keyframes trot {
+        0%, 100% { transform: translateY(0)   rotate(0deg); }
+        25%      { transform: translateY(-3px) rotate(-0.6deg); }
+        75%      { transform: translateY(-3px) rotate(0.6deg); }
+      }
+      @keyframes look-up {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(3deg); }
+      }
+      @keyframes laser-pulse {
+        0%, 100% { opacity: 0.8; box-shadow: 0 0 6px 2px #ff0000, 0 0 16px 4px #ff000066; }
+        50%      { opacity: 1;   box-shadow: 0 0 10px 4px #ff0000, 0 0 30px 8px #ff000088; }
+      }
+      @keyframes btn-hit {
+        0%   { filter: brightness(1); }
+        20%  { filter: brightness(3) drop-shadow(0 0 12px #ff0000); }
+        100% { filter: brightness(1); }
+      }
+      .guard-dog-wrap {
+        animation: creep-in 6s ease-out both;
+        animation-delay: 1.5s;
+      }
+      .guard-dog-trot {
+        animation: trot 0.4s ease-in-out 15;
+        animation-delay: 1.5s;
+      }
+      .guard-dog-look {
+        animation: look-up 0.8s ease-out both;
+        animation-delay: 7.5s;
+        transform-origin: bottom center;
+      }
+      .laser-eye {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #ff0000;
+        animation: laser-pulse 2s ease-in-out infinite;
+        animation-delay: 7.5s;
+        opacity: 0;
+        animation-fill-mode: both;
+      }
+      .laser-eye-left  { top: 22%; left: 40%; }
+      .laser-eye-right { top: 22%; left: 52%; }
+      .laser-beam {
+        position: fixed;
+        height: 2px;
+        background: linear-gradient(90deg, #ff0000, #ff000000);
+        transform-origin: left center;
+        pointer-events: none;
+        z-index: 100;
+        opacity: 0;
+        box-shadow: 0 0 8px 2px #ff0000aa, 0 0 20px 4px #ff000044;
+      }
+      .laser-beam.fire { opacity: 1; transition: opacity 0.05s; }
+      .laser-beam.fade { opacity: 0; transition: opacity 0.4s; }
+      @keyframes rattle {
+        0%, 100% { transform: translate(0, 0); }
+        10%  { transform: translate(-1px, 1px); }
+        20%  { transform: translate(1px, -1px); }
+        30%  { transform: translate(-2px, 0px); }
+        40%  { transform: translate(2px, 1px); }
+        50%  { transform: translate(-1px, -2px); }
+        60%  { transform: translate(2px, 2px); }
+        70%  { transform: translate(-3px, 1px); }
+        80%  { transform: translate(3px, -1px); }
+        90%  { transform: translate(-2px, 2px); }
+      }
+      .btn-zapped {
+        background: #c62030 !important;
+        color: #f7f2e8 !important;
+        box-shadow: 0 0 12px 4px rgba(198, 32, 48, 0.5), 0 0 30px 8px rgba(198, 32, 48, 0.25);
+        animation: rattle 0.15s linear infinite;
+      }
+      #go-home-btn:hover {
+        background: #c62030;
+        color: #f7f2e8;
+      }
+    </style>
+  {% endif %}
+  <section class="relative flex min-h-dvh items-center justify-center overflow-hidden px-6 py-20">
+    <div class="relative z-10 w-full max-w-md text-center">
+      <img src="/static/img/firebreak-brand.svg"
+           alt="Firebreak"
+           width="240"
+           height="268"
+           class="mx-auto mb-8 h-auto w-full max-w-24" />
+      {% if status_code == 401 %}
+        <p class="text-8xl font-bold text-[#c62030]/60 sm:text-9xl">{{ status_code }}</p>
+        <h1 class="mt-4 text-xl font-semibold text-[#f7f2e8]">{{ title }}</h1>
+      {% else %}
+        <p class="text-8xl font-bold text-[#f7f2e8]/20 sm:text-9xl">{{ status_code }}</p>
+        <h1 class="mt-4 text-xl font-semibold text-[#f7f2e8]">{{ title }}</h1>
+      {% endif %}
+      <p class="mt-3 text-sm leading-6 text-[#f7f2e8]/60">{{ detail }}</p>
+      {% if status_code == 401 %}
+        {% set quips = [
+          "This area is protected by Big Tech's finest.",
+          "Your data is safe. His isn't.",
+          "He doesn't bite. He just harvests.",
+          "Move along. Nothing to scrape here.",
+          "Unauthorized. The Zuck abides.",
+          "ACCESS DENIED. Deploying Cuckerberg.",
+        ] %}
+        <p class="mt-2 text-xs italic text-[#f7f2e8]/30">{{ quips | random }}</p>
+      {% endif %}
+      <div class="mt-8">
+        <a href="/" class="btn btn-primary" id="go-home-btn">Go home</a>
+      </div>
+    </div>
+    {% if status_code == 401 %}
+      <div class="guard-dog-wrap pointer-events-none absolute -bottom-4 -right-8 w-44 sm:w-56"
+           aria-hidden="true">
+        <div class="guard-dog-trot">
+          <div class="guard-dog-look">
+            <div class="relative">
+              <img src="/static/img/mark_cuckerberg.png"
+                   alt=""
+                   class="w-full opacity-20 grayscale" />
+              <div class="laser-eye laser-eye-left"></div>
+              <div class="laser-eye laser-eye-right"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </section>
+  {% if status_code == 401 %}
+    <script>
+      console.log('%cUnauthorized access detected. Deploying Cuckerberg.', 'font-size: 16px; color: red;');
+
+      function fireBeam(eye, target) {
+        const eyeRect = eye.getBoundingClientRect();
+        const btnRect = target.getBoundingClientRect();
+        const x1 = eyeRect.left + eyeRect.width / 2;
+        const y1 = eyeRect.top + eyeRect.height / 2;
+        const x2 = btnRect.left + btnRect.width / 2;
+        const y2 = btnRect.top + btnRect.height / 2;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+        const beam = document.createElement('div');
+        beam.className = 'laser-beam';
+        beam.style.left = x1 + 'px';
+        beam.style.top = y1 + 'px';
+        beam.style.width = length + 'px';
+        beam.style.transform = 'rotate(' + angle + 'deg)';
+        document.body.appendChild(beam);
+
+        requestAnimationFrame(() => beam.classList.add('fire'));
+        return beam;
+      }
+
+      const btn = document.getElementById('go-home-btn');
+      let armed = false;
+      if (btn) {
+        setTimeout(() => { armed = true; }, 7500);
+
+        btn.addEventListener('click', (e) => {
+          if (!armed) return;
+          e.preventDefault();
+          const eyes = document.querySelectorAll('.laser-eye');
+          const beams = [];
+          eyes.forEach((eye) => beams.push(fireBeam(eye, btn)));
+          btn.classList.add('btn-zapped');
+
+          // Intensify glow over 2 seconds
+          let start = performance.now();
+          function intensify(now) {
+            const t = Math.min((now - start) / 2000, 1);
+            const spread = 12 + t * 20;
+            const blur = 30 + t * 40;
+            const opacity = 0.5 + t * 0.4;
+            const scale = 1 + t * 0.06;
+            btn.style.boxShadow = `0 0 ${spread}px ${spread/3}px rgba(198,32,48,${opacity}), 0 0 ${blur}px ${blur/3}px rgba(198,32,48,${opacity * 0.5})`;
+            btn.style.scale = scale;
+            if (t < 1) requestAnimationFrame(intensify);
+          }
+          requestAnimationFrame(intensify);
+
+          // Redirect right at peak intensity
+          setTimeout(() => { window.location.href = '/'; }, 2000);
+        });
+      }
+    </script>
+  {% endif %}
+{% endblock %}

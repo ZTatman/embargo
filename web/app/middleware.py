@@ -15,7 +15,7 @@ class SetupRequiredMiddleware(BaseHTTPMiddleware):
         ):
             return await call_next(request)
 
-        if not request.app.state.setup_complete:
+        if request.app.state.app_settings is None:
             if request.headers.get("HX-Request"):
                 response = Response(status_code=200)
                 response.headers["HX-Redirect"] = "/setup"

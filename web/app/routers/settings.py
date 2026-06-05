@@ -9,9 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.crypto import encrypt_optional
 from app.auth.session import get_current_session
-from app.config import get_app_settings
+from app.config import get_fernet
 from app.deps import get_db
-from app.models.app_settings import AppSettings
 from app.models.session import Session as UserBrowserSession
 from app.templating import templates
 
@@ -22,7 +21,6 @@ router = APIRouter(prefix="/settings", tags=["settings"])
 async def settings_page(
     request: Request,
     sess: Annotated[UserBrowserSession, Depends(get_current_session)],
-    app_settings: Annotated[AppSettings, Depends(get_app_settings)],
 ) -> HTMLResponse:
     return templates.TemplateResponse(
         request,
@@ -40,7 +38,6 @@ async def settings_page(
 async def register_pat(
     pat: Annotated[str, Form()],
     db: Annotated[AsyncSession, Depends(get_db)],
-    app_settings: Annotated[AppSettings, Depends(get_app_settings)],
     sess: Annotated[UserBrowserSession, Depends(get_current_session)],
 ) -> RedirectResponse:
     pat = pat.strip()
@@ -50,7 +47,7 @@ async def register_pat(
             detail="Forgejo access token is required.",
         )
 
-    fernet = app_settings.get_fernet()
+    fernet = get_fernet()
     sess.user.pat_encrypted = encrypt_optional(fernet, pat)
     sess.user.pat_registered_at = datetime.now(UTC)
     await db.commit()

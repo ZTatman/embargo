@@ -52,7 +52,21 @@ HTMX provides interactivity (filtering, form submissions) with minimal JavaScrip
 docker compose up -d
 ```
 
-### 2. Run the Setup Wizard
+### 2. Generate an Encryption Key
+
+Firebreak encrypts OAuth tokens and PATs at rest using a Fernet key. Generate one and add it to your environment before running the setup wizard:
+
+```bash
+uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'
+```
+
+Add the output to your `.env` file (or your deployment platform's environment variables):
+
+```
+TOKEN_ENCRYPTION_KEY=your-generated-key-here
+```
+
+### 3. Run the Setup Wizard
 
 Open `http://localhost:8000` in your browser. On first boot, Firebreak redirects to a setup wizard where you configure:
 
@@ -60,13 +74,11 @@ Open `http://localhost:8000` in your browser. On first boot, Firebreak redirects
 - **OAuth credentials** — register an OAuth application in Forgejo first (Settings → Applications → Create OAuth2 Application), then paste the Client ID and Client Secret
 - **Public base URL** (optional) — your production domain for OAuth redirects
 
-The setup wizard auto-generates an encryption key for token storage.
-
-### 3. Sign In and Register Your Token
+### 4. Sign In and Register Your Token
 
 After setup, sign in with your Forgejo account via OAuth. On first login, Firebreak prompts you to register a `read:repository`-scoped Personal Access Token (PAT) to enable share link viewing.
 
-### 4. Alternative Deployments
+### 5. Alternative Deployments
 
 For non-Docker deployments, supply `DATABASE_URL` yourself:
 
