@@ -3,120 +3,29 @@
 {% block body_class %}landing-page{% endblock %}
 {% block main_class %}{% endblock %}
 {% block content %}
-  {% if status_code == 401 %}
-    <style>
-      @keyframes creep-in {
-        from { transform: translateX(100%); opacity: 0; }
-        to   { transform: translateX(0);    opacity: 1; }
-      }
-      @keyframes trot {
-        0%, 100% { transform: translateY(0)   rotate(0deg); }
-        25%      { transform: translateY(-3px) rotate(-0.6deg); }
-        75%      { transform: translateY(-3px) rotate(0.6deg); }
-      }
-      @keyframes look-up {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(3deg); }
-      }
-      @keyframes laser-pulse {
-        0%, 100% { opacity: 0.8; box-shadow: 0 0 6px 2px #ff0000, 0 0 16px 4px #ff000066; }
-        50%      { opacity: 1;   box-shadow: 0 0 10px 4px #ff0000, 0 0 30px 8px #ff000088; }
-      }
-      @keyframes btn-hit {
-        0%   { filter: brightness(1); }
-        20%  { filter: brightness(3) drop-shadow(0 0 12px #ff0000); }
-        100% { filter: brightness(1); }
-      }
-      .guard-dog-wrap {
-        animation: creep-in 6s ease-out both;
-        animation-delay: 1.5s;
-      }
-      .guard-dog-trot {
-        animation: trot 0.4s ease-in-out 15;
-        animation-delay: 1.5s;
-      }
-      .guard-dog-look {
-        animation: look-up 0.8s ease-out both;
-        animation-delay: 7.5s;
-        transform-origin: bottom center;
-      }
-      .laser-eye {
-        position: absolute;
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: #ff0000;
-        animation: laser-pulse 2s ease-in-out infinite;
-        animation-delay: 7.5s;
-        opacity: 0;
-        animation-fill-mode: both;
-      }
-      .laser-eye-left  { inset-block-start: 40px; inset-inline-start: 81px; }
-      .laser-eye-right { inset-block-start: 39px; inset-inline-start: 100px; }
-      .laser-beam {
-        position: fixed;
-        height: 2px;
-        background: linear-gradient(90deg, #ff0000, #ff000000);
-        transform-origin: left center;
-        pointer-events: none;
-        z-index: 100;
-        opacity: 0;
-        box-shadow: 0 0 8px 2px #ff0000aa, 0 0 20px 4px #ff000044;
-      }
-      .laser-beam.fire { opacity: 1; transition: opacity 0.05s; }
-      .laser-beam.fade { opacity: 0; transition: opacity 0.4s; }
-      @keyframes rattle {
-        0%, 100% { transform: translate(0, 0); }
-        10%  { transform: translate(-1px, 1px); }
-        20%  { transform: translate(1px, -1px); }
-        30%  { transform: translate(-2px, 0px); }
-        40%  { transform: translate(2px, 1px); }
-        50%  { transform: translate(-1px, -2px); }
-        60%  { transform: translate(2px, 2px); }
-        70%  { transform: translate(-3px, 1px); }
-        80%  { transform: translate(3px, -1px); }
-        90%  { transform: translate(-2px, 2px); }
-      }
-      .btn-zapped {
-        background: #c62030 !important;
-        color: #f7f2e8 !important;
-        box-shadow: 0 0 12px 4px rgba(198, 32, 48, 0.5), 0 0 30px 8px rgba(198, 32, 48, 0.25);
-        animation: rattle 0.15s linear infinite;
-      }
-      #go-home-btn:hover {
-        background: #c62030;
-        color: #f7f2e8;
-      }
-    </style>
-  {% endif %}
-  <section class="relative flex min-h-dvh items-center justify-center overflow-hidden px-6 py-20">
-    <div class="img-wrapper-[800px] absolute inset-bs-8 opacity-50">
+  <section class="error-shell">
+    <div class="error-backdrop-logo">
       <img src="/static/img/firebreak-logo-red.svg"
            alt="Firebreak"
            width="240"
            height="268" />
     </div>
-    <div class="relative z-10 w-full max-w-md text-center">
-      {% if status_code == 401 %}
-        <p class="text-8xl font-bold text-[#f7f2e8]/20 sm:text-9xl">{{ status_code }}</p>
-        <h1 class="mt-1 text-xl font-semibold text-[#f7f2e8]">{{ title }}</h1>
-      {% else %}
-        <p class="text-8xl font-bold text-[#f7f2e8]/20 sm:text-9xl">{{ status_code }}</p>
-        <h1 class="mt-1 text-xl font-semibold text-[#f7f2e8]">{{ title }}</h1>
-      {% endif %}
-      <p class="mt-4 text-sm leading-6 text-[#f7f2e8]/60">{{ detail }}</p>
+    <div class="error-content">
+      <p class="error-code">{{ status_code }}</p>
+      <h1 class="error-title">{{ title }}</h1>
+      <p class="error-detail">{{ detail }}</p>
       {% if status_code == 401 %}
         {% set quips = [
           "I'm not saying you're a data scraper, but I AM saying that this page is off-limits.",
-          "I'm watching you Wazowski.... ALWAYS watching.",
+          "I'm watching you Wazowski… ALWAYS watching.",
           "He doesn't bite. He just harvests your data.",
           "Move along clanker! Nothing to see here.",
           "Just get out of here you STUPID, DUMB ANIMAL!"
         ] %}
-        <p class="text-xs italic text-[#f7f2e8]/30">{{ quips | random }}</p>
+        <p class="error-quip">{{ quips | random }}</p>
       {% endif %}
       <div class="mt-8">
-        <a href="/" class="btn btn-primary" id="go-home-btn">Go home</a>
+        <a href="/" class="btn-link" id="go-home-btn">Go Home</a>
       </div>
     </div>
     {% if status_code == 401 %}
@@ -138,7 +47,7 @@
   </section>
   {% if status_code == 401 %}
     <script>
-      console.log('%cUnauthorized access detected. Deploying CUCKerberg.', 'font-size: 16px; color: red;');
+      console.log('Unauthorized access detected. Deploying CUCKerberg.');
 
       function fireBeam(eye, target) {
         const eyeRect = eye.getBoundingClientRect();
@@ -185,7 +94,9 @@
             const blur = 30 + t * 40;
             const opacity = 0.5 + t * 0.4;
             const scale = 1 + t * 0.06;
-            btn.style.boxShadow = `0 0 ${spread}px ${spread/3}px rgba(198,32,48,${opacity}), 0 0 ${blur}px ${blur/3}px rgba(198,32,48,${opacity * 0.5})`;
+            const primaryGlow = `color-mix(in oklab, var(--color-brand-red) ${Math.round(opacity * 100)}%, transparent)`;
+            const secondaryGlow = `color-mix(in oklab, var(--color-brand-red) ${Math.round(opacity * 50)}%, transparent)`;
+            btn.style.boxShadow = `0 0 ${spread}px ${spread / 3}px ${primaryGlow}, 0 0 ${blur}px ${blur / 3}px ${secondaryGlow}`;
             btn.style.scale = scale;
             if (t < 1) requestAnimationFrame(intensify);
           }

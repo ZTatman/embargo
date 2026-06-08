@@ -104,6 +104,24 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Solution/Workaround:** Use Tailwind v4 `@theme` tokens with semantic pairs such as `background/foreground`, `card/card-foreground`, `primary/primary-foreground`, `secondary/secondary-foreground`, `border`, `input`, and `ring`. Keep shared component structure in base classes like `.btn`, with variant classes only setting semantic colors.
 **Preference:** Prefer semantic token names over appearance-based names; add dark mode by overriding CSS variables under `.dark`.
 
+### Dark-only Tailwind tokens live at root
+**Area:** web/app/static/css/input.css, web/app/templates/*.html
+**Obstacle:** The Firebreak UI is currently dark-only, but stale light theme tokens and scattered literal palette values made the active design system harder to change safely.
+**Solution/Workaround:** Define Firebreak brand primitives and dark semantic roles in the root Tailwind v4 `@theme`; templates and component classes use token-backed utilities/classes instead of raw theme colors.
+**Preference:** Keep palette values centralized in `@theme`; avoid arbitrary color utilities in templates. Reintroduce light mode only after defining a full paired token set.
+
+### Button hover states belong to variants
+**Area:** web/app/static/css/input.css, web/app/templates/*.html
+**Obstacle:** Buttons mixed shared variants with page-specific hover utilities and ID selectors, causing inconsistent hover colors across pages.
+**Solution/Workaround:** Add explicit variants such as `btn-danger` and `btn-link`; templates should choose the correct variant instead of stacking custom hover color utilities.
+**Preference:** Keep hover behavior in component variants. Use `btn-link` for low-emphasis navigation actions such as returning home from an error page.
+
+### Vercel web guideline fixes should stay template-scoped
+**Area:** web/app/templates/*.html, web/app/static/css/input.css
+**Obstacle:** Vercel Web Interface Guidelines flagged accessibility/theming issues such as missing skip links, missing dark `color-scheme`, non-locale date formatting, form inputs without autocomplete metadata, and motion without reduced-motion handling.
+**Solution/Workaround:** Add global `color-scheme: dark`, keep form metadata in templates, format visible dates with `Intl.DateTimeFormat`, confirm destructive forms client-side, and provide `prefers-reduced-motion` CSS fallbacks.
+**Preference:** Prefer lightweight template/CSS fixes for UI guideline compliance; avoid backend route changes unless the issue requires server state.
+
 ### Header brand SVG inherits unwanted icon styling
 **Area:** web/app/templates/base.html, web/app/templates/index.html, web/app/static/css/input.css
 **Obstacle:** The inline Firebreak header wordmark uses hardcoded SVG fills, and page-level header rules can accidentally apply icon `stroke` styles to the brand SVG. On forced-dark landing headers, the `#17191C` wordmark fill disappears against the obsidian nav.

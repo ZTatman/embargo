@@ -37,18 +37,17 @@
                 <p class="text-sm font-medium text-foreground">Access token</p>
                 <p class="mt-0.5 text-xs text-muted-foreground">
                   {% if pat_registered_at %}
-                    Registered {{ pat_registered_at.strftime("%b %d, %Y") }}
+                    Registered <time datetime="{{ pat_registered_at.isoformat() }}" data-local-date>{{ pat_registered_at.isoformat() }}</time>
                   {% else %}
                     Registered
                   {% endif %}
                 </p>
               </div>
             </div>
-            <form method="post" action="/settings/pat/delete">
-              <button type="submit"
-                      class="btn btn-xs btn-secondary text-danger-foreground hover:bg-danger-muted hover:border-danger-muted">
-                Delete
-              </button>
+            <form method="post"
+                  action="/settings/pat/delete"
+                  data-confirm="Delete this access token? You can register a new token later.">
+              <button type="submit" class="btn btn-xs btn-danger">Delete</button>
             </form>
           </div>
         </div>
@@ -66,14 +65,16 @@
                      id="pat"
                      name="pat"
                      class="block w-full input-mono"
-                     placeholder="Paste new token..."
+                     placeholder="Paste new token…"
                      aria-describedby="pat-error"
                      aria-invalid="false"
+                     autocomplete="off"
+                     spellcheck="false"
                      required />
               <button type="submit" class="btn btn-sm btn-primary self-center">Update</button>
             </div>
             <div class="mt-2">
-              <p id="pat-error" class="input-error hidden">A Forgejo token is required.</p>
+              <p id="pat-error" class="input-error hidden" aria-live="polite">A Forgejo token is required.</p>
             </div>
           </form>
         </details>
@@ -88,14 +89,16 @@
                    id="pat"
                    name="pat"
                    class="block w-full input-mono"
-                   placeholder="ad8j3..."
+                   placeholder="ad8j3…"
                    aria-describedby="pat-error"
                    aria-invalid="false"
+                   autocomplete="off"
+                   spellcheck="false"
                    required />
             <button type="submit" class="btn btn-sm btn-primary self-center">Register</button>
           </div>
           <div class="mt-2">
-            <p id="pat-error" class="input-error hidden">A Forgejo token is required.</p>
+            <p id="pat-error" class="input-error hidden" aria-live="polite">A Forgejo token is required.</p>
           </div>
         </form>
       {% endif %}
@@ -103,6 +106,29 @@
   </div>
   <script>
   (() => {
+    document.querySelectorAll("form[data-confirm]").forEach((confirmForm) => {
+      confirmForm.addEventListener("submit", (event) => {
+        const message = confirmForm.getAttribute("data-confirm");
+        if (message && !window.confirm(message)) {
+          event.preventDefault();
+        }
+      });
+    });
+
+    document.querySelectorAll("time[data-local-date]").forEach((time) => {
+      const value = time.getAttribute("datetime");
+      if (!value) return;
+
+      const date = new Date(value);
+      if (Number.isNaN(date.valueOf())) return;
+
+      time.textContent = new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(date);
+    });
+
     const form = document.getElementById("pat-form");
     const input = document.getElementById("pat");
     const error = document.getElementById("pat-error");

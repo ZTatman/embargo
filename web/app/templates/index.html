@@ -3,8 +3,8 @@
 {% block body_class %}landing-page{% endblock %}
 {% block main_class %}{% endblock %}
 {% block content %}
-  <section class="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-[#17191c] px-6 py-20 text-center text-[#f7f2e8]">
-    <video class="absolute inset-0 h-full w-full object-cover"
+  <section class="hero-section">
+    <video class="hero-video"
            autoplay
            muted
            loop
@@ -14,26 +14,25 @@
            aria-hidden="true">
       <source src="/static/video/firebreak-hero.mp4" type="video/mp4" />
     </video>
-    <div class="absolute inset-0 bg-[#17191c]/65"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0,transparent_30%,rgb(23_25_28_/0.44)_62%,rgb(23_25_28_/0.92)_100%)]">
-    </div>
-    <div class="relative z-10 flex w-full max-w-4xl flex-col items-center">
+    <div class="hero-overlay"></div>
+    <div class="hero-vignette"></div>
+    <div class="hero-content">
       <img src="/static/img/firebreak-brand.svg"
            alt="Firebreak"
            width="240"
            height="268"
-           class="h-auto w-full max-w-36 drop-shadow-[0_14px_34px_rgb(0_0_0_/0.55)] sm:max-w-48 lg:max-w-60" />
-      <p class="mt-8 max-w-2xl text-balance text-base font-medium leading-8 tracking-normal text-[#f7f2e8]/90 drop-shadow-[0_4px_18px_rgb(0_0_0_/0.72)] sm:text-lg sm:leading-9">
+           class="hero-brand" />
+      <p class="hero-tagline">
         <span class="block">Fight Fire with Fire.</span>
         <span class="mt-2 block">Draw a boundary around your code. Let them look, but don't let them scrape.</span>
       </p>
-      <p class="mt-7 max-w-xl rounded-lg border border-[#f7f2e8]/14 bg-[#17191c]/42 px-5 py-4 text-sm leading-6 text-[#f7f2e8]/76 shadow-[0_18px_50px_rgb(0_0_0_/0.24)] backdrop-blur-sm sm:text-[0.9375rem]">
+      <p class="hero-copy-panel">
         Firebreak creates temporary, read-only links to private Forgejo repository snapshots.
         Sign in using Forgejo, register an access token, and control what can be viewed and by whom.
       </p>
       <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
         {% if user %}
-          <a href="/dashboard" class="btn btn-primary">Open dashboard</a>
+          <a href="/dashboard" class="btn btn-primary">Open Dashboard</a>
         {% else %}
           <a href="/auth/login/forgejo" class="btn btn-primary">
             <img src="/static/img/forgejo-logo.svg"
@@ -42,7 +41,7 @@
                  height="16"
                  class="size-4 shrink-0 brightness-0 invert"
                  aria-hidden="true" />
-            <span>Sign in with Forgejo</span>
+            <span>Sign In with Forgejo</span>
           </a>
         {% endif %}
       </div>

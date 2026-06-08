@@ -3,50 +3,48 @@
 {% block body_class %}landing-page{% endblock %}
 {% block main_class %}{% endblock %}
 {% block content %}
-  <section class="flex min-h-dvh items-center justify-center px-6 py-20">
+  <section class="setup-shell">
     <div class="w-full max-w-lg">
       <div class="mb-8 text-center">
         <img src="/static/img/firebreak-brand.svg"
              alt="Firebreak"
              width="240"
              height="268"
-             class="mx-auto h-auto w-full max-w-24" />
-        <h1 class="mt-6 text-2xl font-semibold text-[#f7f2e8]">
-          {{ "Reconfigure" if reconfiguring else "Setup" }}
-        </h1>
+             class="setup-logo" />
+        <h1 class="setup-title">{{ "Reconfigure" if reconfiguring else "Setup" }}</h1>
         {% if reconfiguring %}
-          <p class="mt-2 text-sm leading-6 text-[#f7f2e8]/60">
+          <p class="setup-copy">
             Update your Forgejo OAuth connection. Make sure the OAuth application
             is registered in your Forgejo instance before continuing.
           </p>
         {% else %}
-          <p class="mt-2 text-sm leading-6 text-[#f7f2e8]/60">
+          <p class="setup-copy">
             Connect Firebreak to your Forgejo instance. You'll need to
             <a href="https://forgejo.org/docs/latest/user/oauth2-provider/"
                target="_blank"
                rel="noopener"
-               class="underline underline-offset-2 text-[#f7f2e8]/80 hover:text-[#f7f2e8]">register an OAuth application</a>
+               class="setup-link">register an OAuth application</a>
             in Forgejo first.
           </p>
         {% endif %}
       </div>
       {% if not reconfiguring %}
-        <div class="mb-8 rounded-lg border border-[#f7f2e8]/10 bg-[#1f2226]/60 px-5 py-4 text-xs leading-5 text-[#f7f2e8]/50">
-          <p class="font-medium text-[#f7f2e8]/70 mb-2.5">How to get your OAuth credentials:</p>
+        <div class="setup-help-panel">
+          <p class="setup-help-title">How to get your OAuth credentials:</p>
           <ol class="list-decimal list-inside space-y-1.5">
             <li>
-              In Forgejo, go to <strong class="text-[#f7f2e8]/70">Settings &rarr; Applications</strong>
+              In Forgejo, go to <strong class="setup-strong">Settings &rarr; Applications</strong>
             </li>
             <li>
-              Under <strong class="text-[#f7f2e8]/70">Manage OAuth2 Applications</strong>, create a new app
+              Under <strong class="setup-strong">Manage OAuth2 Applications</strong>, create a new app
             </li>
             <li>
               Set the redirect URI to
               <br />
-              <code class="mt-1 inline-block rounded bg-[#f7f2e8]/8 px-1.5 py-0.5 font-mono text-[10px] text-[#f7f2e8]/60">{{ oauth_callback_url }}</code>
+              <code class="setup-code">{{ oauth_callback_url }}</code>
             </li>
             <li>
-              Copy the <strong class="text-[#f7f2e8]/70">Client ID</strong> and <strong class="text-[#f7f2e8]/70">Client Secret</strong> into the form below
+              Copy the <strong class="setup-strong">Client ID</strong> and <strong class="setup-strong">Client Secret</strong> into the form below
             </li>
           </ol>
         </div>
@@ -54,78 +52,75 @@
       <form method="post" action="/setup" class="space-y-5">
         {% if not reconfiguring %}
           <div>
-            <label for="setup_token"
-                   class="block text-xs font-semibold uppercase tracking-[0.05em] text-[#f7f2e8]/50 mb-1.5">
-              Setup Token
-            </label>
+            <label for="setup_token" class="form-label">Setup Token</label>
             <input type="password"
                    id="setup_token"
                    name="setup_token"
-                   class="block w-full rounded-md border border-[#f7f2e8]/14 bg-[#1f2226] px-3 py-2.5 font-mono text-sm text-[#f7f2e8] placeholder:text-[#f7f2e8]/30 focus:border-[#f7f2e8]/30 focus:outline-none focus:ring-2 focus:ring-[#f7f2e8]/10"
+                   class="form-input form-input-mono"
                    placeholder="Paste the token from your server logs"
+                   autocomplete="off"
+                   spellcheck="false"
                    required />
-            <p class="mt-1.5 text-xs text-[#f7f2e8]/30">Printed to the server console on first boot.</p>
+            <p class="form-hint">Printed to the server console on first boot.</p>
           </div>
         {% endif %}
         <div>
-          <label for="forgejo_base_url"
-                 class="block text-xs font-semibold uppercase tracking-[0.05em] text-[#f7f2e8]/50 mb-1.5">
-            Forgejo Instance URL
-          </label>
+          <label for="forgejo_base_url" class="form-label">Forgejo Instance URL</label>
           <input type="url"
                  id="forgejo_base_url"
                  name="forgejo_base_url"
-                 class="block w-full rounded-md border border-[#f7f2e8]/14 bg-[#1f2226] px-3 py-2.5 text-sm text-[#f7f2e8] placeholder:text-[#f7f2e8]/30 focus:border-[#f7f2e8]/30 focus:outline-none focus:ring-2 focus:ring-[#f7f2e8]/10"
+                 class="form-input"
                  placeholder="https://git.example.com"
+                 autocomplete="off"
                  value="{{ forgejo_base_url }}"
                  required />
         </div>
         <div>
-          <label for="forgejo_oauth_client_id"
-                 class="block text-xs font-semibold uppercase tracking-[0.05em] text-[#f7f2e8]/50 mb-1.5">
-            OAuth Client ID
-          </label>
+          <label for="forgejo_oauth_client_id" class="form-label">OAuth Client ID</label>
           <input type="text"
                  id="forgejo_oauth_client_id"
                  name="forgejo_oauth_client_id"
-                 class="block w-full rounded-md border border-[#f7f2e8]/14 bg-[#1f2226] px-3 py-2.5 font-mono text-sm text-[#f7f2e8] placeholder:text-[#f7f2e8]/30 focus:border-[#f7f2e8]/30 focus:outline-none focus:ring-2 focus:ring-[#f7f2e8]/10"
-                 placeholder="c8ab3315-537d-44f3-..."
+                 class="form-input form-input-mono"
+                 placeholder="c8ab3315-537d-44f3-…"
+                 autocomplete="off"
+                 spellcheck="false"
                  value="{{ forgejo_oauth_client_id }}"
                  required />
         </div>
         <div>
-          <label for="forgejo_oauth_client_secret"
-                 class="block text-xs font-semibold uppercase tracking-[0.05em] text-[#f7f2e8]/50 mb-1.5">
+          <label for="forgejo_oauth_client_secret" class="form-label">
             OAuth Client Secret
             {% if reconfiguring %}
-              <span class="ml-1 normal-case tracking-normal font-normal text-[#f7f2e8]/30">(leave blank to keep current)</span>
+              <span class="form-label-note">(leave blank to keep current)</span>
             {% endif %}
           </label>
           <input type="password"
                  id="forgejo_oauth_client_secret"
                  name="forgejo_oauth_client_secret"
-                 class="block w-full rounded-md border border-[#f7f2e8]/14 bg-[#1f2226] px-3 py-2.5 font-mono text-sm text-[#f7f2e8] placeholder:text-[#f7f2e8]/30 focus:border-[#f7f2e8]/30 focus:outline-none focus:ring-2 focus:ring-[#f7f2e8]/10"
-                 placeholder="gto_wkxxnv4ewa..."
+                 class="form-input form-input-mono"
+                 placeholder="gto_wkxxnv4ewa…"
+                 autocomplete="off"
+                 spellcheck="false"
                  {{ "" if reconfiguring else "required" }} />
         </div>
         <div>
-          <label for="firebreak_public_base_url"
-                 class="block text-xs font-semibold uppercase tracking-[0.05em] text-[#f7f2e8]/50 mb-1.5">
+          <label for="firebreak_public_base_url" class="form-label">
             Public Base URL
-            <span class="ml-1 normal-case tracking-normal font-normal text-[#f7f2e8]/30">(optional)</span>
+            <span class="form-label-note">(optional)</span>
           </label>
           <input type="url"
                  id="firebreak_public_base_url"
                  name="firebreak_public_base_url"
-                 class="block w-full rounded-md border border-[#f7f2e8]/14 bg-[#1f2226] px-3 py-2.5 text-sm text-[#f7f2e8] placeholder:text-[#f7f2e8]/30 focus:border-[#f7f2e8]/30 focus:outline-none focus:ring-2 focus:ring-[#f7f2e8]/10"
+                 class="form-input"
                  placeholder="https://share.example.com"
+                 autocomplete="off"
                  value="{{ firebreak_public_base_url }}" />
-          <p class="mt-1.5 text-xs text-[#f7f2e8]/30">
-            Your production domain for OAuth redirects. Leave blank on localhost &mdash; Firebreak will use <code class="font-mono text-[#f7f2e8]/40">http://localhost:8000</code> automatically.
+          <p class="form-hint">
+            Your production domain for OAuth redirects. Leave blank on localhost &mdash; Firebreak will use <code class="form-hint-code">http://localhost:8000</code> automatically.
           </p>
         </div>
         <button type="submit" class="btn btn-primary w-full mt-2">
-          {{ "Save Forgejo settings" if reconfiguring else "Complete Setup" }}
+          {{ "Save Forgejo Settings" if reconfiguring else "Complete Setup" }}
         </button>
       </form>
     </div>
