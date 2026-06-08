@@ -1,17 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Myst — share Forgejo repositories easily{% endblock %}
+{% block title %}Firebreak — protect your code from scraping{% endblock %}
+{% block body_class %}landing-page{% endblock %}
+{% block main_class %}{% endblock %}
 {% block content %}
-  <section class="grid min-h-[calc(100vh-9rem)] items-center gap-8 py-6 lg:grid-cols-[0.9fr_1.1fr]">
-    <div class="max-w-2xl">
-      <p class="section-header-primary">Secure repository snapshots</p>
-      <h1 class="mt-4 text-4xl font-semibold leading-tight tracking-normal text-foreground sm:text-[3.25rem] sm:leading-[1.05]">
-        Myst
-      </h1>
-      <p class="max-w-xl mt-4 text-base leading-7 text-muted-foreground">
-        Share pinned Forgejo repository snapshots through read-only links with expiration,
-        revocation, and audit visibility built in.
+  <section class="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-[#17191c] px-6 py-20 text-center text-[#f7f2e8]">
+    <video class="absolute inset-0 h-full w-full object-cover"
+           autoplay
+           muted
+           loop
+           playsinline
+           preload="metadata"
+           poster="/static/img/firebreak-hero-poster.jpg"
+           aria-hidden="true">
+      <source src="/static/video/firebreak-hero.mp4" type="video/mp4" />
+    </video>
+    <div class="absolute inset-0 bg-[#17191c]/65"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0,transparent_30%,rgb(23_25_28_/0.44)_62%,rgb(23_25_28_/0.92)_100%)]">
+    </div>
+    <div class="relative z-10 flex w-full max-w-4xl flex-col items-center">
+      <img src="/static/img/firebreak-brand.svg"
+           alt="Firebreak"
+           width="240"
+           height="268"
+           class="h-auto w-full max-w-36 drop-shadow-[0_14px_34px_rgb(0_0_0_/0.55)] sm:max-w-48 lg:max-w-60" />
+      <p class="mt-8 max-w-2xl text-balance text-base font-medium leading-8 tracking-normal text-[#f7f2e8]/90 drop-shadow-[0_4px_18px_rgb(0_0_0_/0.72)] sm:text-lg sm:leading-9">
+        <span class="block">Fight Fire with Fire.</span>
+        <span class="mt-2 block">Draw a boundary around your code. Let them look, but don't let them scrape.</span>
       </p>
-      <div class="flex flex-wrap items-center gap-3 mt-8">
+      <p class="mt-7 max-w-xl rounded-lg border border-[#f7f2e8]/14 bg-[#17191c]/42 px-5 py-4 text-sm leading-6 text-[#f7f2e8]/76 shadow-[0_18px_50px_rgb(0_0_0_/0.24)] backdrop-blur-sm sm:text-[0.9375rem]">
+        Firebreak creates temporary, read-only links to private Forgejo repository snapshots.
+        Sign in using Forgejo, register an access token, and control what can be viewed and by whom.
+      </p>
+      <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
         {% if user %}
           <a href="/dashboard" class="btn btn-primary">Open dashboard</a>
         {% else %}
@@ -20,60 +40,11 @@
                  alt=""
                  width="16"
                  height="16"
-                 class="size-4 shrink-0 brightness-0 invert dark:invert-0"
+                 class="size-4 shrink-0 brightness-0 invert"
                  aria-hidden="true" />
             <span>Sign in with Forgejo</span>
           </a>
         {% endif %}
-        <span class="text-sm text-muted-foreground">Time-limited. Read-only. Auditable.</span>
-      </div>
-    </div>
-    <div class="card rounded-xl">
-      <div class="flex items-center justify-between card-header">
-        <div>
-          <p class="card-header-label">Activity</p>
-          <h2 class="card-header-title">Repository snapshots</h2>
-        </div>
-        <span>
-          <svg xmlns="http://www.w3.org/2000/svg"
-               width="24"
-               height="24"
-               viewBox="0 0 256 256"
-               class="text-muted-foreground"
-               fill="currentColor">
-            <path d="M200,136a8,8,0,0,1-8,8H64a8,8,0,0,1,0-16H192A8,8,0,0,1,200,136Zm32-56H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16Zm-80,96H104a8,8,0,0,0,0,16h48a8,8,0,0,0,0-16Z">
-            </path>
-          </svg>
-        </span>
-      </div>
-      <div>
-        <div class="flex justify-between items-center px-4 py-3 border-b border-border-subtle">
-          <div>
-            <p class="font-mono text-[13px] leading-5 text-foreground">infra/deployment</p>
-            <p class="mt-1 text-xs text-muted-foreground">Pinned commit 9f2a1c8 · expires in 7 days</p>
-          </div>
-          <div class="place-content-center">
-            <span class="self-start badge-success">Active</span>
-          </div>
-        </div>
-        <div class="flex justify-between items-center px-4 py-3 border-b border-border-subtle">
-          <div>
-            <p class="font-mono text-[13px] leading-5 text-foreground">audit/policies</p>
-            <p class="mt-1 text-xs text-muted-foreground">Pinned commit 31e0b77 · revoked yesterday</p>
-          </div>
-          <div class="place-content-center">
-            <span class="self-start badge-danger">Revoked</span>
-          </div>
-        </div>
-        <div class="flex justify-between items-center px-4 py-3 border-b border-border-subtle">
-          <div>
-            <p class="font-mono text-[13px] leading-5 text-foreground">platform/utils</p>
-            <p class="mt-1 text-xs text-muted-foreground">Pinned commit a81dc40 · 14 views</p>
-          </div>
-          <div class="place-content-center">
-            <span class="self-start badge-expired">Expired</span>
-          </div>
-        </div>
       </div>
     </div>
   </section>

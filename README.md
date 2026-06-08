@@ -1,14 +1,14 @@
-# Myst
+# Firebreak
 
-> My stuff, kept private.
+> Fight fire with fire. Your code. Your rules.
 
-Myst is a companion service for Forgejo that lets repo owners create expiring, revocable, read-only share links for code snapshots.
+Firebreak is a companion service for Forgejo that lets repo owners create expiring, revocable, read-only share links for code snapshots.
 
 ## System Diagram
 
-This diagram shows how traffic moves through the public internet, the VPS or self-hosted server, the host firewall, the platform router, Myst, Forgejo, and Postgres.
+This diagram shows how traffic moves through the public internet, the VPS or self-hosted server, the host firewall, the platform router, Firebreak, Forgejo, and Postgres.
 
-[![Myst system routing diagram](docs/diagrams/system-routing.svg)](docs/diagrams/system-routing.svg)
+[![Firebreak system routing diagram](docs/diagrams/system-routing.svg)](docs/diagrams/system-routing.svg)
 
 Click the diagram to open the full-size SVG.
 
@@ -33,8 +33,8 @@ Click the diagram to open the full-size SVG.
 
 | Purpose | Method |
 |---------|--------|
-| User Identity | Forgejo Sessions |
-| Data Access | Dedicated Forgejo User PAT |
+| User Identity | Forgejo OAuth |
+| Data Access | User's Forgejo PAT |
 
 ### Tech Stack
 
@@ -46,91 +46,62 @@ HTMX provides interactivity (filtering, form submissions) with minimal JavaScrip
 
 ## Quick Start
 
-### 1. Run `myst config init`
+### 1. Deploy with Docker Compose
 
 ```bash
-myst config init
-```
-
-Prompts for:
-
-- Forgejo API URL — Docker: `http://forgejo:3000`, bare metal: `http://localhost:3000`, cross-host: `https://git.example.com`
-- Forgejo PAT (with `read:user` and `read:repository` scopes)
-
-### 2. Deploy with Docker Compose
-
-```bash
-cp examples/.env.example .env
-# Edit .env with your FORGEJO_BASE_URL and FORGEJO_PAT
 docker compose up -d
 ```
 
-The DATABASE_URL is injected automatically by Docker Compose.
+### 2. Generate an Encryption Key
 
-### 3. Alternative Deployments
+Firebreak encrypts OAuth tokens and PATs at rest using a Fernet key. Generate one and add it to your environment before running the setup wizard:
 
-For non-Docker deployments, you must supply DATABASE_URL yourself:
-
-- VPS deployment: Hostinger or another VPS with Dokploy, Traefik, UFW, Myst, Forgejo, and a shared Postgres instance that contains separate `forgejo` and `myst` databases.
-- Self-hosted server deployment: a home server, mini PC, NAS, or other self-hosted Linux machine running Myst with Docker, Podman, Docker Compose, Coolify, Caddy, Nginx, or another reverse proxy.
-
-Myst should not assume a VPS-only environment. The requirement is an existing Forgejo instance, Myst's own database, and a way to route the public and admin hostnames to the Myst app.
-
-## Example Configuration
-
-Create a `.env` file with:
-
-```env
-# Docker (same Compose network):
-FORGEJO_BASE_URL=http://forgejo:3000
-# Bare metal / non-container:
-# FORGEJO_BASE_URL=http://localhost:3000
-# Cross-host:
-# FORGEJO_BASE_URL=https://git.example.com
-FORGEJO_PAT=forgejo_pat_xxxxxxxxxxxx
+```bash
+uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'
 ```
 
-When using the provided Docker Compose example, DATABASE_URL is injected automatically. For other deployment approaches (e.g., bare metal, Kubernetes), you must supply DATABASE_URL yourself.
+Add the output to your `.env` file (or your deployment platform's environment variables):
 
-### 4. Register an OAuth application in Forgejo
+```bash
+TOKEN_ENCRYPTION_KEY=your-generated-key-here
+```
 
-The web service authenticates users via Forgejo OAuth. You need to register Myst as an OAuth consumer:
+### 3. Run the Setup Wizard
 
-1. In Forgejo, go to **Settings** → **Applications** → **Create OAuth2 Application**
-2. Set the redirect URI to `https://your-myst-domain.com/auth/callback/forgejo` (or `http://localhost:8000/auth/callback/forgejo` for local dev)
-3. Copy the **Client ID** and **Client Secret** Forgejo gives you
-4. Generate a Fernet encryption key for OAuth token storage:
+Open `http://localhost:8000` in your browser. On first boot, Firebreak redirects to a setup wizard where you configure:
 
-   ```bash
-   python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-   ```
+- **Forgejo instance URL** — where your Forgejo server lives
+- **OAuth credentials** — register an OAuth application in Forgejo first (Settings → Applications → Create OAuth2 Application), then paste the Client ID and Client Secret
+- **Public base URL** (optional) — your production domain for OAuth redirects
 
-5. Add these to your `.env`:
+### 4. Sign In and Register Your Token
 
-   ```env
-   FORGEJO_OAUTH_CLIENT_ID=your_client_id
-   FORGEJO_OAUTH_CLIENT_SECRET=your_client_secret
-   OAUTH_TOKEN_ENCRYPTION_KEY=your_fernet_key_from_step_4
-   MYST_PUBLIC_BASE_URL=https://your-myst-domain.com  # omit trailing slash; omit for local dev
-   ```
+After setup, sign in with your Forgejo account via OAuth. On first login, Firebreak prompts you to register a `read:repository`-scoped Personal Access Token (PAT) to enable share link viewing.
 
-   `MYST_PUBLIC_BASE_URL` is used as the OAuth redirect URI base. In local development, the redirect URI is inferred from the request (Default: `http://localhost:8000/auth/callback/forgejo`). In production, set this to your public Myst domain.
+### 5. Alternative Deployments
+
+For non-Docker deployments, supply `DATABASE_URL` yourself:
+
+- VPS deployment: Hostinger or another VPS with Dokploy, Traefik, UFW, Firebreak, Forgejo, and a shared Postgres instance that contains separate `forgejo` and `firebreak` databases.
+- Self-hosted server deployment: a home server, mini PC, NAS, or other self-hosted Linux machine running Firebreak with Docker, Podman, Docker Compose, Coolify, Caddy, Nginx, or another reverse proxy.
+
+Firebreak should not assume a VPS-only environment. The requirement is an existing Forgejo instance, Firebreak's own database, and a way to route the public and admin hostnames to the Firebreak app.
 
 ## Phase 1 Progress
 
-- [x] Project renamed from Embargo to Myst
-- [x] CLI scaffold (`myst config init`)
+- [x] Project renamed from Embargo to Firebreak
+- [x] CLI scaffold (`firebreak config init`)
 - [x] Config generation (`.env`)
 - [ ] Service foundation (FastAPI + PostgreSQL)
-- [x] `myst config verify` — verify Forgejo connectivity
-- [x] `myst config verify --diagnostic` — comprehensive diagnostics
-- [x] `myst config view` — show current config
-- [ ] Forgejo session authentication
+- [x] `firebreak config verify` — verify Forgejo connectivity
+- [x] `firebreak config verify --diagnostic` — comprehensive diagnostics
+- [x] `firebreak config view` — show current config
+- [x] Forgejo OAuth authentication
 - [ ] Repo ownership verification
 - [ ] Private link creation (email-verified)
 - [ ] Public link creation (time-expired)
 - [ ] Web-based code viewer
-- [ ] User dashboard
+- [x] User dashboard
 - [ ] SMTP configuration UI
 - [ ] Access logs
 

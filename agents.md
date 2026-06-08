@@ -82,7 +82,7 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 
 ### crypto.py decrypt functions kept proactively
 **Area:** web/app/auth/crypto.py
-**Obstacle:** CodeRabbit flagged missing decryption functions and key validation. Added `decrypt_oauth_token`/`decrypt_optional` + key format validation in `fernet_from_encryption_key`.
+**Obstacle:** CodeRabbit flagged missing decryption functions and key validation. Added `decrypt_token`/`decrypt_optional` + key format validation in `fernet_from_encryption_key`.
 **Solution:** Added the functions even though no consumer exists yet. They will be used for PAT decryption in share link flow.
 **Preference:** Keep dead code if it's small, symmetric (`encrypt`/`decrypt`), and has an obvious future consumer.
 
@@ -103,3 +103,27 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Obstacle:** Early UI templates mixed old role names (`background-*`, `text-*`, `stroke`) and hardcoded `white` values inside component classes, which made dark mode and future theming brittle.
 **Solution/Workaround:** Use Tailwind v4 `@theme` tokens with semantic pairs such as `background/foreground`, `card/card-foreground`, `primary/primary-foreground`, `secondary/secondary-foreground`, `border`, `input`, and `ring`. Keep shared component structure in base classes like `.btn`, with variant classes only setting semantic colors.
 **Preference:** Prefer semantic token names over appearance-based names; add dark mode by overriding CSS variables under `.dark`.
+
+### Header brand SVG inherits unwanted icon styling
+**Area:** web/app/templates/base.html, web/app/templates/index.html, web/app/static/css/input.css
+**Obstacle:** The inline Firebreak header wordmark uses hardcoded SVG fills, and page-level header rules can accidentally apply icon `stroke` styles to the brand SVG. On forced-dark landing headers, the `#17191C` wordmark fill disappears against the obsidian nav.
+**Solution/Workaround:** Give the header brand link a stable `brand-link` class, prevent inherited SVG strokes on `.brand-link svg`, and override only the hardcoded wordmark fill in dark contexts or forced-dark page headers.
+**Preference:** Scope icon stroke rules to nav icons; do not apply broad `header svg` stroke styles.
+
+### Landing video poster caused logo flash
+**Area:** web/app/templates/index.html, web/app/static/img/
+**Obstacle:** Using a logo SVG as the `<video poster>` made the browser briefly stretch the logo across the full hero video area before the MP4 painted, which looked like the center logo flashing huge on refresh.
+**Solution/Workaround:** Use a real video-frame poster image (`firebreak-hero-poster.jpg`) or omit `poster`; do not use logo assets as full-bleed video posters.
+**Preference:** Keep logo sizing in the logo `<img>` and use a frame still for video loading states.
+
+### POST forms lack CSRF tokens
+**Area:** web/app/routers/setup.py, web/app/routers/settings.py, web/app/templates/setup.html, web/app/templates/settings.html
+**Obstacle:** All state-changing forms (`/setup`, `/settings/pat`, `/settings/pat/delete`) use plain POST with no CSRF token. SameSite=Lax on the session cookie mitigates most cross-origin attacks, but does not fully cover same-site subdomain scenarios.
+**Solution/Workaround:** Deferred. Low practical risk since Firebreak runs behind a VPN. Add server-generated CSRF tokens (hidden form field + server-side check) before exposing the app to the public internet.
+**Preference:** Use a FastAPI CSRF middleware or manual double-submit cookie pattern when addressing this.
+
+### Firebreak UI is currently dark-only
+**Area:** web/app/templates/base.html, web/app/static/css/input.css
+**Obstacle:** Theme switching and persisted localStorage theme state conflicted with the current Firebreak brand pass, especially on the cinematic landing page.
+**Solution/Workaround:** Force the root document to use the `.dark` token set and remove the theme toggle UI/scripts.
+**Preference:** Keep semantic dark tokens; only reintroduce theme switching after the dark Firebreak identity is stable.

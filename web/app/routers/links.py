@@ -25,6 +25,7 @@ class CreateLinkResponse(BaseModel):
     share_url: str
 
 
-@router.post("/", response_model=CreateLinkResponse)
-async def create_link(request: CreateLinkRequest):
-    pass
+@router.post("/", status_code=501)
+async def create_link(request: CreateLinkRequest) -> dict:
+    """Stub — link creation not yet implemented."""
+    return {"detail": "Link creation is not yet implemented."}

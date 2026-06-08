@@ -1,13 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — Myst{% endblock %}
+{% block title %}Dashboard — Firebreak{% endblock %}
 {% block content %}
   <div class="flex flex-col gap-6">
     <section class="flex flex-col justify-between gap-4 pb-6 border-b border-border sm:flex-row sm:items-end">
       <div>
-        <h1 class="mt-2 text-3xl font-semibold leading-10 tracking-normal text-foreground">Dashboard</h1>
-        <p class="mt-1 text-sm text-muted-foreground">Welcome, {{ user.display_name or user.email }}.</p>
+        <h1 class="mt-2 text-3xl font-semibold leading-10 tracking-normal">Welcome,</h1>
+        <p class=" text-2xl text-muted-foreground">{{ user.display_name or user.email }}.</p>
       </div>
-      <a href="/links/create" class="btn btn-primary w-fit">Create share link</a>
+      {% if pat_registered %}
+        <a href="/links/create" class="btn btn-primary w-fit">Create share link</a>
+      {% else %}
+        <span class="btn btn-primary w-fit opacity-50 pointer-events-none"
+              aria-disabled="true">Create share link</span>
+      {% endif %}
     </section>
     <section class="grid gap-4 md:grid-cols-3">
       <div class="p-4 card">
@@ -26,43 +31,18 @@
         <p class="mt-2 text-xs text-muted-foreground">Viewer activity will appear here.</p>
       </div>
     </section>
-    <div class="space-y-3">
-      <div>
-        <h2 class="text-base font-semibold text-foreground">Forgejo access token</h2>
-        <p class="mt-2 text-sm text-muted-foreground">
-          Register a <code class="rounded-sm bg-secondary px-1.5 py-0.5 text-primary">read:repository</code>-scoped PAT
-          to enable share link viewing.
+    {% if not pat_registered %}
+      <div class="rounded-lg border border-warning-muted bg-warning-muted/40 px-5 py-4">
+        <p class="text-sm font-semibold text-warning-foreground">Access token required</p>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Register a Forgejo access token to create share links.
         </p>
+        <a href="/settings" class="btn btn-sm btn-primary mt-3 w-fit">Go to Settings</a>
       </div>
-      <section class="card">
-        <form id="pat-form"
-              method="post"
-              action="/dashboard/pat"
-              novalidate
-              class="px-4 py-4">
-          <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div>
-              <label for="pat" class="section-header-subtle">Forgejo access token</label>
-              <input type="text"
-                     id="pat"
-                     name="pat"
-                     class="block w-full mt-2 input-mono"
-                     placeholder="ad8j3..."
-                     aria-describedby="pat-error"
-                     aria-invalid="false"
-                     required />
-            </div>
-            <button type="submit" class="btn btn-primary">Register</button>
-          </div>
-          <div class="mt-2">
-            <p id="pat-error" class="input-error hidden">A Forgejo token is required.</p>
-          </div>
-        </form>
-      </section>
-    </div>
+    {% endif %}
     <div class="space-y-3">
       <div>
-        <h2 class="text-base font-semibold text-foreground">Share links</h2>
+        <h2 class="text-base font-semibold">Share links</h2>
         <p class="mt-2 text-sm text-muted-foreground">Repository snapshots published from this account.</p>
       </div>
       <section class="card">
@@ -87,34 +67,4 @@
       </section>
     </div>
   </div>
-  <script>
-    (() => {
-      const form = document.getElementById("pat-form");
-      const input = document.getElementById("pat");
-      const error = document.getElementById("pat-error");
-
-      if (!form || !input || !error) return;
-
-      const showError = () => {
-        input.setAttribute("aria-invalid", "true");
-        input.classList.add("border-danger", "focus:border-danger", "focus:ring-danger-muted");
-        error.classList.remove("hidden");
-        input.focus();
-      };
-
-      const clearError = () => {
-        input.setAttribute("aria-invalid", "false");
-        input.classList.remove("border-danger", "focus:border-danger", "focus:ring-danger-muted");
-        error.classList.add("hidden");
-      };
-
-      form.addEventListener("submit", (event) => {
-        if (input.value.trim()) return;
-        event.preventDefault();
-        showError();
-      });
-
-      input.addEventListener("input", clearError);
-    })();
-  </script>
 {% endblock %}

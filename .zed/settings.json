@@ -1,11 +1,4 @@
 {
-  "lsp": {
-    "basedpyright": {
-      "settings": {
-        "python.pythonPath": "web/.venv/bin/python"
-      }
-    }
-  },
   "languages": {
     "HTML": {
       "formatter": {

@@ -7,7 +7,7 @@ services:
       - "8000:8000"
     env_file: ./web/.env
     environment:
-      - DATABASE_URL=postgresql+asyncpg://myst:myst@db:5432/myst_db
+      - DATABASE_URL=postgresql+asyncpg://firebreak:firebreak@db:5432/firebreak_db
     depends_on:
       db:
         condition: service_healthy
@@ -17,16 +17,24 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: myst
-      POSTGRES_PASSWORD: myst
-      POSTGRES_DB: myst_db
+      POSTGRES_USER: firebreak
+      POSTGRES_PASSWORD: firebreak
+      POSTGRES_DB: firebreak_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myst -d myst_db"]
+      test: ["CMD-SHELL", "pg_isready -U firebreak -d firebreak_db"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:

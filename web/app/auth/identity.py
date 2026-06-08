@@ -6,14 +6,15 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.auth.crypto import encrypt_optional, fernet_from_encryption_key
-from app.config import Settings
+from app.auth.crypto import encrypt_optional
+from app.config import get_fernet
+from app.models.app_settings import AppSettings
 from app.models.user import LinkedIdentity, User
 
 
 async def find_or_create_user(
     db: AsyncSession,
-    settings: Settings,
+    app_settings: AppSettings,
     *,
     provider: str,
     provider_user_id: str,
@@ -25,10 +26,8 @@ async def find_or_create_user(
 ) -> User:
     """Find or create a user based on the given provider and identity details."""
 
-    # Create a Fernet instance for encrypting tokens if a key is available
-    fernet = fernet_from_encryption_key(settings.oauth_token_encryption_key)
+    fernet = get_fernet()
 
-    # Query the database for an existing identity
     result = await db.execute(
         select(LinkedIdentity)
         .options(selectinload(LinkedIdentity.user))
@@ -39,7 +38,6 @@ async def find_or_create_user(
     )
     identity = result.scalar_one_or_none()
 
-    # Update the identity and user if identity exists
     if identity:
         identity.provider_username = provider_username
         if access_token_raw is not None:

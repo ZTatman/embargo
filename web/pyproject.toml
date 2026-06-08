@@ -3,9 +3,9 @@ target-version = "py313"
 line-length = 100
 
 [project]
-name = "myst-web"
+name = "firebreak-web"
 version = "0.1.0"
-description = "Myst: FastAPI + HTMX web interface for managing Forgejo repositories"
+description = "Firebreak: FastAPI + HTMX web interface for managing Forgejo repositories"
 requires-python = ">=3.13"
 dependencies = [
     "aiofiles>=24.1.0",
@@ -24,9 +24,18 @@ dependencies = [
 [dependency-groups]
 dev = [
     "djlint>=1.36.1",
+    "mypy>=1.19.0",
     "ruff>=0.11.0",
     "uvicorn[standard]>=0.44.0",
 ]
+
+[tool.mypy]
+python_version = "3.13"
+files = ["app"]
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+strict_optional = true
 
 [tool.djlint]
 indent = 2
