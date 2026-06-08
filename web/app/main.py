@@ -89,9 +89,7 @@ ERROR_TITLES = {
 
 
 @app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(
-    request: Request, exc: StarletteHTTPException
-) -> Response:
+async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> Response:
     """Render a styled error page for browser requests, JSON for API clients."""
     accept = request.headers.get("accept", "")
     if "text/html" in accept:

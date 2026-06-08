@@ -46,9 +46,7 @@ async def _require_auth_if_configured(
 
 
 @router.get("", dependencies=[Depends(_require_auth_if_configured)])
-async def setup_page(
-    request: Request, db: Annotated[AsyncSession, Depends(get_db)]
-) -> Response:
+async def setup_page(request: Request, db: Annotated[AsyncSession, Depends(get_db)]) -> Response:
     """Render the setup wizard. Pre-fills fields when reconfiguring."""
     existing = request.app.state.app_settings
     user_count = await db.scalar(select(sql_func.count()).select_from(User)) or 0

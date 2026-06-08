@@ -99,6 +99,8 @@
     --color-expired: #bdb8ad;
     --color-expired-foreground: #d6d0c4;
     --color-expired-muted: #282b30;
+
+    --image-wrapper-size: 100%;
 }
 
 @layer base {
@@ -149,7 +151,7 @@
     }
 
     .btn-primary {
-        @apply bg-primary text-primary-foreground hover:bg-primary-hover;
+        @apply text-primary-foreground bg-primary-hover hover:bg-[#c62030]/90 hover:text-[#f7f2e8];
     }
 
     .btn-secondary {
@@ -277,5 +279,19 @@
 
     .input-error {
         @apply text-sm font-medium text-danger-foreground;
+    }
+}
+
+
+@utility img-wrapper-* {
+    width: 100%;
+    height: 100%;
+    max-width: --value(--max-w-*, [length], [percentage], [*], "none", "inherit", "initial", "unset");
+
+    /* Automatically target the image inside */
+    & img {
+        width: 100%; /* Replaces 'stretch' for better compatibility */
+        height: auto; /* Maintains aspect ratio */
+        display: block; /* Removes bottom whitespace common in inline images */
     }
 }
