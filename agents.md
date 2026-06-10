@@ -145,3 +145,57 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Obstacle:** Theme switching and persisted localStorage theme state conflicted with the current Firebreak brand pass, especially on the cinematic landing page.
 **Solution/Workaround:** Force the root document to use the `.dark` token set and remove the theme toggle UI/scripts.
 **Preference:** Keep semantic dark tokens; only reintroduce theme switching after the dark Firebreak identity is stable.
+
+### Landing hero styles belong in tokenized CSS
+**Area:** web/app/templates/index.html, web/app/static/css/input.css
+**Obstacle:** Inline hero gradients, shadows, and hardcoded OKLCH values made the landing page harder to tune without drifting away from the Firebreak design token system.
+**Solution/Workaround:** Keep landing hero structure in `index.html`, but define overlays, logo effects, proof chips, and panel styling in `input.css` using hero-specific tokens.
+**Preference:** Use semantic hero/component classes for cinematic landing styling; avoid inline `<style>` blocks and template-level color literals.
+
+### Landing hero should avoid generic card and pill treatment
+**Area:** web/app/templates/index.html, web/app/static/css/input.css
+**Obstacle:** Bordered hero copy cards and pill-shaped proof badges made the cinematic landing page feel like generic SaaS UI instead of a Firebreak title card.
+**Solution/Workaround:** Put hero copy directly over the video using tuned overlays, text shadow, a soft invisible copy scrim, a small burn-line accent, and bottom-anchored inline metadata separated by ember dots.
+**Preference:** Preserve the video-led title-card feel; use red sparingly as an accent rather than wrapping hero content in panels or badges.
+
+### Dashboard avoids card-heavy summary UI
+**Area:** web/app/templates/dashboard.html, web/app/static/css/input.css
+**Obstacle:** Dashboard summary metrics used repeated bordered cards and page-specific disabled button utilities, which made the UI feel generic and inconsistent with Firebreak's darker operational tone.
+**Solution/Workaround:** Use a metric strip with hairline dividers, notice rails, tokenized table styles, and shared button disabled/hover variants.
+**Preference:** Favor operational density, hairline separation, and semantic component classes over cards, pills, and one-off utility stacks.
+
+### FastAPI drops `Depends` on params typed with TYPE_CHECKING-only forward refs
+**Area:** web/app/config.py, any FastAPI dependency function
+**Obstacle:** A dependency function (`get_app_settings`) had a parameter typed `Annotated[AppSettings | None, Depends(current_app_settings)]`, but `AppSettings` was imported only under `TYPE_CHECKING`. FastAPI introspects a dependency's signature at *runtime*; the unresolved forward ref made the annotation fail to evaluate, so FastAPI silently discarded the `Depends(...)` marker and treated `settings` as a **required query parameter**. Every gated route then 422'd demanding `?settings=...`. Route registration did not error — it only surfaced at request time.
+**Solution/Workaround:** Required-settings dependency takes only `request: Request` and *calls* `current_app_settings(request)` internally (mirroring how `get_current_session` calls `lookup_session`), rather than declaring the accessor as a sub-`Depends` with a forward-ref-typed param.
+**Preference:** Never give a FastAPI dependency/route a parameter whose type is a TYPE_CHECKING-only forward ref. Build required dependencies by *calling* the plain accessor, not by `Depends`-ing on it with a typed param. Verify dependency wiring by inspecting `route.dependant.query_params`, not by calling the function directly.
+
+### Forgejo API access goes through app/services/forgejo.py
+**Area:** web/app/services/forgejo.py, web/app/routers/auth.py, web/app/routers/dashboard.py
+**Obstacle:** Forgejo HTTP calls (httpx client, base-URL joining, error handling) were duplicated across the OAuth flow and the dashboard, and a hand-built authorize URL re-introduced a trailing-slash double-slash hazard.
+**Solution/Workaround:** All Forgejo HTTP goes through the `forgejo` service module: `get`/`post`, plus OAuth ops `authorize_url`/`exchange_code`/`fetch_user`. Base-URL joining is centralized in `_url()` with a defensive `rstrip('/')`. Failures raise a typed `ForgejoError` (with `.unreachable`); routers translate it — OAuth routes to HTTP 502, the dashboard to an inline message.
+**Preference:** Add new Forgejo operations as `forgejo.*` functions; routers orchestrate (cookies, sessions, error mapping) but never build URLs or call httpx directly. Import the module (`from app.services import forgejo` → `forgejo.get(...)`), not individual functions.
+
+### Credential encryption is centralized in app/auth/tokens.py
+**Area:** web/app/auth/tokens.py, web/app/routers/settings.py, web/app/routers/setup.py, web/app/routers/auth.py
+**Obstacle:** The `get_fernet()` + crypto-primitive + which-column pattern was scattered across routers and handlers, leaking the at-rest encryption detail into the web layer and duplicating it (e.g. the client-secret encrypt block appeared twice in setup.py).
+**Solution/Workaround:** `app.auth.tokens` is the single app-aware layer pairing the app Fernet cipher with a model column: `decrypt_pat`/`set_pat` (PAT, keeps `pat_registered_at` in sync) and `set_client_secret`/`decrypt_client_secret`. It sits one level above `app.auth.crypto` (the primitives, which take a `fernet` and know nothing about the app).
+**Preference:** Routers/handlers call `tokens.*`, never `get_fernet()` + crypto inline. Access-token encryption in `auth/identity.py` is intentionally left there — it is already cohesive in one domain function. Key rotation should be a one-file change in `tokens.py`/`crypto.py`.
+
+### App settings exposed as required/optional FastAPI dependencies
+**Area:** web/app/config.py, web/app/middleware.py, web/app/routers/setup.py
+**Obstacle:** `app.state.app_settings` was read/written raw in many places, and the lone `get_app_settings` was typed `-> AppSettings` while actually returning `None` before setup — its non-None guarantee silently depended on `SetupRequiredMiddleware` having gated the route.
+**Solution/Workaround:** Mirror the `session.py` trio: `current_app_settings(request) -> AppSettings | None` (honest accessor, used by middleware and setup), `get_app_settings(request) -> AppSettings` (required dependency; raises HTTP 500 if reached unconfigured), and `set_app_settings(app, row)` (single write path, used by lifespan and setup).
+**Preference:** Routes that require config use `Depends(get_app_settings)`; None-tolerant readers (setup, middleware) use `current_app_settings`. Never read/write `app.state.app_settings` raw outside config.py.
+
+### main.py is a composition root, not a route module
+**Area:** web/app/main.py, web/app/errors.py, web/app/routers/dashboard.py, web/app/routers/dev.py
+**Obstacle:** main.py held the lifespan, app wiring, the global exception handler, page route handlers, and a dev-only endpoint — feature logic mixed into the composition root, inconsistent with the per-feature router convention.
+**Solution/Workaround:** Page routes live in `routers/dashboard.py`; the content-negotiated error handler in `errors.py` (wired via `register_error_handlers(app)`); dev-only endpoints in `routers/dev.py`, included only when `get_settings().debug`. main.py keeps lifespan + wiring + the trivial `/` landing route. An app factory (`create_app()`) is a deferred goal for when tests are added.
+**Preference:** New feature routes get their own `routers/*.py`. Keep dev-only endpoints out of production by gating the `include_router` on the debug flag rather than guarding individual routes.
+
+### Dashboard repositories load lazily; dev CSS reload is debug-gated
+**Area:** web/app/routers/dashboard.py, web/app/templates/dashboard.html, web/app/templates/base.html
+**Obstacle:** The dashboard blocked first paint on a live Forgejo fetch (up to 15s if the instance was slow/unreachable), and a dev CSS live-reload script polled an endpoint every 500ms in *all* environments, including production.
+**Solution/Workaround:** `/dashboard` renders instantly; the repo list loads via an htmx fragment (`/dashboard/repositories` → `partials/dashboard_repositories.html`) after first paint, with a 10s timeout. The live-reload `<script>` and the `/api/dev/css-mtime` endpoint are both gated on the `debug` flag (a Jinja `debug` global + conditional `include_router`). Forgejo-supplied `html_url` is sanitized to drop non-`http(s)` schemes before rendering into an `href` (XSS guard).
+**Preference:** Never block a page render on an external API; lazy-load via htmx. Keep dev tooling behind the debug flag. Treat external-API string fields as untrusted in templates.
