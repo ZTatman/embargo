@@ -1,19 +1,18 @@
 {% extends "base.html" %}
 {% block title %}{{ status_code }} — Firebreak{% endblock %}
-{% block body_class %}landing-page{% endblock %}
-{% block main_class %}{% endblock %}
+{% block main_class %}flex-1 flex flex-col{% endblock %}
 {% block content %}
-  <section class="error-shell">
+  <section class="relative flex flex-1 items-center justify-center px-6 py-20 overflow-hidden">
     <div class="error-backdrop-logo">
       <img src="/static/img/firebreak-logo-red.svg"
            alt="Firebreak"
            width="240"
            height="268" />
     </div>
-    <div class="error-content">
-      <p class="error-code">{{ status_code }}</p>
-      <h1 class="error-title">{{ title }}</h1>
-      <p class="error-detail">{{ detail }}</p>
+    <div class="relative z-10 w-full max-w-md text-center">
+      <p class="font-bold text-8xl text-foreground/20 sm:text-9xl">{{ status_code }}</p>
+      <h1 class="mt-1 text-xl font-semibold text-foreground">{{ title }}</h1>
+      <p class="mt-4 text-sm leading-6 text-foreground/60">{{ detail }}</p>
       {% if status_code == 401 %}
         {% set quips = [
           "I'm not saying you're a data scraper, but I AM saying that this page is off-limits.",
@@ -22,14 +21,14 @@
           "Move along clanker! Nothing to see here.",
           "Just get out of here you STUPID, DUMB ANIMAL!"
         ] %}
-        <p class="error-quip">{{ quips | random }}</p>
+        <p class="text-xs italic text-foreground/30">{{ quips | random }}</p>
       {% endif %}
       <div class="mt-8">
         <a href="/" class="btn-link" id="go-home-btn">Go Home</a>
       </div>
     </div>
     {% if status_code == 401 %}
-      <div class="guard-dog-wrap pointer-events-none absolute -bottom-4 -right-8 w-44 sm:w-56"
+      <div class="absolute pointer-events-none guard-dog-wrap -bottom-4 -right-8 w-44 sm:w-56"
            aria-hidden="true">
         <div class="guard-dog-trot">
           <div class="guard-dog-look">

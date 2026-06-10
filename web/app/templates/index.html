@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Firebreak — protect your code from scraping{% endblock %}
 {% block body_class %}landing-page{% endblock %}
-{% block main_class %}{% endblock %}
+{% block main_class %}flex-1{% endblock %}
 {% block content %}
-  <section class="hero-section">
+  <section class="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-background px-4 py-10 text-center text-foreground sm:px-6 sm:py-14 lg:py-16">
     <video class="hero-video"
            autoplay
            muted
@@ -14,23 +14,29 @@
            aria-hidden="true">
       <source src="/static/video/firebreak-hero.mp4" type="video/mp4" />
     </video>
-    <div class="hero-overlay"></div>
     <div class="hero-vignette"></div>
-    <div class="hero-content">
-      <img src="/static/img/firebreak-brand.svg"
-           alt="Firebreak"
+    <div class="hero-ember"></div>
+    <div class="relative z-10 flex w-full max-w-4xl -translate-y-[2dvh] flex-col items-center gap-6 sm:gap-8 lg:gap-9">
+      <img src="/static/img/firebreak-logo-cream-red.svg"
+           alt=""
            width="240"
-           height="268"
-           class="hero-brand" />
-      <p class="hero-tagline">
-        <span class="block">Fight Fire with Fire.</span>
-        <span class="mt-2 block">Draw a boundary around your code. Let them look, but don't let them scrape.</span>
-      </p>
-      <p class="hero-copy-panel">
-        Firebreak creates temporary, read-only links to private Forgejo repository snapshots.
-        Sign in using Forgejo, register an access token, and control what can be viewed and by whom.
-      </p>
-      <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
+           height="238"
+           class="hero-logo"
+           aria-hidden="true" />
+      <img src="/static/img/firebreak-brand-text.svg"
+           alt="Firebreak"
+           width="280"
+           height="48"
+           class="hero-wordmark" />
+      <div class="hero-statement">
+        <p class="text-base font-semibold leading-7 text-foreground sm:text-lg">Fight Fire with Fire.</p>
+        <div class="hero-burn-line" aria-hidden="true"></div>
+        <p class="max-w-md text-sm leading-6 text-foreground/90 sm:max-w-lg sm:text-[0.9375rem] sm:leading-7">
+          Temporary read-only access to private Forgejo snapshots.
+          Let them inspect what you allow. Nothing more.
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-3">
         {% if user %}
           <a href="/dashboard" class="btn btn-primary">Open Dashboard</a>
         {% else %}
@@ -46,5 +52,12 @@
         {% endif %}
       </div>
     </div>
+    <p class="hero-meta" aria-label="Firebreak security properties">
+      <span>Snapshot scoped</span>
+      <span class="hero-meta-separator" aria-hidden="true"></span>
+      <span>Read-only</span>
+      <span class="hero-meta-separator" aria-hidden="true"></span>
+      <span>Forgejo-native</span>
+    </p>
   </section>
 {% endblock %}

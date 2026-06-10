@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{{ "Reconfigure" if reconfiguring else "Setup" }} — Firebreak{% endblock %}
 {% block body_class %}landing-page{% endblock %}
-{% block main_class %}{% endblock %}
+{% block main_class %}flex-1{% endblock %}
 {% block content %}
-  <section class="setup-shell">
+  <section class="flex min-h-dvh items-center justify-center px-6 py-20">
     <div class="w-full max-w-lg">
       <div class="mb-8 text-center">
         <img src="/static/img/firebreak-brand.svg"
@@ -11,40 +11,42 @@
              width="240"
              height="268"
              class="setup-logo" />
-        <h1 class="setup-title">{{ "Reconfigure" if reconfiguring else "Setup" }}</h1>
+        <h1 class="mt-6 text-2xl font-semibold text-foreground">
+          {{ "Reconfigure" if reconfiguring else "Setup" }}
+        </h1>
         {% if reconfiguring %}
-          <p class="setup-copy">
+          <p class="mt-2 text-sm leading-6 text-foreground/60">
             Update your Forgejo OAuth connection. Make sure the OAuth application
             is registered in your Forgejo instance before continuing.
           </p>
         {% else %}
-          <p class="setup-copy">
+          <p class="mt-2 text-sm leading-6 text-foreground/60">
             Connect Firebreak to your Forgejo instance. You'll need to
             <a href="https://forgejo.org/docs/latest/user/oauth2-provider/"
                target="_blank"
                rel="noopener"
-               class="setup-link">register an OAuth application</a>
+               class="text-foreground/80 underline underline-offset-2 hover:text-foreground">register an OAuth application</a>
             in Forgejo first.
           </p>
         {% endif %}
       </div>
       {% if not reconfiguring %}
-        <div class="setup-help-panel">
-          <p class="setup-help-title">How to get your OAuth credentials:</p>
+        <div class="mb-8 rounded-lg border border-foreground/10 bg-card/60 px-5 py-4 text-xs leading-5 text-foreground/50">
+          <p class="mb-2.5 font-medium text-foreground/70">How to get your OAuth credentials:</p>
           <ol class="list-decimal list-inside space-y-1.5">
             <li>
-              In Forgejo, go to <strong class="setup-strong">Settings &rarr; Applications</strong>
+              In Forgejo, go to <strong class="text-foreground/70">Settings &rarr; Applications</strong>
             </li>
             <li>
-              Under <strong class="setup-strong">Manage OAuth2 Applications</strong>, create a new app
+              Under <strong class="text-foreground/70">Manage OAuth2 Applications</strong>, create a new app
             </li>
             <li>
               Set the redirect URI to
               <br />
-              <code class="setup-code">{{ oauth_callback_url }}</code>
+              <code class="mt-1 inline-block rounded bg-foreground/8 px-1.5 py-0.5 font-mono text-[10px] text-foreground/60">{{ oauth_callback_url }}</code>
             </li>
             <li>
-              Copy the <strong class="setup-strong">Client ID</strong> and <strong class="setup-strong">Client Secret</strong> into the form below
+              Copy the <strong class="text-foreground/70">Client ID</strong> and <strong class="text-foreground/70">Client Secret</strong> into the form below
             </li>
           </ol>
         </div>
@@ -56,12 +58,12 @@
             <input type="password"
                    id="setup_token"
                    name="setup_token"
-                   class="form-input form-input-mono"
+                   class="form-input font-mono"
                    placeholder="Paste the token from your server logs"
                    autocomplete="off"
                    spellcheck="false"
                    required />
-            <p class="form-hint">Printed to the server console on first boot.</p>
+            <p class="mt-1.5 text-xs text-foreground/30">Printed to the server console on first boot.</p>
           </div>
         {% endif %}
         <div>
@@ -80,7 +82,7 @@
           <input type="text"
                  id="forgejo_oauth_client_id"
                  name="forgejo_oauth_client_id"
-                 class="form-input form-input-mono"
+                 class="form-input font-mono"
                  placeholder="c8ab3315-537d-44f3-…"
                  autocomplete="off"
                  spellcheck="false"
@@ -91,13 +93,13 @@
           <label for="forgejo_oauth_client_secret" class="form-label">
             OAuth Client Secret
             {% if reconfiguring %}
-              <span class="form-label-note">(leave blank to keep current)</span>
+              <span class="ml-1 font-normal tracking-normal normal-case text-foreground/30">(leave blank to keep current)</span>
             {% endif %}
           </label>
           <input type="password"
                  id="forgejo_oauth_client_secret"
                  name="forgejo_oauth_client_secret"
-                 class="form-input form-input-mono"
+                 class="form-input font-mono"
                  placeholder="gto_wkxxnv4ewa…"
                  autocomplete="off"
                  spellcheck="false"
@@ -106,7 +108,7 @@
         <div>
           <label for="firebreak_public_base_url" class="form-label">
             Public Base URL
-            <span class="form-label-note">(optional)</span>
+            <span class="ml-1 font-normal tracking-normal normal-case text-foreground/30">(optional)</span>
           </label>
           <input type="url"
                  id="firebreak_public_base_url"
@@ -115,8 +117,8 @@
                  placeholder="https://share.example.com"
                  autocomplete="off"
                  value="{{ firebreak_public_base_url }}" />
-          <p class="form-hint">
-            Your production domain for OAuth redirects. Leave blank on localhost &mdash; Firebreak will use <code class="form-hint-code">http://localhost:8000</code> automatically.
+          <p class="mt-1.5 text-xs text-foreground/30">
+            Your production domain for OAuth redirects. Leave blank on localhost &mdash; Firebreak will use <code class="font-mono text-foreground/40">http://localhost:8000</code> automatically.
           </p>
         </div>
         <button type="submit" class="btn btn-primary w-full mt-2">

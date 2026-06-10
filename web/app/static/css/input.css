@@ -11,30 +11,37 @@
     --color-brand-red: #c62030;
     --color-brand-flame: #f04a36;
 
-    --color-background: var(--color-brand-obsidian);
-    --color-foreground: var(--color-brand-cream);
-    --color-card: #1f2226;
-    --color-card-foreground: var(--color-brand-cream);
-    --color-muted: #282b30;
+    --color-background: oklch(0.175 0.008 260);
+    --color-foreground: oklch(0.985 0.003 270);
+    --color-card: oklch(0.22 0.012 258);
+    --color-card-foreground: oklch(0.985 0.003 270);
+    --color-muted: oklch(0.26 0.014 258);
     --color-muted-foreground: var(--color-brand-ash);
-    --color-accent: #2f2728;
-    --color-accent-foreground: var(--color-brand-cream);
+    --color-elevated: oklch(0.24 0.012 258);
+    --color-elevated-foreground: oklch(0.985 0.003 270);
+    --color-accent: oklch(0.25 0.015 255);
+    --color-accent-foreground: oklch(0.985 0.003 270);
     --color-primary: #2a2d31;
     --color-primary-foreground: var(--color-brand-cream);
     --color-primary-hover: var(--color-brand-obsidian);
     --color-primary-muted: rgb(247 242 232 / 14%);
-    --color-secondary: #282b30;
-    --color-secondary-foreground: var(--color-brand-cream);
-    --color-border: #34373d;
-    --color-border-subtle: #282b30;
-    --color-input: #1f2226;
-    --color-ring: var(--color-brand-cream);
-    --color-ring-muted: rgb(247 242 232 / 18%);
+    --color-secondary: oklch(0.26 0.014 258);
+    --color-secondary-foreground: oklch(0.985 0.003 270);
+    --color-border: oklch(0.3 0.016 256);
+    --color-border-subtle: oklch(0.24 0.01 258);
+    --color-input: oklch(0.2 0.01 258);
+    --color-ring: oklch(0.65 0.12 55);
+    --color-ring-muted: oklch(0.4 0.07 50 / 0.35);
     --color-header: var(--color-brand-jet);
-    --color-header-foreground: var(--color-brand-cream);
-    --color-panel: #1f2226;
-    --color-panel-foreground: var(--color-brand-cream);
-    --color-overlay: var(--color-brand-obsidian);
+    --color-header-foreground: oklch(0.985 0.003 270);
+    --color-panel: oklch(0.22 0.012 258);
+    --color-panel-foreground: oklch(0.985 0.003 270);
+    --color-overlay: oklch(0.14 0.006 260);
+    --color-hero-ember: oklch(0.58 0.2 34 / 0.22);
+    --color-hero-burn: var(--color-brand-flame);
+    --color-slate: oklch(0.55 0.04 250);
+    --color-slate-foreground: oklch(0.985 0.003 270);
+    --color-slate-muted: oklch(0.26 0.035 245);
     --color-success: oklch(75% 0.12 150);
     --color-success-foreground: oklch(82% 0.12 150);
     --color-success-muted: oklch(32% 0.07 150);
@@ -56,10 +63,12 @@
     --radius-xl: 0.5rem;
     --radius-2xl: 0.75rem;
 
-    --shadow-card: 0 1px 2px rgb(0 0 0 / 22%);
-    --shadow-hero-logo: 0 14px 34px rgb(0 0 0 / 55%);
-    --shadow-hero-text: 0 4px 18px rgb(0 0 0 / 72%);
-    --shadow-hero-panel: 0 18px 50px rgb(0 0 0 / 24%);
+    --shadow-card: 0 1px 3px rgb(0 0 0 / 30%), 0 1px 2px rgb(0 0 0 / 18%);
+    --shadow-elevated: 0 4px 12px rgb(0 0 0 / 35%), 0 1px 3px rgb(0 0 0 / 20%);
+    --shadow-hero-logo: 0 14px 34px rgb(0 0 0 / 28%);
+    --shadow-hero-text: 0 4px 18px rgb(0 0 0 / 40%);
+    --shadow-hero-copy: 0 4px 18px rgb(0 0 0 / 62%);
+    --glow-hero: 0 0 80px oklch(0.58 0.2 34 / 0.16);
 }
 
 @layer base {
@@ -74,7 +83,7 @@
     }
 
     body {
-        @apply bg-background text-foreground antialiased;
+        @apply antialiased bg-background text-foreground;
         letter-spacing: 0;
     }
 
@@ -90,10 +99,6 @@
 }
 
 @layer components {
-    .skip-link {
-        @apply fixed left-4 top-4 z-50 -translate-y-16 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground opacity-0 transition focus-visible:translate-y-0 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
-    }
-
     .btn {
         @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50;
     }
@@ -106,24 +111,12 @@
         @apply px-3 py-2 text-sm;
     }
 
-    .btn-md {
-        @apply px-4 py-2.5 text-sm;
-    }
-
-    .btn-lg {
-        @apply px-5 py-3 text-base;
-    }
-
     .btn-primary {
-        @apply bg-primary text-primary-foreground hover:bg-primary-hover hover:text-primary-foreground;
+        @apply border border-foreground/12 bg-primary text-primary-foreground hover:border-brand-flame/45 hover:bg-primary-hover hover:text-primary-foreground;
     }
 
     .btn-secondary {
-        @apply border border-border bg-card text-secondary-foreground hover:border-border hover:bg-accent hover:text-accent-foreground;
-    }
-
-    .btn-borderless {
-        @apply bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground;
+        @apply border border-foreground/12 bg-card text-secondary-foreground hover:border-foreground/22 hover:bg-accent hover:text-accent-foreground;
     }
 
     .btn-danger {
@@ -131,15 +124,36 @@
     }
 
     .btn-link {
-        @apply inline-flex items-center justify-center gap-2 rounded-sm bg-transparent px-0 py-1 text-sm font-medium text-muted-foreground underline decoration-border underline-offset-4 transition hover:text-foreground hover:decoration-brand-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50;
+        @apply relative inline-flex items-center justify-center gap-2 px-0 py-1 text-sm font-medium transition bg-transparent rounded-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50;
+    }
+
+    .btn-link::after {
+        content: "";
+        position: absolute;
+        inset-inline: 0;
+        bottom: 0.125rem;
+        height: 1px;
+        background: var(--color-brand-flame);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 160ms ease;
+    }
+
+    .btn-link:hover::after,
+    .btn-link:focus-visible::after {
+        transform: scaleX(1);
+    }
+
+    .btn-disabled {
+        @apply pointer-events-none border-foreground/8 bg-foreground/6 text-foreground/35;
     }
 
     .app-header {
-        position: relative;
-        z-index: 10;
+        position: sticky;
+        top: 0;
+        z-index: 50;
         background: var(--color-header);
-        border-bottom: 0;
-        box-shadow: none;
+        border-bottom: 1px solid oklch(0.2 0.012 260 / 0.5);
     }
 
     .app-header a,
@@ -153,32 +167,31 @@
         stroke: none;
     }
 
-    .brand-mark {
-        color: var(--color-brand-red);
-    }
-
-    .brand-wordmark {
-        color: var(--color-header-foreground);
-    }
-
-    .app-header .btn-borderless {
-        color: var(--color-header-foreground);
-    }
-
-    .app-header .btn-borderless:hover {
-        background: color-mix(in oklab, var(--color-header-foreground) 10%, transparent);
-        color: var(--color-header-foreground);
-    }
-
     .app-header .btn-secondary {
-        background: color-mix(in oklab, var(--color-header-foreground) 8%, transparent);
-        border-color: color-mix(in oklab, var(--color-header-foreground) 18%, transparent);
+        background: color-mix(
+            in oklab,
+            var(--color-header-foreground) 8%,
+            transparent
+        );
+        border-color: color-mix(
+            in oklab,
+            var(--color-header-foreground) 18%,
+            transparent
+        );
         color: var(--color-header-foreground);
     }
 
     .app-header .btn-secondary:hover {
-        background: color-mix(in oklab, var(--color-header-foreground) 14%, transparent);
-        border-color: color-mix(in oklab, var(--color-header-foreground) 28%, transparent);
+        background: color-mix(
+            in oklab,
+            var(--color-header-foreground) 14%,
+            transparent
+        );
+        border-color: color-mix(
+            in oklab,
+            var(--color-header-foreground) 28%,
+            transparent
+        );
         color: var(--color-header-foreground);
     }
 
@@ -190,46 +203,182 @@
         background: var(--color-background);
     }
 
-    .hero-section {
-        @apply relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-background px-6 py-20 text-center text-foreground;
-    }
-
     .hero-video {
         @apply absolute inset-0 h-full w-full object-cover;
     }
 
-    .hero-overlay {
-        @apply absolute inset-0 bg-overlay/65;
+    .hero-vignette {
+        @apply absolute inset-0 pointer-events-none;
+        background:
+            radial-gradient(
+                circle at center,
+                transparent 0,
+                transparent 30%,
+                color-mix(in oklab, var(--color-overlay) 38%, transparent)
+                    62%,
+                color-mix(in oklab, var(--color-overlay) 90%, transparent)
+                    100%
+            ),
+            linear-gradient(
+                180deg,
+                color-mix(in oklab, var(--color-overlay) 64%, transparent) 0,
+                transparent 28%,
+                color-mix(in oklab, var(--color-overlay) 70%, transparent) 100%
+            ),
+            radial-gradient(
+                ellipse at center,
+                color-mix(in oklab, var(--color-overlay) 10%, transparent) 0,
+                color-mix(in oklab, var(--color-overlay) 26%, transparent)
+                    36%,
+                transparent 58%
+            );
     }
 
-    .hero-vignette {
-        @apply absolute inset-0;
+    .hero-ember {
+        @apply absolute pointer-events-none;
+        inset: 12% 18% 18%;
         background: radial-gradient(
             circle at center,
-            transparent 0,
-            transparent 30%,
-            color-mix(in oklab, var(--color-overlay) 44%, transparent) 62%,
-            color-mix(in oklab, var(--color-overlay) 92%, transparent) 100%
+            var(--color-hero-ember) 0%,
+            color-mix(in oklab, var(--color-hero-ember) 35%, transparent) 35%,
+            transparent 70%
         );
+        mix-blend-mode: screen;
     }
 
-    .hero-content {
-        @apply relative z-10 flex w-full max-w-4xl flex-col items-center;
+    .hero-logo {
+        @apply h-auto w-full max-w-24 sm:max-w-32 lg:max-w-40;
+        filter:
+            drop-shadow(var(--shadow-hero-logo))
+            drop-shadow(var(--glow-hero));
     }
 
-    .hero-brand {
-        @apply h-auto w-full max-w-36 sm:max-w-48 lg:max-w-60;
-        filter: drop-shadow(var(--shadow-hero-logo));
-    }
-
-    .hero-tagline {
-        @apply mt-8 max-w-2xl text-balance text-base font-medium leading-8 tracking-normal text-foreground/90 sm:text-lg sm:leading-9;
+    .hero-wordmark {
+        @apply h-auto w-full max-w-40 sm:max-w-48 lg:max-w-56;
         filter: drop-shadow(var(--shadow-hero-text));
     }
 
-    .hero-copy-panel {
-        @apply mt-7 max-w-xl rounded-lg border border-foreground/14 bg-background/42 px-5 py-4 text-sm leading-6 text-foreground/76 backdrop-blur-sm sm:text-[0.9375rem];
-        box-shadow: var(--shadow-hero-panel);
+    .hero-statement {
+        @apply relative isolate flex max-w-lg flex-col items-center text-balance px-4 py-2 text-foreground sm:max-w-xl;
+        filter: drop-shadow(var(--shadow-hero-copy));
+    }
+
+    .hero-statement::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: -1.5rem -3rem;
+        background: radial-gradient(
+            ellipse at center,
+            color-mix(in oklab, var(--color-overlay) 72%, transparent) 0,
+            color-mix(in oklab, var(--color-overlay) 44%, transparent) 42%,
+            transparent 72%
+        );
+        filter: blur(10px);
+        pointer-events: none;
+    }
+
+    .hero-burn-line {
+        @apply my-4 h-px w-16 rounded-full sm:my-5;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            color-mix(in oklab, var(--color-brand-red) 85%, transparent) 18%,
+            var(--color-hero-burn) 50%,
+            color-mix(in oklab, var(--color-brand-red) 85%, transparent) 82%,
+            transparent
+        );
+        box-shadow:
+            0 0 14px
+                color-mix(in oklab, var(--color-brand-flame) 45%, transparent),
+            0 0 1px var(--color-brand-cream);
+    }
+
+    .hero-meta {
+        @apply absolute inset-x-4 z-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-foreground/56 sm:text-xs;
+        bottom: clamp(1.5rem, 5dvh, 4rem);
+        filter: drop-shadow(var(--shadow-hero-text));
+    }
+
+    .hero-meta-separator {
+        @apply size-1 rounded-full;
+        background: var(--color-brand-flame);
+        box-shadow: 0 0 10px
+            color-mix(in oklab, var(--color-brand-flame) 55%, transparent);
+    }
+
+    .page-header {
+        @apply relative flex flex-col justify-between gap-6 pb-8 sm:flex-row sm:items-end;
+    }
+
+    .page-header::after {
+        content: "";
+        position: absolute;
+        inset-inline: 0;
+        bottom: 0;
+        height: 1px;
+        background: linear-gradient(
+            90deg,
+            color-mix(in oklab, var(--color-brand-flame) 46%, transparent),
+            color-mix(in oklab, var(--color-border) 80%, transparent) 28%,
+            transparent 100%
+        );
+    }
+
+    .notice-rail {
+        @apply border-l-2 border-warning px-5 py-1.5;
+        background: linear-gradient(
+            90deg,
+            color-mix(in oklab, var(--color-warning-muted) 42%, transparent),
+            transparent 72%
+        );
+    }
+
+    .table-panel {
+        @apply overflow-hidden rounded-lg border border-border bg-card;
+        box-shadow: var(--shadow-card);
+    }
+
+    .table-shell {
+        @apply overflow-x-auto;
+    }
+
+    .data-table {
+        @apply w-full min-w-[720px] text-left text-sm;
+    }
+
+    .data-table thead {
+        @apply border-b border-border bg-elevated text-xs font-semibold uppercase tracking-[0.12em] text-foreground/75;
+    }
+
+    .data-table th {
+        @apply px-4 py-2.5;
+    }
+
+    .data-table th:first-child,
+    .data-table td:first-child {
+        @apply pl-5;
+    }
+
+    .data-table th:last-child,
+    .data-table td:last-child {
+        @apply pr-5;
+    }
+
+    .data-table tbody {
+        @apply divide-y divide-border-subtle;
+    }
+
+    .data-table tbody tr:not(.table-empty) {
+        @apply transition-colors hover:bg-muted/30;
+    }
+
+    .data-table td {
+        @apply px-4 py-2.5;
+    }
+
+    .table-empty {
+        @apply text-center text-muted-foreground;
     }
 
     .setup-shell {
@@ -238,66 +387,19 @@
 
     .setup-logo {
         @apply mx-auto h-auto w-full max-w-24;
-    }
-
-    .setup-title {
-        @apply mt-6 text-2xl font-semibold text-foreground;
-    }
-
-    .setup-copy {
-        @apply mt-2 text-sm leading-6 text-foreground/60;
-    }
-
-    .setup-link {
-        @apply text-foreground/80 underline underline-offset-2 hover:text-foreground;
-    }
-
-    .setup-help-panel {
-        @apply mb-8 rounded-lg border border-foreground/10 bg-card/60 px-5 py-4 text-xs leading-5 text-foreground/50;
-    }
-
-    .setup-help-title {
-        @apply mb-2.5 font-medium text-foreground/70;
-    }
-
-    .setup-strong {
-        @apply text-foreground/70;
-    }
-
-    .setup-code {
-        @apply mt-1 inline-block rounded bg-foreground/8 px-1.5 py-0.5 font-mono text-[10px] text-foreground/60;
+        filter: drop-shadow(var(--shadow-hero-logo));
     }
 
     .form-label {
         @apply mb-1.5 block text-xs font-semibold uppercase tracking-[0.05em] text-foreground/50;
     }
 
-    .form-label-note {
-        @apply ml-1 font-normal normal-case tracking-normal text-foreground/30;
-    }
-
     .form-input {
         @apply block w-full rounded-md border border-foreground/14 bg-input px-3 py-2.5 text-sm text-foreground placeholder:text-foreground/30 focus:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-foreground/10;
     }
 
-    .form-input-mono {
-        @apply font-mono;
-    }
-
-    .form-hint {
-        @apply mt-1.5 text-xs text-foreground/30;
-    }
-
-    .form-hint-code {
-        @apply font-mono text-foreground/40;
-    }
-
-    .error-shell {
-        @apply relative flex min-h-dvh items-center justify-center overflow-hidden px-6 py-20;
-    }
-
     .error-backdrop-logo {
-        @apply absolute inset-bs-8 opacity-50;
+        @apply absolute left-1/2 -translate-x-1/2 opacity-50 inset-bs-8;
         width: 100%;
         height: 100%;
         max-width: 800px;
@@ -307,26 +409,6 @@
         display: block;
         width: 100%;
         height: auto;
-    }
-
-    .error-content {
-        @apply relative z-10 w-full max-w-md text-center;
-    }
-
-    .error-code {
-        @apply text-8xl font-bold text-foreground/20 sm:text-9xl;
-    }
-
-    .error-title {
-        @apply mt-1 text-xl font-semibold text-foreground;
-    }
-
-    .error-detail {
-        @apply mt-4 text-sm leading-6 text-foreground/60;
-    }
-
-    .error-quip {
-        @apply text-xs italic text-foreground/30;
     }
 
     @keyframes creep-in {
@@ -444,7 +526,8 @@
         background: var(--color-brand-red);
         box-shadow:
             0 0 8px 2px var(--color-brand-red),
-            0 0 24px 6px color-mix(in oklab, var(--color-brand-red) 45%, transparent);
+            0 0 24px 6px
+                color-mix(in oklab, var(--color-brand-red) 45%, transparent);
         animation: laser-pulse 2s ease-in-out infinite;
         animation-delay: 7.5s;
         animation-fill-mode: both;
@@ -472,8 +555,10 @@
             color-mix(in oklab, var(--color-brand-red) 0%, transparent)
         );
         box-shadow:
-            0 0 8px 2px color-mix(in oklab, var(--color-brand-red) 67%, transparent),
-            0 0 20px 4px color-mix(in oklab, var(--color-brand-red) 27%, transparent);
+            0 0 8px 2px
+                color-mix(in oklab, var(--color-brand-red) 67%, transparent),
+            0 0 20px 4px
+                color-mix(in oklab, var(--color-brand-red) 27%, transparent);
         opacity: 0;
         transform-origin: left center;
     }
@@ -492,8 +577,10 @@
         background: var(--color-brand-red) !important;
         color: var(--color-brand-cream) !important;
         box-shadow:
-            0 0 12px 4px color-mix(in oklab, var(--color-brand-red) 50%, transparent),
-            0 0 30px 8px color-mix(in oklab, var(--color-brand-red) 25%, transparent);
+            0 0 12px 4px
+                color-mix(in oklab, var(--color-brand-red) 50%, transparent),
+            0 0 30px 8px
+                color-mix(in oklab, var(--color-brand-red) 25%, transparent);
         animation: rattle 0.15s linear infinite;
     }
 
@@ -524,56 +611,41 @@
         height: auto;
     }
 
-    .section-header-subtle {
-        @apply text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground;
-    }
-
-    .badge {
-        @apply rounded-full px-2.5 py-1 text-xs font-medium;
-    }
-
-    .badge-success {
-        @apply rounded-full bg-success-muted px-2.5 py-1 text-xs font-medium text-success-foreground;
-    }
-
     .badge-warning {
-        @apply rounded-full bg-warning-muted px-2.5 py-1 text-xs font-medium text-warning-foreground;
+        @apply rounded-full px-2.5 py-1 text-xs font-medium;
+        background: color-mix(in oklab, var(--color-warning) 30%, transparent);
+        border: 1px solid color-mix(in oklab, var(--color-warning) 42%, transparent);
+        color: var(--color-warning-foreground);
     }
 
     .badge-danger {
-        @apply rounded-full bg-danger-muted px-2.5 py-1 text-xs font-medium text-danger-foreground;
+        @apply rounded-full px-2.5 py-1 text-xs font-medium;
+        background: color-mix(in oklab, var(--color-danger) 30%, transparent);
+        border: 1px solid color-mix(in oklab, var(--color-danger) 42%, transparent);
+        color: var(--color-danger-foreground);
     }
 
     .badge-expired {
-        @apply rounded-full bg-expired-muted px-2.5 py-1 text-xs font-medium text-expired-foreground;
+        @apply rounded-full px-2.5 py-1 text-xs font-medium;
+        background: color-mix(in oklab, var(--color-expired) 26%, transparent);
+        border: 1px solid color-mix(in oklab, var(--color-expired) 38%, transparent);
+        color: var(--color-expired-foreground);
+    }
+
+    .badge-slate {
+        @apply rounded-full px-2.5 py-1 text-xs font-medium;
+        background: color-mix(in oklab, var(--color-slate) 32%, transparent);
+        border: 1px solid color-mix(in oklab, var(--color-slate) 44%, transparent);
+        color: oklch(0.82 0.04 250);
     }
 
     .card {
-        @apply rounded-lg border border-border bg-card text-card-foreground;
+        @apply border rounded-lg border-border bg-card text-card-foreground;
         box-shadow: var(--shadow-card);
-    }
-
-    .card-header {
-        @apply border-b border-border px-4 py-3;
-    }
-
-    .card-header-label {
-        @apply text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground;
-    }
-
-    .card-header-title {
-        @apply mt-1 text-base font-semibold text-card-foreground;
-    }
-
-    .card-body {
-        @apply px-4 py-4;
     }
 
     .input-mono {
         @apply rounded-md border border-border bg-input px-3 py-2 font-mono text-[13px] leading-5 text-foreground transition placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring-muted;
     }
 
-    .input-error {
-        @apply text-sm font-medium text-danger-foreground;
-    }
 }
