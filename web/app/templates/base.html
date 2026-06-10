@@ -14,16 +14,16 @@
     <link rel="stylesheet" href="/static/css/output.css" />
     <script src="https://unpkg.com/htmx.org@2"></script>
   </head>
-  <body class="min-h-screen bg-background text-sm text-foreground antialiased {% block body_class %}{% endblock %}">
+  <body class="min-h-dvh flex flex-col bg-background text-sm text-foreground antialiased {% block body_class %}{% endblock %}">
     <header class="app-header">
-      <div class="flex items-center justify-between px-4 py-3 mx-auto max-w-7xl sm:px-8">
+      <div class="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 px-4 py-3 sm:px-8">
         <a href="/"
-           class="brand-link flex items-center gap-2 text-base text-foreground"
+           class="brand-link flex min-w-0 shrink-0 items-center gap-2 justify-self-start text-base text-foreground"
            aria-label="Firebreak home">
           <svg width="28"
                height="30"
                viewBox="0 0 28 30"
-               class="brand-mark"
+               class="text-brand-red"
                fill="none"
                xmlns="http://www.w3.org/2000/svg">
             <path d="M21.5596 8.01157C21.9844 7.96011 22.829 8.0003 23.1709 8.30259C23.6097 8.69079 23.5179 8.79938 24.1025 8.91489C24.0501 9.93095 24.2099 9.61686 24.5459 10.3573C24.7906 11.0572 25.0721 11.8012 25.2324 12.5272C25.4173 13.3648 24.6717 13.9479 25.7383 14.2616C25.4591 15.7115 26.2085 16.3515 27.3818 16.6141C26.3596 16.9714 25.9787 17.4089 25.7168 18.5331C25.6328 18.8692 25.5274 19.2128 25.4668 19.5545C25.377 20.0609 25.3545 20.5702 25.0117 20.9686C24.9012 21.097 24.7889 21.1919 24.6611 21.3006C24.6971 21.46 24.74 21.6249 24.7793 21.784C24.292 22.5752 24.0626 23.4229 23.5742 24.204C23.4297 24.4351 23.3003 24.6731 23.1875 24.9247C24.6225 24.5974 25.6338 24.0962 26.8867 23.3006C26.5461 23.839 26.0563 24.5635 25.623 25.0145C25.1786 25.465 24.7082 25.8802 24.2637 26.3319C23.7252 26.8791 23.1983 27.4409 22.6592 27.9872C22.3934 28.2565 22.0988 28.4942 21.8262 28.7577C21.9804 28.4492 22.1733 28.0481 22.2852 27.7274C22.5183 27.0585 22.6706 25.7273 22.5547 25.0272C22.4042 24.119 22.3097 24.0636 22.3721 23.117C21.9741 24.0484 22.123 24.3097 22.1807 25.2733C22.1961 25.5308 22.009 26.1329 21.8301 26.3045C21.3927 26.4253 21.2374 26.7755 20.8818 27.0594C20.4801 27.3801 20.0375 27.6228 19.6064 27.8924C19.8619 27.5379 19.9983 27.3673 20.3115 27.0741C19.9244 27.281 19.4925 27.5399 19.1543 27.829C19.0209 27.943 18.9042 28.1524 18.7529 28.244C17.8582 28.786 16.7321 29.1024 15.7461 29.3153C14.7702 29.5054 13.7767 29.5679 12.7871 29.5018C12.2082 29.457 11.9201 29.3637 11.3877 29.1336C11.3634 29.1232 11.2161 29.2681 11.1436 29.2713C10.7993 29.2848 10.4429 29.2104 10.1143 29.1014C8.98932 28.5792 7.85592 27.9781 6.81934 27.2713C6.50006 27.0536 6.23649 26.7258 5.91211 26.5184C5.51707 26.2658 5.09943 26.0819 4.71191 25.8221C6.34186 25.9961 6.84406 25.852 8.38867 25.7059C8.65531 25.8513 8.99419 26.101 9.26172 26.2713C9.66483 26.5243 10.0917 26.7301 10.5352 26.8836C11.4259 27.1801 12.358 27.3031 13.2881 27.2469C13.824 27.2119 14.3885 27.0906 14.9219 27.1561C16.2722 27.3218 17.3818 26.6248 18.5361 25.9696L18.5977 26.3377C19.0615 25.8774 19.1974 25.5721 19.5312 25.0243C19.6175 24.8832 20.0982 24.5102 20.2559 24.3719C20.6583 24.0191 21.0791 23.6679 21.4473 23.2665C22.7499 21.8542 22.6729 20.812 24.4531 19.9051C23.0524 19.1473 23.4708 18.7529 23.915 17.4803C24.0003 17.2358 24.0164 16.8013 24.0244 16.537C24.2699 16.6269 24.5438 16.7031 24.7949 16.7792C24.7438 16.7185 24.6935 16.6564 24.6445 16.5936C23.9833 15.7385 23.4568 14.2696 23.3232 13.1551C23.2955 12.9235 23.3267 12.5395 23.3447 12.3026C23.2574 12.1449 22.8972 11.7452 22.8701 11.6698C22.3398 10.1933 21.6402 9.39436 20.5234 8.37583C20.9186 8.12619 21.1053 8.08436 21.5596 8.01157Z" fill="currentColor" />
@@ -42,7 +42,7 @@
           <svg width="114"
                height="20"
                viewBox="0 0 114 20"
-               class="brand-wordmark"
+               class="text-header-foreground"
                fill="none"
                xmlns="http://www.w3.org/2000/svg">
             <path d="M48.4923 0.00654069C48.7964 0.29344 48.6961 6.65684 48.6961 7.49071C50.2534 6.30339 51.895 5.46624 53.9209 5.76604C58.4095 6.42994 60.7139 11.94 58.6683 15.8045C58.0278 17.0147 57.326 17.6839 56.2404 18.4738C53.6721 20.1022 51.1111 19.4924 48.8025 17.8218C48.8034 18.355 48.7475 18.7103 48.6785 19.2344C47.7436 19.2098 46.7779 19.236 45.8406 19.2489C45.7126 13.2211 45.9041 7.05515 45.8189 1.00077C46.6931 0.744994 47.6371 0.345046 48.4923 0.00654069ZM52.9146 16.6756C57.8541 15.5749 57.3784 7.91769 51.8855 8.52241C50.6155 9.01614 49.5609 9.64953 48.9885 10.9468C48.1112 12.9353 48.8851 15.5905 50.9929 16.3774C51.6077 16.6019 52.2607 16.7032 52.9146 16.6756Z" fill="currentColor" />
@@ -57,10 +57,15 @@
             <path d="M15.4375 0.376667C16.1305 0.156321 16.8886 0.33039 17.4159 0.830877C17.9432 1.33157 18.1566 2.07943 17.9727 2.78306C17.7886 3.48648 17.2365 4.03428 16.5317 4.21265C15.4858 4.47722 14.4193 3.86267 14.1234 2.82545C13.8275 1.78823 14.4095 0.703499 15.4375 0.376667Z" fill="currentColor" />
           </svg>
         </a>
-        <nav class="flex items-center gap-2">
+        <nav class="flex shrink-0 items-center justify-center gap-6"
+             aria-label="Primary navigation">
           {% if user %}
-            <a href="/dashboard" class="btn btn-sm btn-borderless">Dashboard</a>
-            <a href="/settings" class="btn btn-sm btn-borderless">Settings</a>
+            <a href="/dashboard" class="btn-link">Dashboard</a>
+            <a href="/settings" class="btn-link">Settings</a>
+          {% endif %}
+        </nav>
+        <div class="flex items-center justify-self-end">
+          {% if user %}
             <a href="/auth/logout" class="btn btn-sm btn-secondary">Logout</a>
           {% else %}
             <a href="/auth/login/forgejo" class="btn btn-sm btn-primary">
@@ -73,12 +78,37 @@
               <span>Sign In with Forgejo</span>
             </a>
           {% endif %}
-        </nav>
+        </div>
       </div>
     </header>
     <main id="main"
-          class="{% block main_class %}px-4 py-8 mx-auto max-w-7xl sm:px-8{% endblock %}">
+          class="{% block main_class %}flex-1 w-full px-4 py-8 mx-auto max-w-7xl sm:px-8{% endblock %}">
       {% block content %}{% endblock %}
     </main>
+    {% if debug %}
+      <!-- Live reload for CSS changes (development only; gated on the debug flag) -->
+      <script>
+      let lastCssMtime = null;
+
+      async function checkForCssChanges() {
+        try {
+          const response = await fetch('/api/dev/css-mtime');
+          const data = await response.json();
+
+          if (lastCssMtime === null) {
+            lastCssMtime = data.mtime;
+          } else if (data.mtime > lastCssMtime) {
+            lastCssMtime = data.mtime;
+            location.reload();
+          }
+        } catch (err) {
+          // Endpoint unavailable — stop polling rather than spamming errors.
+        }
+      }
+
+      // Check every second.
+      setInterval(checkForCssChanges, 1000);
+      </script>
+    {% endif %}
   </body>
 </html>
