@@ -1,0 +1,89 @@
+<section class="table-panel">
+  <div class="flex flex-col gap-1 px-5 py-4 border-b border-border">
+    <h2 class="text-base font-semibold text-foreground">
+      Repositories
+      {% if repositories %}
+        <span class="ml-1.5 text-sm font-normal text-muted-foreground">{{ repositories|length }}</span>
+      {% endif %}
+    </h2>
+    <p class="text-sm leading-6 text-muted-foreground">
+      Your Forgejo repositories. Create a share link to grant temporary read-only access.
+    </p>
+  </div>
+  {% if repo_error %}
+    <div class="px-5 py-8 text-sm text-center text-muted-foreground">{{ repo_error }}</div>
+  {% elif repositories %}
+    <div class="table-shell">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Repository</th>
+            <th>Status</th>
+            <th>Branch</th>
+            <th>Language</th>
+            <th>Updated</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for repo in repositories %}
+            <tr>
+              <td>
+                {% if repo.html_url %}
+                  <a href="{{ repo.html_url }}"
+                     target="_blank"
+                     rel="noopener"
+                     class="font-medium text-foreground hover:text-brand-flame">{{ repo.full_name }}</a>
+                {% else %}
+                  <span class="font-medium text-foreground">{{ repo.full_name }}</span>
+                {% endif %}
+                {% if repo.description %}
+                  <p class="mt-0.5 max-w-md truncate text-xs text-muted-foreground">{{ repo.description }}</p>
+                {% endif %}
+              </td>
+              <td>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  {% if repo.private %}
+                    <span class="badge-warning">Private</span>
+                  {% else %}
+                    <span class="badge-slate">Public</span>
+                  {% endif %}
+                  {% if repo.archived %}<span class="badge-expired">Archived</span>{% endif %}
+                  {% if repo.empty %}<span class="badge-danger">Empty</span>{% endif %}
+                  {% if repo.fork %}<span class="badge-slate">Fork</span>{% endif %}
+                  {% if repo.mirror %}<span class="badge-slate">Mirror</span>{% endif %}
+                </div>
+              </td>
+              <td>
+                <span class="inline-block rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">{{ repo.default_branch }}</span>
+              </td>
+              <td class="whitespace-nowrap text-muted-foreground">
+                {% if repo.language %}
+                  <span class="inline-flex items-center gap-1.5">
+                    <span class="rounded-full size-2 bg-brand-flame/70" aria-hidden="true"></span>{{ repo.language }}
+                  </span>
+                {% else %}
+                  <span class="text-muted-foreground/50">—</span>
+                {% endif %}
+              </td>
+              <td class="whitespace-nowrap text-muted-foreground">
+                <time datetime="{{ repo.updated_at }}" data-local-date>{{ repo.updated_at }}</time>
+              </td>
+              <td class="text-right">
+                {% if repo.empty %}
+                  <span class="btn btn-sm btn-disabled" aria-disabled="true">Create Link</span>
+                {% else %}
+                  <a href="/links/create" class="btn btn-sm btn-primary">Create Link</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="px-5 py-8 text-sm text-center text-muted-foreground">
+      No repositories found in your Forgejo account.
+    </div>
+  {% endif %}
+</section>

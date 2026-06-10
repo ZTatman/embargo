@@ -5,21 +5,21 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
 from sqlalchemy import func as sql_func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app import models as _models  # noqa: F401 - register ORM tables on metadata
-from app.auth.session import get_current_session, get_optional_session
-from app.config import get_settings
+from app.auth.session import get_optional_session
+from app.config import get_settings, set_app_settings
 from app.database import Base
+from app.errors import register_error_handlers
 from app.middleware import SetupRequiredMiddleware
 from app.models.app_settings import AppSettings
 from app.models.session import Session as UserBrowserSession
-from app.routers import auth, links, settings, setup
+from app.routers import auth, dashboard, dev, links, settings, setup
 from app.templating import templates
 
 
@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
         row = result.scalar_one_or_none()
         user_count = await db.scalar(select(sql_func.count()).select_from(User))
 
-        app.state.app_settings = row
+        set_app_settings(app, row)
 
         # Generate a setup token whenever no users exist yet — whether it's
         # a fresh install or a retry after bad OAuth config.
@@ -74,36 +74,14 @@ app.add_middleware(SetupRequiredMiddleware)
 
 app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 app.include_router(auth.router)
+app.include_router(dashboard.router)
 app.include_router(links.router)
 app.include_router(settings.router)
 app.include_router(setup.router)
+if get_settings().debug:
+    app.include_router(dev.router)
 
-ERROR_TITLES = {
-    400: "Bad Request",
-    401: "Unauthorized",
-    403: "Forbidden",
-    404: "Not Found",
-    500: "Internal Server Error",
-    503: "Service Unavailable",
-}
-
-
-@app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> Response:
-    """Render a styled error page for browser requests, JSON for API clients."""
-    accept = request.headers.get("accept", "")
-    if "text/html" in accept:
-        return templates.TemplateResponse(
-            request,
-            "error.html",
-            {
-                "status_code": exc.status_code,
-                "title": ERROR_TITLES.get(exc.status_code, "Error"),
-                "detail": exc.detail,
-            },
-            status_code=exc.status_code,
-        )
-    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+register_error_handlers(app)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -114,18 +92,4 @@ async def root(
         request,
         "index.html",
         {"user": sess.user if sess else None},
-    )
-
-
-@app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(
-    request: Request, sess: Annotated[UserBrowserSession, Depends(get_current_session)]
-) -> Response:
-    return templates.TemplateResponse(
-        request,
-        "dashboard.html",
-        {
-            "user": sess.user,
-            "pat_registered": sess.user.has_pat,
-        },
     )
