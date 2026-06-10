@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from cryptography.fernet import Fernet
-from fastapi import Request
+from fastapi import FastAPI, HTTPException, Request, status
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     app_name: str = "Firebreak"
     database_url: str = "postgresql+asyncpg://firebreak:firebreak@db:5432/firebreak_db"
     token_encryption_key: str = ""
+    debug: bool = False
 
     model_config = SettingsConfigDict(env_file=str(_env_file))
 
@@ -56,6 +57,32 @@ def get_fernet() -> Fernet:
     return fernet
 
 
-def get_app_settings(request: Request) -> AppSettings:
-    """FastAPI dependency returning the AppSettings row from app state."""
+def current_app_settings(request: Request) -> AppSettings | None:
+    """Get AppSettings row, or None if not available.
+
+    This is the source of truth for the live AppSettings row
+    """
     return request.app.state.app_settings
+
+
+def get_app_settings(request: Request) -> AppSettings:
+    """FastAPI dependency that requires configured app settings.
+
+    Calls `current_app_settings` directly (rather than depending on it) so the
+    only injected parameter is the runtime-resolvable `request` — mirroring how
+    `get_current_session` calls `lookup_session`. Raises HTTP 500 when settings
+    are unavailable, which should only happen if a route that requires settings
+    is reached before setup completes (i.e. not gated by setup middleware).
+    """
+    settings = current_app_settings(request)
+    if settings is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="App settings unavailable — route not gated by setup middleware.",
+        )
+    return settings
+
+
+def set_app_settings(app: FastAPI, row: AppSettings | None) -> None:
+    """Set application settings on the FastAPI app state."""
+    app.state.app_settings = row

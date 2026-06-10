@@ -2,6 +2,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 
+from app.config import current_app_settings
+
 
 class SetupRequiredMiddleware(BaseHTTPMiddleware):
     """Redirect all requests to /setup when the app has not been configured yet."""
@@ -11,7 +13,7 @@ class SetupRequiredMiddleware(BaseHTTPMiddleware):
         if path.startswith("/setup") or path.startswith("/static") or path == "/favicon.ico":
             return await call_next(request)
 
-        if request.app.state.app_settings is None:
+        if current_app_settings(request) is None:
             if request.headers.get("HX-Request"):
                 response = Response(status_code=200)
                 response.headers["HX-Redirect"] = "/setup"
