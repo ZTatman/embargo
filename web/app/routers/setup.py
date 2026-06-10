@@ -8,9 +8,9 @@ from starlette.responses import Response
 from sqlalchemy import func as sql_func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.crypto import encrypt_token
+from app.auth import tokens
 from app.auth.session import lookup_session
-from app.config import get_fernet
+from app.config import current_app_settings, set_app_settings
 from app.deps import get_db
 from app.models.app_settings import AppSettings
 from app.models.user import User
@@ -19,9 +19,21 @@ from app.templating import templates
 router = APIRouter(prefix="/setup", tags=["setup"])
 
 
+def _encryption_unavailable() -> HTTPException:
+    """503 raised when the Forgejo client secret can't be encrypted (no key)."""
+    return HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail=(
+            "TOKEN_ENCRYPTION_KEY is not set. Add it to your .env file or deployment "
+            "environment. Generate one with: "
+            "uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+        ),
+    )
+
+
 async def _require_auth_if_configured(
-    request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
+    app_settings: Annotated[AppSettings | None, Depends(current_app_settings)],
     firebreak_session: Annotated[str | None, Cookie()] = None,
 ) -> None:
     """Block anonymous access to /setup after initial configuration.
@@ -29,7 +41,7 @@ async def _require_auth_if_configured(
     If no users exist yet (e.g. bad OAuth config on first setup), the setup
     token is still required but login is not — there's nobody to log in as.
     """
-    if request.app.state.app_settings is None:
+    if app_settings is None:
         return
 
     # If no users exist, allow access — the setup token still protects POST
@@ -46,9 +58,12 @@ async def _require_auth_if_configured(
 
 
 @router.get("", dependencies=[Depends(_require_auth_if_configured)])
-async def setup_page(request: Request, db: Annotated[AsyncSession, Depends(get_db)]) -> Response:
+async def setup_page(
+    request: Request,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    existing: Annotated[AppSettings | None, Depends(current_app_settings)],
+) -> Response:
     """Render the setup wizard. Pre-fills fields when reconfiguring."""
-    existing = request.app.state.app_settings
     user_count = await db.scalar(select(sql_func.count()).select_from(User)) or 0
     has_users = user_count > 0
     public_base = (existing.firebreak_public_base_url if existing else "") or str(
@@ -68,6 +83,7 @@ async def setup_page(request: Request, db: Annotated[AsyncSession, Depends(get_d
 async def setup_submit(
     request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
+    app_settings: Annotated[AppSettings | None, Depends(current_app_settings)],
     forgejo_base_url: Annotated[str, Form()],
     forgejo_oauth_client_id: Annotated[str, Form()],
     forgejo_oauth_client_secret: Annotated[str, Form()] = "",
@@ -77,7 +93,7 @@ async def setup_submit(
     """Process the setup wizard — creates or updates Forgejo settings."""
     user_count = await db.scalar(select(sql_func.count()).select_from(User)) or 0
     has_users = user_count > 0
-    is_reconfiguring = request.app.state.app_settings is not None and has_users
+    is_reconfiguring = app_settings is not None and has_users
 
     # Require setup token when no users exist (first-time or fixing bad config)
     if not has_users:
@@ -111,22 +127,12 @@ async def setup_submit(
         row.firebreak_public_base_url = firebreak_public_base_url
         if forgejo_oauth_client_secret:
             try:
-                fernet = get_fernet()
+                tokens.set_client_secret(row, forgejo_oauth_client_secret)
             except ValueError:
-                raise HTTPException(
-                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    detail=(
-                        "TOKEN_ENCRYPTION_KEY is not set. Add it to your .env file or deployment "
-                        "environment. Generate one with: "
-                        "uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
-                    ),
-                )
-            row.forgejo_oauth_client_secret_encrypted = encrypt_token(
-                fernet, forgejo_oauth_client_secret
-            )
+                raise _encryption_unavailable()
         await db.commit()
         await db.refresh(row)
-        request.app.state.app_settings = row
+        set_app_settings(request.app, row)
         return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
 
     # First-time setup (or retry after bad config) — no users exist yet
@@ -136,38 +142,21 @@ async def setup_submit(
             detail="Client Secret is required during initial setup.",
         )
 
-    try:
-        fernet = get_fernet()
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=(
-                "TOKEN_ENCRYPTION_KEY is not set. Add it to your .env file or deployment "
-                "environment. Generate one with: "
-                "uv run python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
-            ),
-        )
-    encrypted_secret = encrypt_token(fernet, forgejo_oauth_client_secret)
-
-    # Update existing row if retrying after bad config, otherwise create
+    # Update existing row if retrying after bad config, otherwise create one.
     result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
     row = result.scalar_one_or_none()
-    if row:
-        row.forgejo_base_url = forgejo_base_url
-        row.forgejo_oauth_client_id = forgejo_oauth_client_id
-        row.forgejo_oauth_client_secret_encrypted = encrypted_secret
-        row.firebreak_public_base_url = firebreak_public_base_url
-    else:
-        row = AppSettings(
-            id=1,
-            forgejo_base_url=forgejo_base_url,
-            forgejo_oauth_client_id=forgejo_oauth_client_id,
-            forgejo_oauth_client_secret_encrypted=encrypted_secret,
-            firebreak_public_base_url=firebreak_public_base_url,
-        )
+    if row is None:
+        row = AppSettings(id=1, forgejo_oauth_client_secret_encrypted="")
         db.add(row)
+    row.forgejo_base_url = forgejo_base_url
+    row.forgejo_oauth_client_id = forgejo_oauth_client_id
+    row.firebreak_public_base_url = firebreak_public_base_url
+    try:
+        tokens.set_client_secret(row, forgejo_oauth_client_secret)
+    except ValueError:
+        raise _encryption_unavailable()
     await db.commit()
     await db.refresh(row)
-    request.app.state.app_settings = row
+    set_app_settings(request.app, row)
 
     return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)

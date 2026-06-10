@@ -3,60 +3,32 @@ from __future__ import annotations
 import secrets
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
-from urllib.parse import urlencode
 
-import httpx
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.crypto import decrypt_token
+from app.auth import tokens
 from app.auth.identity import find_or_create_user
 from app.auth.session import create_session, revoke_session
-from app.config import get_app_settings, get_fernet
+from app.config import get_app_settings
 from app.deps import get_db
 from app.models.app_settings import AppSettings
+from app.services import forgejo
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-# ── Forgejo API client ──
+# ── Forgejo OAuth error translation ──
 
 
-async def _forgejo_post(app_settings: AppSettings, path: str, data: dict) -> dict:
-    url = f"{app_settings.forgejo_base_url}{path}"
-    try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(url, data=data, headers={"Accept": "application/json"})
-    except httpx.RequestError:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Cannot reach Forgejo. Check your connection settings.",
-        )
-    if resp.status_code != 200:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Forgejo returned an error ({resp.status_code}). Verify your OAuth configuration.",
-        )
-    return resp.json()
-
-
-async def _forgejo_get(app_settings: AppSettings, path: str, token: str) -> dict:
-    url = f"{app_settings.forgejo_base_url}{path}"
-    try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.get(url, headers={"Authorization": f"token {token}"})
-    except httpx.RequestError:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Cannot reach Forgejo. Check your connection settings.",
-        )
-    if resp.status_code != 200:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Forgejo returned an error ({resp.status_code}). Verify your OAuth configuration.",
-        )
-    return resp.json()
+def _oauth_gateway_error(exc: forgejo.ForgejoError) -> HTTPException:
+    """Translate a Forgejo failure into the OAuth flow's 502 response."""
+    if exc.unreachable:
+        detail = "Cannot reach Forgejo. Check your connection settings."
+    else:
+        detail = f"Forgejo returned an error ({exc.status_code}). Verify your OAuth configuration."
+    return HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=detail)
 
 
 # ── OAuth CSRF helpers ──
@@ -126,7 +98,7 @@ def _forgejo_oauth_redirect_uri(request: Request, app_settings: AppSettings) -> 
 
 def _get_oauth_client_secret(app_settings: AppSettings) -> str:
     try:
-        return decrypt_token(get_fernet(), app_settings.forgejo_oauth_client_secret_encrypted)
+        return tokens.decrypt_client_secret(app_settings)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -145,15 +117,7 @@ async def login_forgejo(
 
     redirect_uri = _forgejo_oauth_redirect_uri(request, app_settings)
     state = secrets.token_urlsafe(32)
-    query = urlencode(
-        {
-            "client_id": app_settings.forgejo_oauth_client_id,
-            "response_type": "code",
-            "redirect_uri": redirect_uri,
-            "state": state,
-        }
-    )
-    authorization_url = f"{app_settings.forgejo_base_url}/login/oauth/authorize?{query}"
+    authorization_url = forgejo.authorize_url(app_settings, redirect_uri=redirect_uri, state=state)
     response = RedirectResponse(authorization_url, status_code=status.HTTP_302_FOUND)
     _set_oauth_state_cookie(response, state)
     return response
@@ -181,20 +145,21 @@ async def callback_forgejo(
     client_secret = _get_oauth_client_secret(app_settings)
     redirect_uri = _forgejo_oauth_redirect_uri(request, app_settings)
 
-    token_data = await _forgejo_post(
-        app_settings,
-        "/login/oauth/access_token",
-        {
-            "grant_type": "authorization_code",
-            "client_id": app_settings.forgejo_oauth_client_id,
-            "client_secret": client_secret,
-            "code": code,
-            "redirect_uri": redirect_uri,
-        },
-    )
+    try:
+        token_data = await forgejo.exchange_code(
+            app_settings,
+            code=code,
+            client_secret=client_secret,
+            redirect_uri=redirect_uri,
+        )
+    except forgejo.ForgejoError as exc:
+        raise _oauth_gateway_error(exc) from exc
     access_token, refresh_plain, expires_at = _parse_token_response(token_data)
 
-    user_data = await _forgejo_get(app_settings, "/api/v1/user", access_token)
+    try:
+        user_data = await forgejo.fetch_user(app_settings, access_token)
+    except forgejo.ForgejoError as exc:
+        raise _oauth_gateway_error(exc) from exc
     provider_user_id, provider_username, email = _parse_user_response(user_data)
 
     user = await find_or_create_user(
