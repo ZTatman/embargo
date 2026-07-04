@@ -1,9 +1,19 @@
 <section class="table-panel">
-  <div class="flex flex-col gap-1 px-5 py-4 border-b border-border">
-    <h2 class="text-base font-semibold text-foreground">
+  <div class="flex flex-col gap-1 border-b border-border px-4 py-3.5 sm:px-5 sm:py-4">
+    <h2 class="flex items-center gap-2 text-base font-semibold text-foreground">
+      <svg class="status-icon text-muted-foreground"
+           viewBox="0 0 24 24"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="2"
+           stroke-linecap="round"
+           stroke-linejoin="round"
+           aria-hidden="true">
+        <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+      </svg>
       Repositories
       {% if repositories %}
-        <span class="ml-1.5 text-sm font-normal text-muted-foreground">{{ repositories|length }}</span>
+        <span class="text-sm font-normal text-muted-foreground">{{ repositories|length }}</span>
       {% endif %}
     </h2>
     <p class="text-sm leading-6 text-muted-foreground">
@@ -11,69 +21,121 @@
     </p>
   </div>
   {% if repo_error %}
-    <div class="px-5 py-8 text-sm text-center text-muted-foreground">{{ repo_error }}</div>
+    <div class="table-placeholder text-warning-foreground">
+      {{ repo_error }}
+      <button type="button"
+              class="btn btn-sm btn-secondary"
+              hx-get="/dashboard/repositories"
+              hx-target="#repositories-region"
+              hx-swap="innerHTML">Retry</button>
+    </div>
   {% elif repositories %}
     <div class="table-shell">
       <table class="data-table">
+        <caption class="sr-only">Your Forgejo repositories</caption>
         <thead>
           <tr>
-            <th>Repository</th>
-            <th>Status</th>
-            <th>Branch</th>
-            <th>Language</th>
-            <th>Updated</th>
-            <th class="text-right">Actions</th>
+            <th scope="col">Repository</th>
+            <th scope="col">Type</th>
+            <th scope="col">Branch</th>
+            <th scope="col" class="hidden lg:table-cell">Language</th>
+            <th scope="col" class="hidden md:table-cell">Last Updated</th>
+            <th scope="col" class="text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
           {% for repo in repositories %}
             <tr>
               <td>
+                {# Owner muted, name bright — eyes land on the repo, not the prefix #}
+                {% set owner, slash, name = repo.full_name.partition('/') %}
                 {% if repo.html_url %}
                   <a href="{{ repo.html_url }}"
                      target="_blank"
                      rel="noopener"
-                     class="font-medium text-foreground hover:text-brand-flame">{{ repo.full_name }}</a>
+                     class="group inline-flex items-center gap-1 font-medium text-foreground hover:text-ember">
+                    {% if slash %}
+                      <span class="font-normal text-muted-foreground">{{ owner }}/</span>{{ name }}
+                    {% else %}
+                      {{ repo.full_name }}
+                    {% endif %}
+                    <svg class="size-3 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-ember"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                      <path d="M15 3h6v6m-11 5L21 3m-3 10v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    </svg>
+                    <span class="sr-only">(opens in Forgejo in a new tab)</span>
+                  </a>
                 {% else %}
-                  <span class="font-medium text-foreground">{{ repo.full_name }}</span>
+                  <span class="font-medium text-foreground">
+                    {% if slash %}
+                      <span class="font-normal text-muted-foreground">{{ owner }}/</span>{{ name }}
+                    {% else %}
+                      {{ repo.full_name }}
+                    {% endif %}
+                  </span>
+                {% endif %}
+                {# Provenance is metadata, not risk — muted mono, never a badge #}
+                {% set provenance = (['fork'] if repo.fork else []) + (['mirror'] if repo.mirror else []) %}
+                {% if provenance %}
+                  <span class="font-mono text-xs text-muted-foreground">· {{ provenance | join(' · ') }}</span>
                 {% endif %}
                 {% if repo.description %}
-                  <p class="mt-0.5 max-w-md truncate text-xs text-muted-foreground">{{ repo.description }}</p>
+                  <p class="mt-0.5 max-w-[16rem] truncate text-xs text-muted-foreground sm:max-w-md">
+                    {{ repo.description }}
+                  </p>
                 {% endif %}
               </td>
               <td>
+                {# Heat = exposure: only exception states earn a badge.
+                   Private is the ground state — an unmarked row is contained. #}
                 <div class="flex flex-wrap items-center gap-1.5">
-                  {% if repo.private %}
-                    <span class="badge-warning">Private</span>
-                  {% else %}
-                    <span class="badge-slate">Public</span>
+                  {% if not repo.private %}
+                    <span class="badge badge-ember">Public</span>
                   {% endif %}
-                  {% if repo.archived %}<span class="badge-expired">Archived</span>{% endif %}
-                  {% if repo.empty %}<span class="badge-danger">Empty</span>{% endif %}
-                  {% if repo.fork %}<span class="badge-slate">Fork</span>{% endif %}
-                  {% if repo.mirror %}<span class="badge-slate">Mirror</span>{% endif %}
+                  {% if repo.archived %}<span class="badge badge-expired">Archived</span>{% endif %}
+                  {% if repo.empty %}<span class="badge badge-danger">Empty</span>{% endif %}
                 </div>
               </td>
               <td>
-                <span class="inline-block rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">{{ repo.default_branch }}</span>
+                <span class="mono-chip inline-flex items-center gap-1">
+                  <svg class="size-3 shrink-0"
+                       viewBox="0 0 24 24"
+                       fill="none"
+                       stroke="currentColor"
+                       stroke-width="2"
+                       stroke-linecap="round"
+                       stroke-linejoin="round"
+                       aria-hidden="true">
+                    <path d="M15 6a9 9 0 0 0-9 9V3" />
+                    <circle cx="18" cy="6" r="3" />
+                    <circle cx="6" cy="18" r="3" />
+                  </svg>
+                  {{ repo.default_branch }}
+                </span>
               </td>
-              <td class="whitespace-nowrap text-muted-foreground">
+              <td class="hidden whitespace-nowrap text-muted-foreground lg:table-cell">
                 {% if repo.language %}
-                  <span class="inline-flex items-center gap-1.5">
-                    <span class="rounded-full size-2 bg-brand-flame/70" aria-hidden="true"></span>{{ repo.language }}
-                  </span>
+                  {{ repo.language }}
                 {% else %}
-                  <span class="text-muted-foreground/50">—</span>
+                  <span class="text-muted-foreground">—</span>
                 {% endif %}
               </td>
-              <td class="whitespace-nowrap text-muted-foreground">
-                <time datetime="{{ repo.updated_at }}" data-local-date>{{ repo.updated_at }}</time>
+              <td class="hidden whitespace-nowrap text-muted-foreground md:table-cell">
+                <time datetime="{{ repo.updated_at }}" data-relative-date>{{ repo.updated_at }}</time>
               </td>
-              <td class="text-right">
+              <td class="text-center">
                 {% if repo.empty %}
                   <span class="btn btn-sm btn-disabled" aria-disabled="true">Create Link</span>
                 {% else %}
-                  <a href="/links/create" class="btn btn-sm btn-primary">Create Link</a>
+                  <a href="/links/create"
+                     class="btn btn-sm btn-primary"
+                     aria-label="Create link for {{ repo.full_name }}">Create Link</a>
                 {% endif %}
               </td>
             </tr>
@@ -82,8 +144,6 @@
       </table>
     </div>
   {% else %}
-    <div class="px-5 py-8 text-sm text-center text-muted-foreground">
-      No repositories found in your Forgejo account.
-    </div>
+    <div class="table-placeholder">No repositories found in your Forgejo account.</div>
   {% endif %}
 </section>
