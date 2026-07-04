@@ -1,18 +1,26 @@
 {% extends "base.html" %}
+{% from "partials/_brand.html" import mark %}
 {% block title %}{{ status_code }} — Firebreak{% endblock %}
 {% block main_class %}flex-1 flex flex-col{% endblock %}
 {% block content %}
   <section class="relative flex flex-1 items-center justify-center px-6 py-20 overflow-hidden">
-    <div class="error-backdrop-logo">
-      <img src="/static/img/firebreak-logo-red.svg"
-           alt="Firebreak"
-           width="240"
-           height="268" />
+    {# Watermark, not hero — the ring frames the message, it doesn't compete #}
+    <div class="absolute left-1/2 h-full w-full max-w-200 -translate-x-1/2 text-danger opacity-25 inset-bs-8"
+         aria-hidden="true">
+      {{ mark("block h-auto w-full") }}
     </div>
     <div class="relative z-10 w-full max-w-md text-center">
       <p class="font-bold text-8xl text-foreground/20 sm:text-9xl">{{ status_code }}</p>
-      <h1 class="mt-1 text-xl font-semibold text-foreground">{{ title }}</h1>
-      <p class="mt-4 text-sm leading-6 text-foreground/60">{{ detail }}</p>
+      {% if status_code == 404 %}
+        <h1 class="mt-1 text-xl font-semibold text-foreground">Outside the break</h1>
+        <p class="mt-4 text-sm leading-6 text-muted-foreground">This path lies beyond the cleared ground.</p>
+      {% else %}
+        <h1 class="mt-1 text-xl font-semibold text-foreground">{{ title }}</h1>
+        {# FastAPI defaults detail to the title text — don't say it twice #}
+        {% if detail and detail != title %}
+          <p class="mt-4 text-sm leading-6 text-muted-foreground">{{ detail }}</p>
+        {% endif %}
+      {% endif %}
       {% if status_code == 401 %}
         {% set quips = [
           "I'm not saying you're a data scraper, but I AM saying that this page is off-limits.",
@@ -21,10 +29,11 @@
           "Move along clanker! Nothing to see here.",
           "Just get out of here you STUPID, DUMB ANIMAL!"
         ] %}
-        <p class="text-xs italic text-foreground/30">{{ quips | random }}</p>
+        <p class="mt-3 text-xs italic text-muted-foreground">{{ quips | random }}</p>
       {% endif %}
       <div class="mt-8">
-        <a href="/" class="btn-link" id="go-home-btn">Go Home</a>
+        {# The only recovery action on the page — it earns button weight #}
+        <a href="/" class="btn btn-secondary" id="go-home-btn">Go home</a>
       </div>
     </div>
     {% if status_code == 401 %}
