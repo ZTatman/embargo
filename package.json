@@ -2,9 +2,10 @@
   "name": "myst",
   "private": true,
   "version": "0.1.0",
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@11.6.0",
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "tailwindcss": "4.3.0",
     "typescript": "^5.8.3"
   },
   "scripts": {

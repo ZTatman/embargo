@@ -36,6 +36,26 @@ class ForgejoError(Exception):
         return self.status_code is None
 
 
+def _response_error(resp: httpx.Response) -> str:
+    """Return a short, actionable error message from a non-2xx Forgejo response."""
+    detail = ""
+    content_type = resp.headers.get("content-type", "")
+    if "application/json" in content_type:
+        try:
+            data = resp.json()
+        except ValueError:
+            data = None
+        if isinstance(data, dict):
+            raw = data.get("message") or data.get("error") or data.get("detail")
+            if raw:
+                detail = str(raw)
+    if not detail:
+        detail = resp.text.strip()
+
+    suffix = f": {detail[:240]}" if detail else ""
+    return f"Forgejo returned an error ({resp.status_code} {resp.reason_phrase}){suffix}."
+
+
 def _url(app_settings: AppSettings, path: str) -> str:
     # Defensive rstrip: a base URL stored with a trailing slash would otherwise
     # produce a double slash (`https://forge//api/...`) and 404.
@@ -61,7 +81,7 @@ async def get(
         raise ForgejoError("Cannot reach Forgejo. Check your connection settings.") from exc
     if resp.status_code != 200:
         raise ForgejoError(
-            f"Forgejo returned an error ({resp.status_code}).",
+            _response_error(resp),
             status_code=resp.status_code,
         )
     return resp.json()
@@ -84,7 +104,7 @@ async def post(
         raise ForgejoError("Cannot reach Forgejo. Check your connection settings.") from exc
     if resp.status_code != 200:
         raise ForgejoError(
-            f"Forgejo returned an error ({resp.status_code}).",
+            _response_error(resp),
             status_code=resp.status_code,
         )
     return resp.json()

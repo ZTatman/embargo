@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "firebreak",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["web/dev.sh"],
+      "port": 8000
+    },
+    {
+      "name": "firebreak-watch",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["web/dev.sh", "--watch"],
+      "port": 8000
+    }
+  ]
+}

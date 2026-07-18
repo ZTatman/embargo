@@ -27,6 +27,7 @@ async def settings_page(
         {
             "user": sess.user,
             "pat_deleted": request.query_params.get("pat") == "deleted",
+            "pat_registered": request.query_params.get("pat") == "registered",
         },
     )
 

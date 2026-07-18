@@ -1,5 +1,18 @@
 {
   "css.lint.unknownAtRules": "ignore",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.experimental.configFile": {
+    "web/app/static/css/input.css": "web/app/templates/**/*.html"
+  },
+  "tailwindCSS.includeLanguages": {
+    "jinja-html": "html",
+    "django-html": "html"
+  },
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
   "python.defaultInterpreterPath": "${workspaceFolder}/web/.venv/bin/python",
   "python.analysis.typeCheckingMode": "off",
   "mypy-type-checker.importStrategy": "fromEnvironment",

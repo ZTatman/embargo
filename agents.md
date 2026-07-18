@@ -128,6 +128,12 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Solution/Workaround:** Give the header brand link a stable `brand-link` class, prevent inherited SVG strokes on `.brand-link svg`, and override only the hardcoded wordmark fill in dark contexts or forced-dark page headers.
 **Preference:** Scope icon stroke rules to nav icons; do not apply broad `header svg` stroke styles.
 
+### Header navigation uses logo-only brand and account menu
+**Area:** web/app/templates/base.html, web/app/static/css/input.css
+**Obstacle:** The desktop header crowded narrow screens when the Firebreak wordmark, Dashboard, Settings, and Logout all competed for the same row.
+**Solution/Workaround:** Keep the header logo-only, expose Dashboard as the lone primary nav item, and put account actions in an Alpine-controlled avatar dropdown. Use a real `<button>` trigger with `aria-expanded`/`aria-controls`, `x-show`, `x-cloak`, outside-click close, Escape close, and focus-leave close. The dropdown includes the user identity, Settings with a Lucide gear icon, and Logout with a Lucide log-out icon.
+**Preference:** Do not put Settings or Logout as standalone navbar buttons. Use Alpine for client-side reactivity instead of native `<details>` when behavior needs explicit dismissal. Header account controls should use Lucide icons, solid token-backed surfaces, visible focus states, and no glow/sheer effects. Keep brand SVG stroke protection scoped to `.brand-link svg`.
+
 ### Landing video poster caused logo flash
 **Area:** web/app/templates/index.html, web/app/static/img/
 **Obstacle:** Using a logo SVG as the `<video poster>` made the browser briefly stretch the logo across the full hero video area before the MP4 painted, which looked like the center logo flashing huge on refresh.
@@ -164,6 +170,12 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Solution/Workaround:** Use a metric strip with hairline dividers, notice rails, tokenized table styles, and shared button disabled/hover variants.
 **Preference:** Favor operational density, hairline separation, and semantic component classes over cards, pills, and one-off utility stacks.
 
+### Interior rails should be solid, not gradients
+**Area:** web/app/static/css/input.css, web/app/templates/*.html
+**Obstacle:** Gradient notice rails and divider treatments read as generic generated UI and fought the restrained operational direction.
+**Solution/Workaround:** Use solid token-backed surfaces with hairline borders for notice rails and interior separators. Page headers use a single hairline border with a short solid ember tick at the left instead of a full-width gradient rule.
+**Preference:** Avoid gradient banners, gradient dividers, and sheer rail backgrounds on interior app pages. Use solid fills, hairline separation, and short solid accents only where hierarchy needs it.
+
 ### FastAPI drops `Depends` on params typed with TYPE_CHECKING-only forward refs
 **Area:** web/app/config.py, any FastAPI dependency function
 **Obstacle:** A dependency function (`get_app_settings`) had a parameter typed `Annotated[AppSettings | None, Depends(current_app_settings)]`, but `AppSettings` was imported only under `TYPE_CHECKING`. FastAPI introspects a dependency's signature at *runtime*; the unresolved forward ref made the annotation fail to evaluate, so FastAPI silently discarded the `Depends(...)` marker and treated `settings` as a **required query parameter**. Every gated route then 422'd demanding `?settings=...`. Route registration did not error — it only surfaced at request time.
@@ -194,8 +206,62 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Solution/Workaround:** Page routes live in `routers/dashboard.py`; the content-negotiated error handler in `errors.py` (wired via `register_error_handlers(app)`); dev-only endpoints in `routers/dev.py`, included only when `get_settings().debug`. main.py keeps lifespan + wiring + the trivial `/` landing route. An app factory (`create_app()`) is a deferred goal for when tests are added.
 **Preference:** New feature routes get their own `routers/*.py`. Keep dev-only endpoints out of production by gating the `include_router` on the debug flag rather than guarding individual routes.
 
+### Firelight theme: warm light on cool shadow, temperature = meaning
+**Area:** web/app/static/css/input.css (@theme), all templates
+**Obstacle:** Interior pages read too dark and monochrome next to the hero. Surfaces, borders, AND text were all cool (hue 256–270), while the hero is firelight cinematography — warm cream light and ember glow against cool obsidian shadows. The palette was also binary (gray chrome vs flame red), so flame kept getting borrowed for decoration, diluting the alarm color.
+**Solution/Workaround:** Derive the theme from the hero: surfaces stay cool obsidian (unchanged); the *light* is warm — `--color-foreground` is cream-tinted (oklch 0.96 0.012 88, all *-foreground aliases follow via var()), borders are warm-neutral (hue 75), and every page body gets a faint fixed ember radial ("the fire is off-screen"). A new `--color-ember` token (oklch 0.7 0.13 58) is the interactive/alive tier: focus ring, btn-link underline + aria-current nav state, btn-primary hover border, table row hover wash, branch mono-chips, and status icons.
+**Preference:** Temperature carries meaning — warm = light/active/alive (ember), cool = structure/shadow/rest, flame red = alarm duty ONLY (danger, destructive, expiring; the error page and brand logo are exempt). Do not warm the large surfaces (chroma > ~0.01 goes muddy) and keep slate as the deliberate cool counterpoint. New interactive accents use ember, never flame.
+
+### Buttons are solid fills that darken on hover
+**Area:** web/app/static/css/input.css (.btn-* variants, danger tokens)
+**Obstacle:** Action buttons mixed two styles: the hero's solid-fill primary vs sheer-wash + colored-border variants (old btn-danger: 18% flame wash that only became solid on hover; header Logout had its own translucent override). Sizes also varied between peer actions (btn-xs Delete vs btn-sm Update).
+**Solution/Workaround:** All filled buttons follow the hero button's behavior: solid rest fill, one step darker on hover. `--color-danger` is now brand-red (#c62030, the old `--color-danger-hover`) as the resting fill with cream text; `--color-danger-hover` is a 78% mix toward black. `--color-secondary-hover` added; the `.app-header .btn-secondary` translucent override was deleted. `--color-danger-foreground` (#ff7a66) remains the on-surface danger text for error messages and badge text — it is NOT the on-fill text color.
+**Preference:** New button variants are solid fills with a darker hover step; never sheer washes, glow effects, or decorative borders. Peer actions in the same context share a size (btn-sm on settings rows). Destructive = solid danger red; constructive = primary.
+
+### Settings page uses the panel grammar
+**Area:** web/app/templates/settings.html, web/app/routers/settings.py
+**Obstacle:** Settings mixed three container styles on one page (bare floating heading, `.card` status with an icon tile, native `<details>` accordion with the browser's default marker) — inconsistent with the dashboard's panel grammar.
+**Solution/Workaround:** Settings uses a left section rail and right-side setting panels instead of a top page title/header. The rail has a small mono "Settings" label and text-only section links; status belongs inside panels, not in the sidebar. One `table-panel` per setting group: header bar (title + description), then hairline-divided rows — status row (Lucide status icon + registered date + Delete) and an always-visible replace/register form row whose muted row label is the input's `<label>`. Flashes use `.notice-rail` (warning) / `.notice-rail-success`; the route passes both `pat_deleted` and `pat_registered`.
+**Preference:** Settings groups are navigable from the side rail and render as panels with rows, mirroring dashboard panels. Do not add a large page heading/title above settings. Sidebar links are navigation-only, text-first, and use `aria-current` for active state; active markers use a bottom border on horizontal mobile rails and a left border on desktop side rails. Status uses small Lucide icons inline with panel text, not glowing dots, icon tiles, or sidebar badges. Avoid `<details>` accordions for single rarely-used forms — subordinate with a muted row label instead.
+
+### Dashboard reads as an exposure console
+**Area:** web/app/routers/dashboard.py, web/app/templates/dashboard.html, web/app/templates/partials/dashboard_repositories.html
+**Obstacle:** The dashboard presented repositories (inventory) as the headline while share links (the live exposure a security tool exists to surface) were an afterthought, and badge colors didn't read as risk: Private wore caution-amber while Public — the actually-exposed state — looked calm.
+**Solution/Workaround:** The page-header's right slot carries a live exposure strip computed from the grants table (active count + next expiry, relative time): a `link-2` icon + counts when links are live, a `shield-check` icon + "Nothing exposed" when zero (the zero state is good news and says so — same voice as the share-links empty state). Badge semantics follow temperature=risk: Public = badge-warning, Private = badge-slate. Loading is skeleton rows (`.skeleton-bar`, motion-safe), the repo error state offers an htmx Retry targeting `#repositories-region`, dates render relative ("3d ago"/"in 3d") with absolute on hover via `data-relative-date`, and repo rows split owner (muted) from name (bright) with an external-link glyph for the Forgejo tab.
+**Preference:** Surface exposure before inventory. Status colors encode risk, not category. Tables carry `sr-only` captions, `scope="col"`, and `tabular-nums`; technical strings use `.mono-chip` (settings' `read:repository` chip included).
+
 ### Dashboard repositories load lazily; dev CSS reload is debug-gated
 **Area:** web/app/routers/dashboard.py, web/app/templates/dashboard.html, web/app/templates/base.html
 **Obstacle:** The dashboard blocked first paint on a live Forgejo fetch (up to 15s if the instance was slow/unreachable), and a dev CSS live-reload script polled an endpoint every 500ms in *all* environments, including production.
 **Solution/Workaround:** `/dashboard` renders instantly; the repo list loads via an htmx fragment (`/dashboard/repositories` → `partials/dashboard_repositories.html`) after first paint, with a 10s timeout. The live-reload `<script>` and the `/api/dev/css-mtime` endpoint are both gated on the `debug` flag (a Jinja `debug` global + conditional `include_router`). Forgejo-supplied `html_url` is sanitized to drop non-`http(s)` schemes before rendering into an `href` (XSS guard).
 **Preference:** Never block a page render on an external API; lazy-load via htmx. Keep dev tooling behind the debug flag. Treat external-API string fields as untrusted in templates.
+
+### Repository fragment 200 can still show Forgejo errors
+**Area:** web/app/routers/dashboard.py, web/app/services/forgejo.py, web/app/templates/partials/dashboard_repositories.html
+**Obstacle:** `/dashboard/repositories` intentionally returns an HTML fragment with HTTP 200 even when the upstream Forgejo API call fails; the table then renders `repo_error` plus Retry. This makes the browser Network panel look successful while the fragment content reports failure.
+**Solution/Workaround:** Preserve Forgejo's upstream status/reason/detail in `ForgejoError`, and map common repository failures in `dashboard.py`: 401 = invalid token, 403 = missing scope/denied access, 404 = bad Forgejo base URL/API path, unreachable = connection problem.
+**Preference:** Keep htmx fragment responses renderable, but make inline repository errors specific enough to debug PAT scope, token validity, or base-URL configuration.
+
+### Repository list endpoint must match PAT scope
+**Area:** web/app/routers/dashboard.py, web/app/templates/settings.html, README.md
+**Obstacle:** `GET /api/v1/user/repos` is under Forgejo's `/user/*` route group and requires `read:user`. A PAT with the documented minimum `read:repository` scope gets a 403: `token does not have at least one of required scope(s): [read:user]`.
+**Solution/Workaround:** Fetch repositories with `GET /api/v1/repos/search` and read the top-level `data` array. That endpoint succeeds with `read:repository` and returns the same repository fields the dashboard template needs.
+**Preference:** Keep the minimum PAT scope as `read:repository`; do not add `read:user` just to list repositories.
+
+### Repository htmx load should replace the placeholder
+**Area:** web/app/templates/dashboard.html, web/app/templates/partials/dashboard_repositories.html
+**Obstacle:** Putting `hx-get="/dashboard/repositories" hx-trigger="load"` on `#repositories-region` made the same element both the load trigger and the retry swap target. Retrying or re-processing the region could issue repeated `/dashboard/repositories` requests.
+**Solution/Workaround:** Keep `#repositories-region` as a layout wrapper only. Put the initial `hx-get`/`hx-trigger="load"` on the placeholder child section and use `hx-swap="outerHTML"` so the returned repository `<section>` replaces the placeholder exactly once.
+**Preference:** htmx fragment wrappers should be stable layout containers. Put one-shot load triggers on child placeholders and replace those placeholders with `outerHTML`; do not put load triggers on retry targets.
+
+### SSE CSS reload caused dashboard reload loops
+**Area:** web/app/routers/dev.py, web/app/templates/base.html, web/dev.sh
+**Obstacle:** Replacing the old `/api/dev/css-mtime` poller with an EventSource `/api/dev/css-reload` stream made the dashboard repeatedly reload in watch mode. The log pattern looked like `/dashboard` → `/api/dev/css-reload` → `/dashboard/repositories` → `/dashboard`, which made the repository htmx fragment look broken.
+**Solution/Workaround:** Restore the debug-only `/api/dev/css-mtime` endpoint and the template polling script. Keep `dev.sh --watch` as the gate for DEBUG/live reload.
+**Preference:** Use the known mtime poller for local CSS reload unless a future SSE version is proven not to reload on connection, reconnect, or watcher startup.
+
+### Single-use CSS belongs with the template
+**Area:** web/app/static/css/input.css, web/app/templates/*.html
+**Obstacle:** `input.css` accumulated page-specific selectors that were used once, making it harder to read and edit styling in the HTML where the one-off structure lives.
+**Solution/Workaround:** Inline single-use Tailwind utility styles in the relevant template elements. Keep `input.css` for theme tokens, base rules, reusable component classes, and complex CSS that needs selectors, pseudo-elements, descendant rules, keyframes, media queries, or JavaScript class hooks.
+**Preference:** Prefer template-local utility classes for one-off page styling. Keep reusable classes for buttons, forms, tables, badges, and the error-page animation/easter egg.
