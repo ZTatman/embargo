@@ -1,120 +1,103 @@
 {% extends "base.html" %}
 {% block title %}Settings — Firebreak{% endblock %}
 {% block content %}
-  <div class="flex flex-col gap-10">
-    <section class="page-header">
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Settings</p>
-        <h1 class="mt-3 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
-          Configuration
-        </h1>
-        <p class="mt-2 text-base leading-7 text-foreground/68 sm:text-lg">
-          Manage your Firebreak configuration.
-        </p>
-      </div>
+  {# One section doesn't earn a sidebar — a single quiet column until it does. #}
+  <div class="mx-auto flex w-full max-w-3xl flex-col gap-6">
+    <section>
+      <h1 class="text-2xl font-semibold leading-tight text-foreground sm:text-3xl">Settings</h1>
+      <div class="firebreak-rule mt-6" aria-hidden="true"></div>
     </section>
-    <div class="max-w-3xl">
+    <div class="flex min-w-0 flex-col gap-4">
       {% if pat_deleted %}
-        <div class="rounded-md border-l-4 border-warning bg-warning-muted px-4 py-3 text-sm font-semibold text-warning-foreground"
-             role="status">Access token removed.</div>
+        <div class="notice-rail" role="status">
+          <p class="text-sm font-semibold text-warning-foreground">Access token removed.</p>
+        </div>
       {% endif %}
-      <div id="forgejo-access-token">
-        <h2 class="text-base font-semibold">Forgejo access token</h2>
-        <p class="mt-2 text-sm text-muted-foreground">
-          A <code class="rounded-sm bg-secondary px-1.5 py-0.5 text-foreground">read:repository</code>-scoped
-          Personal Access Token is required for share link viewing.
-        </p>
+      {% if pat_registered %}
+        <div class="notice-rail border-success" role="status">
+          <p class="text-sm font-semibold text-success-foreground">Access token registered.</p>
+        </div>
+      {% endif %}
+      <section class="table-panel">
+        <div class="flex flex-col gap-1 border-b border-border px-4 py-3.5 sm:px-5 sm:py-4">
+          <h2 class="text-base font-semibold text-foreground">Forgejo access token</h2>
+          <p class="text-sm leading-6 text-muted-foreground">
+            A <code class="mono-chip">read:repository</code>-scoped
+            Personal Access Token is required for share link viewing.
+          </p>
+        </div>
         {% if user.has_pat %}
-          <div class="mt-4 card">
-            <div class="flex items-center justify-between px-4 py-3.5">
-              <div class="flex items-center gap-3">
-                <div class="flex size-8 items-center justify-center rounded-md bg-success-muted text-success-foreground">
-                  <svg xmlns="http://www.w3.org/2000/svg"
-                       width="16"
-                       height="16"
-                       viewBox="0 0 24 24"
-                       fill="none"
-                       stroke="currentColor"
-                       stroke-width="2"
-                       stroke-linecap="round"
-                       stroke-linejoin="round">
-                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-foreground">Access token</p>
-                  <p class="mt-0.5 text-xs text-muted-foreground">
-                    {% if user.pat_registered_at %}
-                      Registered <time datetime="{{ user.pat_registered_at.isoformat() }}" data-local-date>{{ user.pat_registered_at.isoformat() }}</time>
-                    {% else %}
-                      Registered
-                    {% endif %}
-                  </p>
-                </div>
+          <div class="flex items-center justify-between gap-4 border-b border-border-subtle px-4 py-3.5 sm:px-5">
+            <div class="flex items-center gap-2.5">
+              <svg class="status-icon text-success-foreground"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2"
+                   stroke-linecap="round"
+                   stroke-linejoin="round"
+                   aria-hidden="true">
+                <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" />
+                <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" stroke="none" />
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-foreground">Access token</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">
+                  {% if user.pat_registered_at %}
+                    Registered <time datetime="{{ user.pat_registered_at.isoformat() }}" data-local-date>{{ user.pat_registered_at.isoformat() }}</time>
+                  {% else %}
+                    Registered
+                  {% endif %}
+                </p>
               </div>
-              <form method="post"
-                    action="/settings/pat/delete"
-                    data-confirm="Delete this access token? You can register a new token later.">
-                <button type="submit" class="btn btn-xs btn-danger">Delete</button>
-              </form>
             </div>
-          </div>
-          <details class="mt-4">
-            <summary class="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-              Update token
-            </summary>
-            <form id="pat-form"
-                  class="mt-3"
-                  method="post"
-                  action="/settings/pat"
-                  novalidate>
-              <div class="grid gap-2 sm:gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-                <input type="password"
-                       id="pat"
-                       name="pat"
-                       class="block w-full input-mono"
-                       placeholder="Paste new token…"
-                       aria-describedby="pat-error"
-                       aria-invalid="false"
-                       autocomplete="off"
-                       spellcheck="false"
-                       required />
-                <button type="submit" class="btn btn-sm btn-primary self-center">Update</button>
-              </div>
-              <div class="mt-2">
-                <p id="pat-error"
-                   class="text-sm font-medium text-danger-foreground hidden"
-                   aria-live="polite">A Forgejo token is required.</p>
-              </div>
+            <form method="post"
+                  action="/settings/pat/delete"
+                  data-confirm="Delete this access token? You can register a new token later.">
+              <button type="submit" class="btn btn-sm btn-danger-quiet">Delete</button>
             </form>
-          </details>
+          </div>
         {% else %}
-          <form id="pat-form"
-                class="mt-4"
-                method="post"
-                action="/settings/pat"
-                novalidate>
-            <div class="grid gap-2 sm:gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div class="flex items-center gap-2.5 border-b border-border-subtle px-4 py-3.5 sm:px-5">
+            <svg class="status-icon text-warning-foreground"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 stroke-linecap="round"
+                 stroke-linejoin="round"
+                 aria-hidden="true">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4m0 4h.01" />
+            </svg>
+            <p class="status-line text-warning-foreground">Status · No token registered</p>
+          </div>
+        {% endif %}
+        <div class="px-4 py-3.5 sm:px-5 sm:py-4">
+          <form id="pat-form" method="post" action="/settings/pat" novalidate>
+            <label for="pat" class="form-label">
+              {{ "Replace token" if user.has_pat else "Register token" }}
+            </label>
+            <div class="grid gap-2 sm:grid-cols-[1fr_auto] sm:gap-3">
               <input type="password"
                      id="pat"
                      name="pat"
-                     class="block w-full input-mono"
-                     placeholder="ad8j3…"
+                     class="form-input font-mono"
+                     placeholder="Paste new token…"
                      aria-describedby="pat-error"
                      aria-invalid="false"
                      autocomplete="off"
                      spellcheck="false"
                      required />
-              <button type="submit" class="btn btn-sm btn-primary self-center">Register</button>
+              <button type="submit" class="btn btn-sm btn-primary self-center">
+                {{ "Update" if user.has_pat else "Register" }}
+              </button>
             </div>
-            <div class="mt-2">
-              <p id="pat-error"
-                 class="text-sm font-medium text-danger-foreground hidden"
-                 aria-live="polite">A Forgejo token is required.</p>
-            </div>
+            <p id="pat-error"
+               class="mt-2 hidden text-sm font-medium text-danger-foreground"
+               aria-live="polite">A Forgejo token is required.</p>
           </form>
-        {% endif %}
-      </div>
+        </div>
+      </section>
     </div>
   </div>
   <script>

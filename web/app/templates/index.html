@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Firebreak — protect your code from scraping{% endblock %}
-{% block body_class %}landing-page{% endblock %}
+{% block header_class %}hidden{% endblock %}
 {% block main_class %}flex-1{% endblock %}
 {% block content %}
-  <section class="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-background px-4 py-10 text-center text-foreground sm:px-6 sm:py-14 lg:py-16">
-    <video class="hero-video"
+  <section class="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-background px-4 py-10 text-center text-brand-cream sm:px-6 sm:py-14 lg:py-16">
+    <video class="absolute inset-0 h-full w-full object-cover"
            autoplay
            muted
            loop
@@ -14,24 +14,38 @@
            aria-hidden="true">
       <source src="/static/video/firebreak-hero.mp4" type="video/mp4" />
     </video>
-    <div class="hero-vignette"></div>
-    <div class="hero-ember"></div>
-    <div class="relative z-10 flex w-full max-w-4xl -translate-y-[2dvh] flex-col items-center gap-6 sm:gap-8 lg:gap-9">
+    <div class="pointer-events-none absolute inset-0"
+         style="background: radial-gradient(circle at center, transparent 0, transparent 30%, color-mix(in oklab, var(--color-overlay) 38%, transparent) 62%, color-mix(in oklab, var(--color-overlay) 90%, transparent) 100%), linear-gradient(180deg, color-mix(in oklab, var(--color-overlay) 64%, transparent) 0, transparent 28%, color-mix(in oklab, var(--color-overlay) 70%, transparent) 100%), radial-gradient(ellipse at center, color-mix(in oklab, var(--color-overlay) 10%, transparent) 0, color-mix(in oklab, var(--color-overlay) 26%, transparent) 36%, transparent 58%)">
+    </div>
+    <div class="pointer-events-none absolute inset-[12%_18%_18%]"
+         style="background: radial-gradient(circle at center, var(--color-hero-ember) 0%, color-mix(in oklab, var(--color-hero-ember) 35%, transparent) 35%, transparent 70%);
+                mix-blend-mode: screen"></div>
+    <div class="relative z-10 flex w-full max-w-4xl translate-y-[-2dvh] flex-col items-center gap-6 sm:gap-8 lg:gap-9">
       <img src="/static/img/firebreak-logo-cream-red.svg"
            alt=""
            width="240"
            height="238"
-           class="hero-logo"
+           class="h-auto w-full max-w-24 sm:max-w-32 lg:max-w-40"
+           style="filter: drop-shadow(var(--shadow-hero-logo)) drop-shadow(var(--glow-hero))"
            aria-hidden="true" />
       <img src="/static/img/firebreak-brand-text.svg"
            alt="Firebreak"
            width="280"
            height="48"
-           class="hero-wordmark" />
-      <div class="hero-statement">
-        <p class="text-base font-semibold leading-7 text-foreground sm:text-lg">Fight Fire with Fire.</p>
-        <div class="hero-burn-line" aria-hidden="true"></div>
-        <p class="max-w-md text-sm leading-6 text-foreground/90 sm:max-w-lg sm:text-[0.9375rem] sm:leading-7">
+           class="h-auto w-full max-w-40 sm:max-w-48 lg:max-w-56"
+           style="filter: drop-shadow(var(--shadow-hero-text))" />
+      <div class="relative isolate flex max-w-lg flex-col items-center text-balance px-4 py-2 text-brand-cream sm:max-w-xl"
+           style="filter: drop-shadow(var(--shadow-hero-copy))">
+        <div class="pointer-events-none absolute -z-10 blur-[10px]"
+             style="inset: -1.5rem -3rem;
+                    background: radial-gradient(ellipse at center, color-mix(in oklab, var(--color-overlay) 72%, transparent) 0, color-mix(in oklab, var(--color-overlay) 44%, transparent) 42%, transparent 72%)">
+        </div>
+        <p class="text-base font-semibold leading-7 text-brand-cream sm:text-lg">Fight Fire with Fire.</p>
+        <div class="my-4 h-px w-16 rounded-full sm:my-5"
+             style="background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-brand-red) 85%, transparent) 18%, var(--color-hero-burn) 50%, color-mix(in oklab, var(--color-brand-red) 85%, transparent) 82%, transparent);
+                    box-shadow: 0 0 14px color-mix(in oklab, var(--color-brand-flame) 45%, transparent), 0 0 1px var(--color-brand-cream)"
+             aria-hidden="true"></div>
+        <p class="max-w-md text-sm leading-6 text-brand-cream/90 sm:max-w-lg sm:text-[0.9375rem] sm:leading-7">
           Temporary read-only access to private Forgejo snapshots.
           Let them inspect what you allow. Nothing more.
         </p>
@@ -52,11 +66,20 @@
         {% endif %}
       </div>
     </div>
-    <p class="hero-meta" aria-label="Firebreak security properties">
+    <p class="absolute inset-x-4 z-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-brand-cream/56 sm:text-xs"
+       style="bottom: clamp(1.5rem, 5dvh, 4rem);
+              filter: drop-shadow(var(--shadow-hero-text))"
+       aria-label="Firebreak security properties">
       <span>Snapshot scoped</span>
-      <span class="hero-meta-separator" aria-hidden="true"></span>
+      <span class="size-1 rounded-full"
+            style="background: var(--color-brand-flame);
+                   box-shadow: 0 0 10px color-mix(in oklab, var(--color-brand-flame) 55%, transparent)"
+            aria-hidden="true"></span>
       <span>Read-only</span>
-      <span class="hero-meta-separator" aria-hidden="true"></span>
+      <span class="size-1 rounded-full"
+            style="background: var(--color-brand-flame);
+                   box-shadow: 0 0 10px color-mix(in oklab, var(--color-brand-flame) 55%, transparent)"
+            aria-hidden="true"></span>
       <span>Forgejo-native</span>
     </p>
   </section>
