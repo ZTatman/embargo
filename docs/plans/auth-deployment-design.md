@@ -338,27 +338,18 @@ The viewer is the only public application surface that emits code content.
 - Public access must be read-only
 - Public access must not expose database ports or Forgejo admin surfaces
 
-## Repo Implementation Impact
+## Active Surfaces
 
-Active surfaces:
+- CLI entrypoint: `cli/src/index.ts`
+- Command stubs: `cli/src/commands/*`
+- Web app: `web/app/` (FastAPI + Jinja2)
+- Web routers: `web/app/routers/*`
+- Web models: `web/app/models/*`
 
-- CLI entrypoint: `packages/cli/src/index.ts`
-- Command stubs: `packages/cli/src/commands/*`
-- Config generators: `packages/cli/src/generators/*`
-- Shared constants/types: `packages/shared/src/*`
-- Service entrypoint: `packages/service/src/index.ts`
-- Viewer routes: `packages/service/src/viewer/*`
-- Dashboard routes: `packages/service/src/dashboard/*`
+## Next implementation work
 
-Next implementation work:
-
-1. Narrow `init` to Firebreak-only config generation for an existing Forgejo deployment
-2. Add config types for Forgejo connection details, Firebreak base URL, database, and SMTP settings
-3. Implement `forgejo bootstrap` and `doctor`
-4. Add Postgres-backed service foundation using the data model
-5. Wire the service to load generated config and validate required env at startup
-6. Implement Forgejo session authentication for the dashboard
-7. Build the link creation flow with repo ownership verification
-8. Implement the web-based code viewer
-9. Build the user dashboard with access logs
-10. Implement email sending for private link verification codes
+1. Implement Forgejo session authentication for the dashboard
+2. Build the link creation flow with repo ownership verification
+3. Implement the web-based code viewer
+4. Build the user dashboard with access logs
+5. Implement email sending for private link verification codes

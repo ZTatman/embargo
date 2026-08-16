@@ -23,8 +23,8 @@ Phase 1 does not deliver:
 
 ## Tech Stack
 
-- **Backend**: Python 3.11+ with FastAPI
-- **Frontend**: Jinja2 templates with HTMX for interactivity
+- **Backend**: Python 3.13+ with FastAPI
+- **Frontend**: Jinja2 templates with HTMX + Tailwind CSS
 - **Database**: PostgreSQL
 - **Async**: Uses `async/await` with asyncpg for database access
 
@@ -32,18 +32,9 @@ Phase 1 does not deliver:
 
 **FastAPI**: Lightweight async framework, automatic OpenAPI docs, Pydantic for validation.
 
-**Jinja2 + HTMX**: Server-side rendering with minimal JavaScript. HTMX handles dynamic updates (filtering, form submissions) without a build step or heavy SPA framework.
+**Jinja2 + HTMX**: Server-side rendering with minimal JavaScript. HTMX handles dynamic updates (filtering, form submissions) without a heavy SPA framework.
 
-**PostgreSQL**: Reliable, well-supported by async libraries (asyncpg, SQLModel).
-
-## Reviewable Branches
-
-1. `codex/phase1-bootstrap-monorepo`
-2. `codex/phase1-cli-init-skeleton`
-3. `codex/phase1-service-foundation`
-4. `codex/phase1-forgejo-integration`
-5. `codex/phase1-grants-viewer`
-6. `codex/phase1-dashboard-logs-settings`
+**PostgreSQL**: Reliable, well-supported by async libraries (asyncpg, SQLAlchemy).
 
 ## Security Baseline
 
