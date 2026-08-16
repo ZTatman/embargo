@@ -186,6 +186,7 @@
     }
 
     .app-header .btn-borderless {
+        background: transparent;
         color: #f7f2e8;
     }
 
