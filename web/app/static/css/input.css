@@ -151,7 +151,7 @@
     }
 
     .btn-primary {
-        @apply text-primary-foreground bg-primary-hover hover:bg-[#c62030]/90 hover:text-[#f7f2e8];
+        @apply bg-danger text-white hover:bg-[#a81a27];
     }
 
     .btn-secondary {
