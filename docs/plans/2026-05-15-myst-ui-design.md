@@ -1,4 +1,4 @@
-# Myst UI Design
+# Firebreak UI Design
 
 ## Purpose
 
@@ -7,7 +7,7 @@ Web application for creating secure, time-limited, view-only links to self-hoste
 ## Pages
 
 ### Landing Page (`GET /`)
-- Explains Myst
+- Explains Firebreak
 - "Sign in with Forgejo" button
 - Nav shows Sign in (anonymous) or Dashboard/Logout (authenticated)
 

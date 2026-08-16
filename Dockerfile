@@ -13,7 +13,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN pnpm -r --filter @myst/service build
+RUN pnpm -r --filter @firebreak/service build
 
 ENV PORT=3000
 
@@ -21,4 +21,4 @@ EXPOSE 3000
 
 USER node
 
-CMD ["pnpm", "--filter", "@myst/service", "start"]
+CMD ["pnpm", "--filter", "@firebreak/service", "start"]

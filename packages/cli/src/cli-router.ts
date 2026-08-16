@@ -53,12 +53,12 @@ function showHelp(registry: CommandRegistry, description: string): void {
   const colWidth = Math.max(...allRows.map((r) => r.name.length)) + PADDING;
 
   const lines: string[] = [];
-  lines.push(c.yellow("myst"));
+  lines.push(c.yellow("firebreak"));
   lines.push("");
   lines.push(`${INDENT}${description}`);
   lines.push("");
   lines.push(c.bold("Usage:"));
-  lines.push(`${INDENT}myst <command> [options]`);
+  lines.push(`${INDENT}firebreak <command> [options]`);
   lines.push("");
 
   lines.push(c.bold("Commands:"));
@@ -99,7 +99,7 @@ function showCommandHelp(
   const lines: string[] = [];
 
   const fullName = subcommand ? `${command} ${subcommand}` : command;
-  lines.push(c.yellow("myst " + fullName));
+  lines.push(c.yellow("firebreak " + fullName));
   lines.push("");
 
   if (targetConf.description) {
@@ -112,8 +112,8 @@ function showCommandHelp(
   const usageCmd = subcommand ? `${command} ${subcommand}` : command;
   const usageLine =
     hasSubcommands && !subcommand
-      ? `myst ${command} <subcommand> [options]`
-      : `myst ${usageCmd} [options]`;
+      ? `firebreak ${command} <subcommand> [options]`
+      : `firebreak ${usageCmd} [options]`;
   lines.push(c.bold("Usage:"));
   lines.push(`${INDENT}${usageLine}`);
   lines.push("");
@@ -201,7 +201,7 @@ export async function runCli(
   const subcommand = argv[1] ?? "";
   const remainingArgs = argv.slice(2);
 
-  // If user types myst -h or --help with a command
+  // If user types firebreak -h or --help with a command
   const wantsCommandHelp =
     isHelpFlag(subcommand) || remainingArgs.some(isHelpFlag);
 

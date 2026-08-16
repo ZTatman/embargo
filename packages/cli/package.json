@@ -1,19 +1,19 @@
 {
-  "name": "@myst/cli",
-  "description": "CLI for configuring and verifying Myst with Forgejo",
+  "name": "@firebreak/cli",
+  "description": "CLI for configuring and verifying Firebreak with Forgejo",
   "version": "0.1.0",
   "author": {
     "name": "Zach Tatman",
     "email": "zach.tatman.dev@gmail.com"
   },
   "bugs": {
-    "url": "https://github.com/ZTatman/myst/issues"
+    "url": "https://github.com/ZTatman/firebreak/issues"
   },
-  "homepage": "https://github.com/ZTatman/myst#readme",
+  "homepage": "https://github.com/ZTatman/firebreak#readme",
   "private": true,
   "type": "module",
   "bin": {
-    "myst": "./dist/index.js"
+    "firebreak": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
