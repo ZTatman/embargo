@@ -186,12 +186,11 @@
     }
 
     .app-header .btn-borderless {
-        background: #c62030;
         color: #f7f2e8;
     }
 
     .app-header .btn-borderless:hover {
-        background: #a81a27;
+        background: rgb(247 242 232 / 10%);
         color: #fffdf8;
     }
 
