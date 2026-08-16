@@ -17,15 +17,11 @@
     --color-accent-foreground: #17191c;
 
     --color-primary: #2a2d31;
-    --color-primary-foreground: #ffffff;
-    --color-primary-hover: #17191c;
-    --color-primary-muted: rgb(23 25 28 / 10%);
 
     --color-secondary: #eeeeea;
     --color-secondary-foreground: #17191c;
 
     --color-border: #d8d8d2;
-    --color-border-subtle: #e9e9e4;
     --color-input: #ffffff;
     --color-ring: #2a2d31;
     --color-ring-muted: rgb(23 25 28 / 12%);
@@ -39,9 +35,10 @@
     --color-warning-foreground: oklch(54.7% 0.13 65);
     --color-warning-muted: oklch(96.3% 0.052 85);
 
-    --color-danger: #c62030;
-    --color-danger-foreground: #c62030;
-    --color-danger-muted: rgb(198 32 48 / 10%);
+    --color-danger: #b01c2a;
+    --color-danger-foreground: #d94555;
+    --color-danger-hover: #9a1824;
+    --color-danger-muted: rgb(176 28 42 / 10%);
 
     --color-expired: #5c5c58;
     --color-expired-foreground: #4b4b47;
@@ -70,15 +67,11 @@
     --color-accent-foreground: #f7f2e8;
 
     --color-primary: #2a2d31;
-    --color-primary-foreground: #f7f2e8;
-    --color-primary-hover: #17191c;
-    --color-primary-muted: rgb(247 242 232 / 14%);
 
     --color-secondary: #282b30;
     --color-secondary-foreground: #f7f2e8;
 
     --color-border: #34373d;
-    --color-border-subtle: #282b30;
     --color-input: #1f2226;
     --color-ring: #f7f2e8;
     --color-ring-muted: rgb(247 242 232 / 18%);
@@ -92,8 +85,9 @@
     --color-warning-foreground: oklch(86% 0.13 75);
     --color-warning-muted: oklch(35% 0.075 75);
 
-    --color-danger: #f04a36;
-    --color-danger-foreground: #ff7a66;
+    --color-danger: #d93f2d;
+    --color-danger-foreground: #f06a58;
+    --color-danger-hover: #c23625;
     --color-danger-muted: rgb(240 74 54 / 18%);
 
     --color-expired: #bdb8ad;
@@ -151,7 +145,7 @@
     }
 
     .btn-primary {
-        @apply bg-danger text-white hover:bg-[#a81a27];
+        @apply bg-danger text-white hover:bg-danger-hover;
     }
 
     .btn-secondary {
@@ -159,7 +153,7 @@
     }
 
     .btn-borderless {
-        @apply bg-danger text-white hover:bg-danger/80;
+        @apply bg-danger text-white hover:bg-danger-hover;
     }
 
     .app-header {
@@ -173,8 +167,8 @@
     .app-header a,
     .app-header button,
     .app-header nav svg {
-        color: #f7f2e8;
-        stroke: #f7f2e8;
+        color: var(--color-foreground);
+        stroke: var(--color-foreground);
     }
 
     .app-header .brand-link svg {
@@ -182,29 +176,29 @@
     }
 
     .app-header .brand-link svg path[fill="#17191C"] {
-        fill: #f7f2e8;
+        fill: var(--color-foreground);
     }
 
     .app-header .btn-borderless {
         background: transparent;
-        color: #f7f2e8;
+        color: var(--color-foreground);
     }
 
     .app-header .btn-borderless:hover {
         background: rgb(247 242 232 / 10%);
-        color: #fffdf8;
+        color: var(--color-foreground);
     }
 
     .app-header .btn-secondary {
         background: rgb(247 242 232 / 8%);
         border-color: rgb(247 242 232 / 18%);
-        color: #f7f2e8;
+        color: var(--color-foreground);
     }
 
     .app-header .btn-secondary:hover {
         background: rgb(247 242 232 / 14%);
         border-color: rgb(247 242 232 / 28%);
-        color: #fffdf8;
+        color: var(--color-foreground);
     }
 
     .landing-page .app-header {
@@ -212,7 +206,7 @@
     }
 
     .landing-page {
-        background: #17191c;
+        background: var(--color-background);
     }
 
     .brand-link svg {
