@@ -1,13 +1,13 @@
-# Myst Phase 1 Design
+# Firebreak Phase 1 Design
 
-This document captures the approved Phase 1 plan for Myst.
+This document captures the approved Phase 1 plan for Firebreak.
 
 ## Scope
 
 Phase 1 delivers:
 
-- CLI setup for attaching Myst to an existing Forgejo deployment
-- Myst service foundation
+- CLI setup for attaching Firebreak to an existing Forgejo deployment
+- Firebreak service foundation
 - constrained Forgejo service-account integration
 - immutable snapshot grants pinned to `commit_sha`
 - owner dashboard and viewer flow
@@ -23,8 +23,8 @@ Phase 1 does not deliver:
 
 ## Tech Stack
 
-- **Backend**: Python 3.11+ with FastAPI
-- **Frontend**: Jinja2 templates with HTMX for interactivity
+- **Backend**: Python 3.13+ with FastAPI
+- **Frontend**: Jinja2 templates with HTMX + Tailwind CSS
 - **Database**: PostgreSQL
 - **Async**: Uses `async/await` with asyncpg for database access
 
@@ -32,62 +32,53 @@ Phase 1 does not deliver:
 
 **FastAPI**: Lightweight async framework, automatic OpenAPI docs, Pydantic for validation.
 
-**Jinja2 + HTMX**: Server-side rendering with minimal JavaScript. HTMX handles dynamic updates (filtering, form submissions) without a build step or heavy SPA framework.
+**Jinja2 + HTMX**: Server-side rendering with minimal JavaScript. HTMX handles dynamic updates (filtering, form submissions) without a heavy SPA framework.
 
-**PostgreSQL**: Reliable, well-supported by async libraries (asyncpg, SQLModel).
-
-## Reviewable Branches
-
-1. `codex/phase1-bootstrap-monorepo`
-2. `codex/phase1-cli-init-skeleton`
-3. `codex/phase1-service-foundation`
-4. `codex/phase1-forgejo-integration`
-5. `codex/phase1-grants-viewer`
-6. `codex/phase1-dashboard-logs-settings`
+**PostgreSQL**: Reliable, well-supported by async libraries (asyncpg, SQLAlchemy).
 
 ## Security Baseline
 
 - dedicated Forgejo user access is restricted to approved repos
-- Myst grant checks are enforced on every Forgejo read
+- Firebreak grant checks are enforced on every Forgejo read
 - grants store `repo_id` and pinned `commit_sha`
 - viewer requests never choose repo or ref directly
 - operators create the dedicated Forgejo user and PAT themselves
-- Myst stores only its own app config and metadata in its own database
+- Firebreak stores only its own app config and metadata in its own database
 - admin access is protected upstream with Tailscale, VPN, Cloudflare Access, reverse-proxy auth, or equivalent operator-managed controls
-- Myst does not ship built-in admin auth in Phase 1
+- Firebreak does not ship built-in admin auth in Phase 1
 
 ## Authentication Model
 
-Myst uses two authentication mechanisms:
+Firebreak uses two authentication mechanisms:
 
 **User Identity (Forgejo Sessions)**
 - Users log in via Forgejo's session system
-- Myst redirects to Forgejo login and validates the session
-- Users use their existing Forgejo accounts — no separate Myst login
-- All Forgejo users with an account are trusted Myst users
+- Firebreak redirects to Forgejo login and validates the session
+- Users use their existing Forgejo accounts — no separate Firebreak login
+- All Forgejo users with an account are trusted Firebreak users
 
 **Data Access (Dedicated Forgejo User PAT)**
-- Myst uses an operator-created PAT for a dedicated Forgejo user to call the Forgejo API
+- Firebreak uses an operator-created PAT for a dedicated Forgejo user to call the Forgejo API
 - PAT is used to verify repo ownership and fetch code for viewers
 - PAT is never used for user identity (that's handled by sessions)
 
 **Why both?**
 - Sessions identify who the user is (zach@me.com logged in)
-- PAT allows Myst to verify repo ownership (can zach@me.com create view links for this repo?)
-- PAT allows Myst to fetch code content for the viewer (get the pinned commit's files)
+- PAT allows Firebreak to verify repo ownership (can zach@me.com create view links for this repo?)
+- PAT allows Firebreak to fetch code content for the viewer (get the pinned commit's files)
 
 ## Dedicated Forgejo User Baseline
 
-- the dedicated Forgejo user is a normal Forgejo user account dedicated to Myst, such as `myst-bot`
+- the dedicated Forgejo user is a normal Forgejo user account dedicated to Firebreak, such as `firebreak-bot`
 - the operator creates this user in Forgejo and grants repo access explicitly
 - the operator creates the PAT for this user through the Forgejo UI or admin CLI
 - recommended PAT scopes are `read:user` and `read:repository`
 - `read:organization` may also be required when repo visibility depends on org or team APIs
-- Myst must not create Forgejo users, PATs, or repo permissions in Phase 1
+- Firebreak must not create Forgejo users, PATs, or repo permissions in Phase 1
 
 ## Link Types
 
-Myst supports two types of view links:
+Firebreak supports two types of view links:
 
 ### Private Links (Email-Verified)
 
@@ -96,7 +87,7 @@ Myst supports two types of view links:
 - Requires email verification code to view
 - Tied to a specific email address
 - Owner specifies the recipient's email when creating the link
-- Myst sends an email with a verification code
+- Firebreak sends an email with a verification code
 - Viewer enters the code to access the snapshot
 
 ### Public Links (Time-Expired)
@@ -112,32 +103,32 @@ Myst supports two types of view links:
 
 Only repo owners can create view links for their repos.
 
-- Myst verifies ownership via the Forgejo API using the dedicated Forgejo user PAT
+- Firebreak verifies ownership via the Forgejo API using the dedicated Forgejo user PAT
 - Collaborators or read-access users cannot create view links
 - Site admins are treated as regular users for this purpose (details to be finalized)
 
 ## CLI Init Baseline
 
-`myst init` should ask only for:
+`firebreak init` should ask only for:
 
 - public viewer URL, for example `https://share.example.com`
-- private admin URL, for example `https://admin.example.com` or `https://myst-admin.tailnet.ts.net`
+- private admin URL, for example `https://admin.example.com` or `https://firebreak-admin.tailnet.ts.net`
 - Forgejo base URL, for example `https://git.example.com`
-- Myst Postgres URL, for example `postgresql://myst:password@db.example.com:5432/myst`
-- Forgejo bot username, for example `myst-bot`
+- Firebreak Postgres URL, for example `postgresql://firebreak:password@db.example.com:5432/firebreak_db`
+- Forgejo bot username, for example `firebreak-bot`
 - Forgejo PAT for that dedicated Forgejo user
 - grant token secret, with secure auto-generation as the default
 
-`myst init` should generate all Myst-owned deployment config needed for Phase 1:
+`firebreak init` should generate all Firebreak-owned deployment config needed for Phase 1:
 
 - `.env` (environment variables for Docker/container deployment)
-- any future Myst-only deployment templates, but never Forgejo provisioning files
+- any future Firebreak-only deployment templates, but never Forgejo provisioning files
 
-`myst init` should provide inline guidance that:
+`firebreak init` should provide inline guidance that:
 
-- it should be run in the directory where Myst will be deployed, usually on the target VPS or server workspace
-- the admin URL must be protected upstream because Myst does not provide admin auth in Phase 1
-- the database URL must point to Myst's own Postgres database, not Forgejo's tables
+- it should be run in the directory where Firebreak will be deployed, usually on the target VPS or server workspace
+- the admin URL must be protected upstream because Firebreak does not provide admin auth in Phase 1
+- the database URL must point to Firebreak's own Postgres database, not Forgejo's tables
 - the PAT should be created for the dedicated Forgejo user
 - the operator can consult Forgejo docs for token creation and scopes if needed
 - bare hostnames such as `share.example.com` are accepted and should default to `https://`
@@ -145,35 +136,35 @@ Only repo owners can create view links for their repos.
 ## Deployment Baseline
 
 - Forgejo is already deployed and operator-managed
-- Myst is deployed independently as its own app
-- Myst uses its own Postgres database on the same DB server as Forgejo (separate database, not shared tables)
-- Myst reaches Forgejo via API using a least-privilege PAT for the dedicated Forgejo user
+- Firebreak is deployed independently as its own app
+- Firebreak uses its own Postgres database on the same DB server as Forgejo (separate database, not shared tables)
+- Firebreak reaches Forgejo via API using a least-privilege PAT for the dedicated Forgejo user
 - the CLI validates configuration and connectivity rather than provisioning infrastructure
-- the Myst admin surface must be protected by VPN, Tailscale, Cloudflare Access, or reverse-proxy auth in front of the app
+- the Firebreak admin surface must be protected by VPN, Tailscale, Cloudflare Access, or reverse-proxy auth in front of the app
 
 ### Docker and Deployment
 
-Myst provides a Dockerfile for containerized deployment:
+Firebreak provides a Dockerfile for containerized deployment:
 
-- Myst includes a `Dockerfile` in its repository for building the container image
-- Operators use their preferred platform (Dokploy, Coolify, manual Docker, etc.) to deploy the Myst container
-- Myst does not generate Docker Compose files for Forgejo or other infrastructure
-- Myst does not provision containers, images, or hosting resources
+- Firebreak includes a `Dockerfile` in its repository for building the container image
+- Operators use their preferred platform (Dokploy, Coolify, manual Docker, etc.) to deploy the Firebreak container
+- Firebreak does not generate Docker Compose files for Forgejo or other infrastructure
+- Firebreak does not provision containers, images, or hosting resources
 - Operators manage their own container orchestration (Dokploy handles this for most users)
 
-For Dokploy users, deploying Myst is similar to deploying any other containerized application:
+For Dokploy users, deploying Firebreak is similar to deploying any other containerized application:
 
-1. Build or import the Myst image using Dokploy's Docker Compose support
-2. Configure environment variables from `.env` generated by `myst init`
+1. Build or import the Firebreak image using Dokploy's Docker Compose support
+2. Configure environment variables from `.env` generated by `firebreak init`
 3. Set up the public and admin domains in Dokploy's domain configuration
 4. Dokploy handles Traefik routing, TLS, and container restarts
 
 ## Database Model
 
-Myst uses its own Postgres database on the same DB server as Forgejo:
+Firebreak uses its own Postgres database on the same DB server as Forgejo:
 
 - separate databases (not shared tables with Forgejo)
-- recommended: same PostgreSQL instance with `forgejo` and `myst` databases
+- recommended: same PostgreSQL instance with `forgejo` and `firebreak_db` databases
 - clean schema separation prevents coupling to Forgejo's database schema
 - independent backups and migrations
 - operators can run both databases on a small VPS efficiently
@@ -187,14 +178,14 @@ Minimum v1 data model:
 
 ## Forgejo Bootstrap Baseline
 
-`myst forgejo bootstrap` should verify, not provision:
+`firebreak forgejo bootstrap` should verify, not provision:
 
 - Forgejo base URL reachability
 - dedicated Forgejo user token validity
 - authenticated user matches the configured Forgejo bot username
-- minimum token scopes are sufficient for Myst's read-only API usage
-- Myst can resolve repo metadata, pinned commits, and tree/file reads for the repos it is expected to serve
-- Myst can verify repo ownership for the operator's user account
+- minimum token scopes are sufficient for Firebreak's read-only API usage
+- Firebreak can resolve repo metadata, pinned commits, and tree/file reads for the repos it is expected to serve
+- Firebreak can verify repo ownership for the operator's user account
 
 ## Viewer Baseline
 

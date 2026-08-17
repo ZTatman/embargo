@@ -162,7 +162,7 @@ async function runForgejoChecks(
 
 async function verifyCommand(opts: VerifyOptions): Promise<void> {
   const isDiagnostic = opts.diagnostic ?? false;
-  p.intro(c.bold("myst verify"));
+  p.intro(c.bold("firebreak verify"));
 
   const config = loadConfig();
   if (!config) {
@@ -179,7 +179,7 @@ async function verifyCommand(opts: VerifyOptions): Promise<void> {
 }
 
 export const commandConfig: CommandConfig = {
-  description: "Verify Myst configuration and connection to Forgejo",
+  description: "Verify Firebreak configuration and connection to Forgejo",
   options: {
     diagnostic: {
       type: "boolean",

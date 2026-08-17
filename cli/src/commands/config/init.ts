@@ -36,10 +36,10 @@ function validateHttpUrlOrHost(
 }
 
 async function init(opts: { output?: string }) {
-  p.intro(c.bold("myst config init"));
+  p.intro(c.bold("firebreak config init"));
   p.note(
     [
-      `${c.bold("Run this in the directory where you plan to deploy Myst.")}`,
+      `${c.bold("Run this in the directory where you plan to deploy Firebreak.")}`,
       "",
       c.bold("Forgejo docs:"),
       "",
@@ -116,7 +116,7 @@ async function init(opts: { output?: string }) {
       forgejoBaseUrl: () =>
         p.text({
           message:
-            "Forgejo API URL (how Myst reaches Forgejo, not your browser URL)?",
+            "Forgejo API URL (how Firebreak reaches Forgejo, not your browser URL)?",
           placeholder: "http://forgejo:3000",
           validate: (v) => validateHttpUrlOrHost(v, "Forgejo base URL"),
         }),
@@ -171,19 +171,19 @@ async function init(opts: { output?: string }) {
       [
         `${c.bold("Forgejo API URL:")} ${c.cyan(forgejoBaseUrl)}`,
         "",
-        `Myst will use this URL to call Forgejo's API.`,
+        `Firebreak will use this URL to call Forgejo's API.`,
         `- Docker (same Compose network): http://forgejo:3000`,
         `- Bare metal / non-container:    http://localhost:3000`,
         `- Cross-host deployment:         https://git.example.com`,
       ].join("\n"),
     );
     p.log.success(
-      "Done. Verify myst's connection using the 'verify' command.\nOnce verified, deploy!",
+      "Done. Verify firebreak's connection using the 'verify' command.\nOnce verified, deploy!",
     );
   } catch (error) {
     s.stop();
     p.cancel(
-      error instanceof Error ? error.message : "Failed to initialize Myst",
+      error instanceof Error ? error.message : "Failed to initialize Firebreak",
     );
     process.exitCode = 1;
   }

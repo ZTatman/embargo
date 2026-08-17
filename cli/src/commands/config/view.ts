@@ -4,7 +4,7 @@ import * as c from "yoctocolors";
 
 import {
   ENV_MAPPING,
-  MystEnvironmentVariables,
+  FirebreakEnvironmentVariables,
   parseEnvFile,
   SECRET_KEYS,
 } from "../../utils/config.js";
@@ -15,7 +15,7 @@ export const commandConfig: CommandConfig = {
   handler: async () => {
     const envPath = path.join(process.cwd(), ".env");
 
-    let config: Partial<MystEnvironmentVariables>;
+    let config: Partial<FirebreakEnvironmentVariables>;
 
     try {
       config = parseEnvFile(envPath);
@@ -31,7 +31,7 @@ export const commandConfig: CommandConfig = {
       throw error;
     }
 
-    process.stdout.write(c.bold("Myst Configuration\n"));
+    process.stdout.write(c.bold("Firebreak Configuration\n"));
     process.stdout.write(`${c.dim("─".repeat(40))}\n`);
 
     for (const [envKey, configKey] of Object.entries(ENV_MAPPING)) {

@@ -1,1 +1,0 @@
-export const MYST_DEFAULT_SERVICE_PORT = 4000;

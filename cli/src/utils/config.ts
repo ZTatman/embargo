@@ -1,6 +1,6 @@
 import fs from "node:fs";
 
-export interface MystEnvironmentVariables {
+export interface FirebreakEnvironmentVariables {
   forgejoBaseUrl: string;
   forgejoPat: string;
 }
@@ -18,8 +18,8 @@ export const SECRET_ENV_KEYS = ["FORGEJO_PAT"] as const;
 
 export function parseEnvFile(
   envPath: string,
-): Partial<MystEnvironmentVariables> {
-  const config: Partial<MystEnvironmentVariables> = {};
+): Partial<FirebreakEnvironmentVariables> {
+  const config: Partial<FirebreakEnvironmentVariables> = {};
   const content = fs.readFileSync(envPath, "utf-8");
   const lines = content.split("\n");
 
@@ -41,9 +41,9 @@ export function parseEnvFile(
   return config;
 }
 
-export function generateEnvFile(options: MystEnvironmentVariables): string {
+export function generateEnvFile(options: FirebreakEnvironmentVariables): string {
   const lines = [
-    `# Forgejo API endpoint that Myst calls.`,
+    `# Forgejo API endpoint that Firebreak calls.`,
     `# Docker (same Compose network): http://forgejo:3000`,
     `# Bare metal / non-container:    http://localhost:3000`,
     `# Cross-host:                    https://git.example.com`,
