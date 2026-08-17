@@ -173,7 +173,7 @@ For Dokploy users, deploying Firebreak is similar to deploying any other contain
 
 Firebreak uses its own Postgres database on the same DB server as Forgejo:
 
-- Separate databases (e.g., `forgejo` and `firebreak`)
+- Separate databases (e.g., `forgejo` and `firebreak_db`)
 - NOT shared tables or schemas
 - Operators can run both on a small VPS efficiently
 - Independent backups and migrations
@@ -204,7 +204,7 @@ The CLI is the primary way to configure and validate Firebreak against an existi
 - prompt for the Forgejo base URL, for example `https://git.example.com`
 - collect the dedicated Forgejo username Firebreak should use for API access, for example `firebreak-bot`
 - collect a user-created Forgejo PAT for that dedicated Forgejo user
-- collect Firebreak Postgres connection details, for example `postgresql://firebreak:password@db.example.com:5432/firebreak`
+- collect Firebreak Postgres connection details, for example `postgresql://firebreak:password@db.example.com:5432/firebreak_db`
 - generate a grant token secret by default unless the operator pastes one
 - generate all Firebreak-owned config files needed for deployment in Phase 1
 - write `.env`
@@ -219,7 +219,7 @@ Suggested `init` prompt guidance:
 - Public viewer URL: "What public URL should viewers use for shared links?" Example: `https://share.example.com`
 - Private admin URL: "What private URL should operators use for the Firebreak admin UI?" Example: `https://admin.example.com`
 - Forgejo base URL: "What is the base URL of your existing Forgejo instance?" Example: `https://git.example.com`
-- Firebreak database URL: "What Postgres connection string should Firebreak use?" Example: `postgresql://firebreak:password@db.example.com:5432/firebreak`
+- Firebreak database URL: "What Postgres connection string should Firebreak use?" Example: `postgresql://firebreak:password@db.example.com:5432/firebreak_db`
 - Dedicated Forgejo username: "What Forgejo username should Firebreak use for API access?" Example: `firebreak-bot`
 - Forgejo PAT: "Paste the Forgejo personal access token for that dedicated Forgejo user" Example: `fgp_...`
 - Grant token secret: "Paste a grant token secret, or press enter to generate one automatically"

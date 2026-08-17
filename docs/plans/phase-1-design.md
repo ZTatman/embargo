@@ -114,7 +114,7 @@ Only repo owners can create view links for their repos.
 - public viewer URL, for example `https://share.example.com`
 - private admin URL, for example `https://admin.example.com` or `https://firebreak-admin.tailnet.ts.net`
 - Forgejo base URL, for example `https://git.example.com`
-- Firebreak Postgres URL, for example `postgresql://firebreak:password@db.example.com:5432/firebreak`
+- Firebreak Postgres URL, for example `postgresql://firebreak:password@db.example.com:5432/firebreak_db`
 - Forgejo bot username, for example `firebreak-bot`
 - Forgejo PAT for that dedicated Forgejo user
 - grant token secret, with secure auto-generation as the default
@@ -164,7 +164,7 @@ For Dokploy users, deploying Firebreak is similar to deploying any other contain
 Firebreak uses its own Postgres database on the same DB server as Forgejo:
 
 - separate databases (not shared tables with Forgejo)
-- recommended: same PostgreSQL instance with `forgejo` and `firebreak` databases
+- recommended: same PostgreSQL instance with `forgejo` and `firebreak_db` databases
 - clean schema separation prevents coupling to Forgejo's database schema
 - independent backups and migrations
 - operators can run both databases on a small VPS efficiently
