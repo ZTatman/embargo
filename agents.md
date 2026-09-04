@@ -115,3 +115,9 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Obstacle:** Theme switching and persisted localStorage theme state conflicted with the current Firebreak brand pass, especially on the cinematic landing page.
 **Solution/Workaround:** Force the root document to use the `.dark` token set and remove the theme toggle UI/scripts.
 **Preference:** Keep semantic dark tokens; only reintroduce theme switching after the dark Firebreak identity is stable.
+
+### Forgejo PAT could be sent over remote HTTP
+**Area:** cli/src/utils/forgejo-checks.ts, cli/src/commands/config/init.ts
+**Obstacle:** CLI setup and verification accepted remote `http://` Forgejo URLs, allowing the PAT to be sent without transport encryption.
+**Solution/Workaround:** Centralize Forgejo URL validation, require HTTPS for non-local endpoints, and allow HTTP only for the documented `forgejo` service and loopback hosts. Validate again inside authenticated checks before constructing requests.
+**Preference:** Reject insecure remote transport instead of adding an acknowledgement flag.

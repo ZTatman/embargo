@@ -1,5 +1,13 @@
 const TIMEOUT = 5000;
 
+const LOCAL_HTTP_HOSTS = new Set([
+  "forgejo",
+  "localhost",
+  "127.0.0.1",
+  "::1",
+  "[::1]",
+]);
+
 export type CheckResult = {
   name: string;
   success: boolean;
@@ -16,6 +24,42 @@ export function createCheckResult(
     result.message = message;
   }
   return result;
+}
+
+export function validateForgejoBaseUrl(
+  value: string | undefined,
+  label = "Forgejo base URL",
+): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return `${label} is required`;
+
+  const hasProtocol = /^[a-z]+:\/\//i.test(trimmed);
+  const isHttp = /^https?:\/\//i.test(trimmed);
+
+  if (hasProtocol && !isHttp) {
+    return `${label} must use http:// or https://`;
+  }
+
+  if (!hasProtocol) {
+    return `${label} must include a scheme — e.g. http://forgejo:3000 or https://git.example.com`;
+  }
+
+  try {
+    const url = new URL(trimmed);
+    if (!url.hostname) return `${label} must include a domain or hostname`;
+
+    const isLocalHttp =
+      url.protocol === "http:" &&
+      (LOCAL_HTTP_HOSTS.has(url.hostname) ||
+        url.hostname.endsWith(".localhost"));
+    if (url.protocol === "http:" && !isLocalHttp) {
+      return `${label} must use https:// unless it is a local Forgejo endpoint`;
+    }
+  } catch {
+    return `${label} must be a valid URL`;
+  }
+
+  return undefined;
 }
 
 async function fetchWithTimeout(
@@ -47,6 +91,11 @@ function getErrorMessage(error: unknown, context: string): string {
 export async function checkForgejoReachability(
   baseUrl: string,
 ): Promise<CheckResult> {
+  const validationError = validateForgejoBaseUrl(baseUrl);
+  if (validationError) {
+    return createCheckResult("Forgejo", false, validationError);
+  }
+
   try {
     const response = await fetchWithTimeout(baseUrl, { method: "GET" });
     if (response.ok) {
@@ -70,6 +119,11 @@ export async function checkRepoAccess(
   baseUrl: string,
   pat: string,
 ): Promise<CheckResult> {
+  const validationError = validateForgejoBaseUrl(baseUrl);
+  if (validationError) {
+    return createCheckResult("Forgejo", false, validationError);
+  }
+
   try {
     const responses = await Promise.all([
       fetchWithTimeout(`${baseUrl}/api/v1/user`, {

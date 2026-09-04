@@ -5,35 +5,8 @@ import * as c from "yoctocolors";
 import * as p from "@clack/prompts";
 
 import { generateEnvFile, SECRET_ENV_KEYS } from "../../utils/config.js";
+import { validateForgejoBaseUrl } from "../../utils/forgejo-checks.js";
 import { CommandConfig } from "../../cli-router.js";
-
-function validateHttpUrlOrHost(
-  value: string | undefined,
-  label: string,
-): string | undefined {
-  const trimmed = value?.trim();
-  if (!trimmed) return `${label} is required`;
-
-  const hasProtocol = /^[a-z]+:\/\//i.test(trimmed);
-  const isHttp = /^https?:\/\//i.test(trimmed);
-
-  if (hasProtocol && !isHttp) {
-    return `${label} must use http:// or https://`;
-  }
-
-  if (!hasProtocol) {
-    return `${label} must include a scheme — e.g. http://forgejo:3000 or https://git.example.com`;
-  }
-
-  try {
-    const url = new URL(trimmed);
-    if (!url.hostname) return `${label} must include a domain or hostname`;
-  } catch {
-    return `${label} must be a valid URL`;
-  }
-
-  return undefined;
-}
 
 async function init(opts: { output?: string }) {
   p.intro(c.bold("firebreak config init"));
@@ -118,7 +91,7 @@ async function init(opts: { output?: string }) {
           message:
             "Forgejo API URL (how Firebreak reaches Forgejo, not your browser URL)?",
           placeholder: "http://forgejo:3000",
-          validate: (v) => validateHttpUrlOrHost(v, "Forgejo base URL"),
+          validate: (v) => validateForgejoBaseUrl(v),
         }),
       forgejoPat: () =>
         p.password({
@@ -178,7 +151,7 @@ async function init(opts: { output?: string }) {
       ].join("\n"),
     );
     p.log.success(
-      "Done. Verify firebreak's connection using the 'verify' command.\nOnce verified, deploy!",
+      "Done. Verify Firebreak's connection using 'firebreak config verify'.\nOnce verified, deploy!",
     );
   } catch (error) {
     s.stop();
