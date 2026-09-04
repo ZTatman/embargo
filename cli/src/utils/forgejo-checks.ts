@@ -155,7 +155,7 @@ export async function checkRepoAccess(
       reposResponse.headers.get("x-total-count") ?? "0",
     );
 
-    if (user) {
+    if (user && totalRepos > 0) {
       return createCheckResult(
         "Forgejo",
         true,

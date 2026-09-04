@@ -116,6 +116,12 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Solution/Workaround:** Force the root document to use the `.dark` token set and remove the theme toggle UI/scripts.
 **Preference:** Keep semantic dark tokens; only reintroduce theme switching after the dark Firebreak identity is stable.
 
+### Forgejo repository check accepted empty accounts
+**Area:** cli/src/utils/forgejo-checks.ts
+**Obstacle:** `checkRepoAccess` treated any parsed user object as success, even when Forgejo reported zero accessible repositories.
+**Solution/Workaround:** Require `totalRepos > 0` before returning the existing success result; preserve the existing zero-repository failure.
+**Preference:** A valid token alone is insufficient for repository-access verification.
+
 ### Forgejo PAT could be sent over remote HTTP
 **Area:** cli/src/utils/forgejo-checks.ts, cli/src/commands/config/init.ts
 **Obstacle:** CLI setup and verification accepted remote `http://` Forgejo URLs, allowing the PAT to be sent without transport encryption.
