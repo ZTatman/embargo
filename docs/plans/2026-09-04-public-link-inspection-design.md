@@ -68,6 +68,9 @@ personal-ownership rule, and returns:
       "private": true
     }
   ],
+  "page": 1,
+  "limit": 30,
+  "next_page": null,
   "inspection": {
     "forgejo": {
       "authenticated_user": {},
@@ -78,8 +81,10 @@ personal-ownership rule, and returns:
 ```
 
 `repositories` is the normalized Firebreak contract. `inspection` is included
-only when `inspect=true` and contains the unmodified JSON bodies received from
-Forgejo after response parsing. Firebreak does not persist the inspection data.
+only when `inspect=true` and preserves JSON fields received from Forgejo after
+response parsing, except for credential redaction. Discovery accepts `page` and
+`limit` and reports `next_page` using Forgejo's pagination header. Firebreak does
+not persist the inspection data.
 
 ### Create a public grant
 
@@ -182,8 +187,8 @@ returned only to the authenticated Firebreak user that requested inspection.
   database details
 
 Failures identify the stage (`identity`, `repositories`, `repository`, `branch`,
-or `grant`) without exposing credentials. An inspection response may include only
-the safe upstream JSON successfully received before the failure.
+or `grant`) without exposing credentials. Partial upstream inspection payloads
+are omitted on failure.
 
 ## Testing
 
