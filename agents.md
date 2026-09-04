@@ -121,3 +121,9 @@ This file is the single source of truth for codebase obstacles, oddities, and th
 **Obstacle:** `checkRepoAccess` treated any parsed user object as success, even when Forgejo reported zero accessible repositories.
 **Solution/Workaround:** Require `totalRepos > 0` before returning the existing success result; preserve the existing zero-repository failure.
 **Preference:** A valid token alone is insufficient for repository-access verification.
+
+### Forgejo PAT could be sent over remote HTTP
+**Area:** cli/src/utils/forgejo-checks.ts, cli/src/commands/config/init.ts
+**Obstacle:** CLI setup and verification accepted remote `http://` Forgejo URLs, allowing the PAT to be sent without transport encryption.
+**Solution/Workaround:** Centralize Forgejo URL validation, require HTTPS for non-local endpoints, and allow HTTP only for the documented `forgejo` service and loopback hosts. Validate again inside authenticated checks before constructing requests.
+**Preference:** Reject insecure remote transport instead of adding an acknowledgement flag.

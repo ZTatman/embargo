@@ -162,7 +162,7 @@ async function runForgejoChecks(
 
 async function verifyCommand(opts: VerifyOptions): Promise<void> {
   const isDiagnostic = opts.diagnostic ?? false;
-  p.intro(c.bold("firebreak verify"));
+  p.intro(c.bold("firebreak config verify"));
 
   const config = loadConfig();
   if (!config) {

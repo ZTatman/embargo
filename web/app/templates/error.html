@@ -78,14 +78,14 @@
         90%  { transform: translate(-2px, 2px); }
       }
       .btn-zapped {
-        background: #c62030 !important;
-        color: #f7f2e8 !important;
-        box-shadow: 0 0 12px 4px rgba(198, 32, 48, 0.5), 0 0 30px 8px rgba(198, 32, 48, 0.25);
+        background: var(--color-danger) !important;
+        color: var(--color-foreground) !important;
+        box-shadow: 0 0 12px 4px color-mix(in srgb, var(--color-danger) 50%, transparent), 0 0 30px 8px color-mix(in srgb, var(--color-danger) 25%, transparent);
         animation: rattle 0.15s linear infinite;
       }
       #go-home-btn:hover {
-        background: #c62030;
-        color: #f7f2e8;
+        background: var(--color-danger-hover);
+        color: var(--color-foreground);
       }
     </style>
   {% endif %}
@@ -185,7 +185,7 @@
             const blur = 30 + t * 40;
             const opacity = 0.5 + t * 0.4;
             const scale = 1 + t * 0.06;
-            btn.style.boxShadow = `0 0 ${spread}px ${spread/3}px rgba(198,32,48,${opacity}), 0 0 ${blur}px ${blur/3}px rgba(198,32,48,${opacity * 0.5})`;
+            btn.style.boxShadow = `0 0 ${spread}px ${spread/3}px rgba(217,63,45,${opacity}), 0 0 ${blur}px ${blur/3}px rgba(217,63,45,${opacity * 0.5})`;
             btn.style.scale = scale;
             if (t < 1) requestAnimationFrame(intensify);
           }
